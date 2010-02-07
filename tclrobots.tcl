@@ -9,20 +9,19 @@ set ::tick 0
 #    From: eichin@cygnus.com (Mark Eichin)
 #
 
-set _lastvalue [expr ([pid]*[file atime /dev/tty])%65536]
+set ::lastvalue [expr ([pid]*[file atime /dev/tty])%65536]
 
-proc _rawrand {} {
-    global _lastvalue
+proc rawrand {} {
     # per Knuth 3.6:
     # 65277 mod 8 = 5 (since 65536 is a power of 2)
     # c/m = .5-(1/6)\sqrt{3}
     # c = 0.21132*m = 13849, and should be odd.
-    set _lastvalue [expr (65277*$_lastvalue+13849)%65536]
-    set _lastvalue [expr ($_lastvalue+65536)%65536]
-    return $_lastvalue
+    set ::lastvalue [expr (65277*$::lastvalue+13849)%65536]
+    set ::lastvalue [expr ($::lastvalue+65536)%65536]
+    return $::lastvalue
 }
 proc rand {base} {
-    set rr [_rawrand]
+    set rr [rawrand]
     return [expr abs(($rr*$base)/65536)]
 }
 
@@ -35,7 +34,7 @@ proc syscall {args} {
     if {[lindex $syscall 0] eq "rand"} {
 	set result [rand [lindex $syscall 1]]
     } else {
-	set ::robotData($robot,syscall,$::tick) $syscall
+	set ::data($robot,syscall,$::tick) $syscall
     }
     puts -nonewline "syscall: "
     foreach arg $args {
@@ -51,27 +50,96 @@ proc init {} {
     #set f [open robot1.tr]
     #set ::robotData(r1,code) [read $f]
 
-    # Available data fields
-    # ::robotData($robot,interp)
-    # ::robotData($robot,reload)
-    # ::robotData($robot,location)
 
     foreach robot $::robots {
-	set ::robotData($robot,interp) [interp create -safe]
+	set ::data($robot,interp) [interp create -safe]
 
-	set ::robotData($robot,reload) 0
-	set ::robotData($robot,location) "[rand 999] [rand 999]"
-	set ::robotData($robot,syscall,0) {}
-	set ::robotData($robot,sysreturn,0) {}
+	#set name [file tail $fn]
+	set name $robot
+	set x [rand 999]
+	set y [rand 999]
 
-	interp alias $::robotData($robot,interp) syscall {} syscall $robot
+	# generate a new signature
+	set newsig [rand 65535]
 
-	$::robotData($robot,interp) invokehidden source syscalls.tcl
+	#########
+	# set robot parms
+	#########
+	# window name = source.file_randnumber
+	set ::data($robot,name) ${name}_$newsig
+	# the rand number as digital signature
+	set ::data($robot,num) $newsig
+	# robot status: 0=not used or dead, 1=running 
+	set ::data($robot,status)	1
+	# robot current x
+	set ::data($robot,x) $x
+	# robot current y
+	set ::data($robot,y) $y
+	# robot origin  x since last heading
+	set ::data($robot,orgx) $x
+	# robot origin  y   "    "     "
+	set ::data($robot,orgy) $y
+	# robot current range on this heading
+	set ::data($robot,range) 0
+	# robot current damage
+	set ::data($robot,damage) 0
+	# robot current speed
+	set ::data($robot,speed) 0
+	# robot desired   "
+	set ::data($robot,dspeed)	0
+	# robot current heading
+	set ::data($robot,hdg) [rand 360]
+	# robot desired   "
+	set ::data($robot,dhdg) $::data($robot,hdg)
+	# robot direction of turn (+/-)
+	set ::data($robot,dir) +
+	# robot last scan dsp signature
+	set ::data($robot,sig) "0 0"
+	# missile state: 0=avail, 1=flying
+	set ::data($robot,mstate) 0
+	# missile reload time: 0=ok, >0 = reloading
+	set ::data($robot,reload) 0
+	# number of missiles used per clip
+	set ::data($robot,mused) 0
+	# missile current x
+	set ::data($robot,mx) 0
+	# missile current y
+	set ::data($robot,my) 0
+	# missile origin  x
+	set ::data($robot,morgx) 0		
+	# missile origin  y
+	set ::data($robot,morgy) 0
+	# missile heading
+	set ::data($robot,mhdg) 0
+	# missile current range
+	set ::data($robot,mrange)	0
+	# missile target distance
+	set ::data($robot,mdist) 0
+	# motor heat index
+	set ::data($robot,heat) 0
+	# overheated flag
+	set ::data($robot,hflag) 0
+	# signature of last robot to scan us
+	set ::data($robot,ping) 0
+	# declared team
+	set ::data($robot,team) ""
+	# last team message sent
+	set ::data($robot,data) ""
+	# barrel temp, affected by cannon fire
+	set ::data($robot,btemp) 0
+	# request from robot slave interp to master
+	set ::data($robot,syscall,0) {}
+	# return value from master to slave interp
+	set ::data($robot,sysreturn,0) {}
 
-	#    $robotData($robot,interp) invokehidden source robot1.tr
+	interp alias $::data($robot,interp) syscall {} syscall $robot
+
+	$::data($robot,interp) invokehidden source syscalls.tcl
+
+	#    $data($robot,interp) invokehidden source robot1.tr
 
 	if {$robot eq "r1"} {
-	    $::robotData($robot,interp) eval coroutine ${robot}Run {
+	    $::data($robot,interp) eval coroutine ${robot}Run {
 		apply {
 		    {} {
 			set dir [rand 360]
@@ -103,7 +171,7 @@ proc init {} {
 		}
 	    }
 	} elseif {$robot eq "r2"} {
-	    $::robotData($robot,interp) eval coroutine ${robot}Run {
+	    $::data($robot,interp) eval coroutine ${robot}Run {
 		apply {
 		    {} {
 			set corners {{10 10} {990 10} {10 990} {990 990}  }
@@ -168,59 +236,84 @@ proc init {} {
 	    }
 	}
 
-	interp alias {} ${robot}Run $::robotData($robot,interp) ${robot}Run
+	interp alias {} ${robot}Run $::data($robot,interp) ${robot}Run
 
     }
 }
 
 proc sysScanner {robot} {
     if {($::tick > 0) &&
-	($::robotData($robot,syscall,$::tick) eq \
-	     $::robotData($robot,syscall,[- $::tick 1]))} {
+	($::data($robot,syscall,$::tick) eq \
+	     $::data($robot,syscall,[- $::tick 1]))} {
 	puts SCANNING
-	set ::robotData($robot,sysreturn,$::tick) 500
+	set ::data($robot,sysreturn,$::tick) 500
     } else {
 	puts scannerCharge
-	set ::robotData($robot,sysreturn,$::tick) 600
+	set ::data($robot,sysreturn,$::tick) 600
     }
 }
 
 proc sysCannon {robot} {
-    set ::robotData($robot,sysreturn,$::tick) 0
+    set ::data($robot,sysreturn,$::tick) 0
 }
 
 proc sysRand {robot} {
-    rand [lindex $::robotData($robot,syscall,$::tick) 2]
+    rand [lindex $::data($robot,syscall,$::tick) 2]
 }
 
 proc sysDrive {robot} {
-    set ::robotData($robot,drive) \
-	[list [lindex $::robotData($robot,syscall,$::tick) 1] \
-		   [lindex $::robotData($robot,syscall,$::tick) 2]]
+    set ::data($robot,drive) \
+	[list [lindex $::data($robot,syscall,$::tick) 1] \
+		   [lindex $::data($robot,syscall,$::tick) 2]]
 
-    set ::robotData($robot,sysreturn,$::tick) $::robotData($robot,drive)
+    set ::data($robot,sysreturn,$::tick) $::data($robot,drive)
 
 }
 
 proc sysLoc_x {robot} {
-    set ::robotData($robot,sysreturn,$::tick) \
-	[lindex $::robotData($robot,location) 0]
+    set ::data($robot,sysreturn,$::tick) $::data($robot,x)
 }
 
 proc sysLoc_y {robot} {
-    set ::robotData($robot,sysreturn,$::tick) \
-	[lindex $::robotData($robot,location) 1]
+    set ::data($robot,sysreturn,$::tick) $::data($robot,y)
 }
 
 proc move {robot} {
+    if 0 {
+    set d1  [expr ($r(hdg)-$deg+360)%360]
+    set d2  [expr ($deg-$r(hdg)+360)%360]
+    set d   [expr $d1<$d2?$d1:$d2]
+    
+    set r(dhdg)   $deg
+    set r(dspeed) [expr $r(hflag) && $spd>$parms(heatsp) ? $parms(heatsp) : $spd]
+    
+    # shutdown drive if turning too fast at current speed
+    set idx [expr int($d/25)] 
+    if {$idx>3} {set idx 3}
+    if {$r(speed)>$parms(turn,$idx)} {
+	set r(dspeed) 0 
+	set r(dhdg) $r(hdg)
+    } else {
+	set r(orgx)  $r(x)
+	set r(orgy)  $r(y)
+    set r(range) 0
+    }
+    # find direction of turn
+    if {($r(hdg)+$d+360)%360==$deg} {
+	set r(dir) +
+    } else {
+	set r(dir) -
+    }
+  append r(syscall) " ($r(dspeed))"
+    return $r(dspeed) 
+    }
 
-
-    puts "$robot loc: $::robotData($robot,location)"
+    puts "$robot loc: $::data($robot,x) $::data($robot,y)"
 }
 
 proc act {} {
     foreach robot $::robots {
-	set currentSyscall $::robotData($robot,syscall,$::tick)
+	set currentSyscall $::data($robot,syscall,$::tick)
 	puts "currentSyscall: $currentSyscall"
 	switch [lindex $currentSyscall 0] {
 	    scanner {sysScanner $robot}
@@ -245,7 +338,7 @@ proc main {} {
 
     for {set i 0} {$i < 20} {incr i} {
 	foreach robot $::robots {
-	    ${robot}Run $::robotData($robot,sysreturn,[- $::tick 1])
+	    ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
 	}
 	act
 	tick

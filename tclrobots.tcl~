@@ -37,7 +37,6 @@ proc syscall {args} {
     } else {
 	set ::robotData($robot,syscall,$::tick) $syscall
     }
-
     puts -nonewline "syscall: "
     foreach arg $args {
 	puts -nonewline "$arg "
@@ -195,7 +194,12 @@ proc sysRand {robot} {
 }
 
 proc sysDrive {robot} {
-    set ::robotData($robot,sysreturn,$::tick) 0
+    set ::robotData($robot,drive) \
+	[list [lindex $::robotData($robot,syscall,$::tick) 1] \
+		   [lindex $::robotData($robot,syscall,$::tick) 2]]
+
+    set ::robotData($robot,sysreturn,$::tick) $::robotData($robot,drive)
+
 }
 
 proc sysLoc_x {robot} {
@@ -209,6 +213,8 @@ proc sysLoc_y {robot} {
 }
 
 proc move {robot} {
+
+
     puts "$robot loc: $::robotData($robot,location)"
 }
 
