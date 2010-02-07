@@ -1,0 +1,4 @@
+1 new tick is 500 ms old = 2 ticks/s
+
+$::r(speed) 
+
