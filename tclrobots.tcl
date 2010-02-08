@@ -353,7 +353,9 @@ proc updateRobots {} {
 	
 	# check for excessive speed, increment heat 
 	if {$::data($robot,speed) > $::parms(heatsp)} {
-	    incr ::data($robot,heat) [expr round(($::data($robot,speed)-$::parms(heatsp))/$::parms(hrate))+1]
+	    incr ::data($robot,heat) \
+		[expr round(($::data($robot,speed)-\
+				 $::parms(heatsp))/$::parms(hrate))+1]
 	    if {$::data($robot,heat) >= $::parms(heatmax)} {
 		set ::data($robot,heat) $::parms(heatmax)
 		set ::data($robot,hflag) 1
@@ -365,7 +367,10 @@ proc updateRobots {} {
 	    # if overheating, apply cooling rate
 	    if {$::data($robot,hflag) || $::data($robot,heat) > 0} {
 		incr ::data($robot,heat) $::parms(cooling)
-		if {$::data($robot,heat) <= 0} { set ::data($robot,hflag) 0; set ::data($robot,heat) 0 }
+		if {$::data($robot,heat) <= 0} {
+		    set ::data($robot,hflag) 0; 
+		    set ::data($robot,heat) 0
+		}
 	    }
 	}
 	
@@ -399,7 +404,9 @@ proc updateRobots {} {
 	    if {$d<=$mrate} {
 		set ::data($robot,hdg) $::data($robot,dhdg)
 	    } else {
-		set ::data($robot,hdg) [expr ($::data($robot,hdg)$::data($robot,dir)$mrate+360)%360]
+		set ::data($robot,hdg) \
+		    [expr ($::data($robot,hdg)$::data($robot,dir)$mrate+\
+			       360)%360]
 	    }
 	    set ::data($robot,orgx)  $::data($robot,x)
 	    set ::data($robot,orgy)  $::data($robot,y)
@@ -408,9 +415,15 @@ proc updateRobots {} {
 	
 	# update distance traveled on this heading
 	if {$::data($robot,speed) > 0} {
-	    set ::data($robot,range) [expr $::data($robot,range)+($::data($robot,speed)*$::parms(sp)/100)]
-	    set ::data($robot,x)     [expr round(($::c_tab($::data($robot,hdg))*$::data($robot,range))+$::data($robot,orgx))]
-	    set ::data($robot,y)     [expr round(($::s_tab($::data($robot,hdg))*$::data($robot,range))+$::data($robot,orgy))]
+	    set ::data($robot,range) \
+		[expr $::data($robot,range)+($::data($robot,speed)*\
+						 $::parms(sp)/100)]
+	    set ::data($robot,x) \
+		[expr round(($::c_tab($::data($robot,hdg))*\
+				 $::data($robot,range))+$::data($robot,orgx))]
+	    set ::data($robot,y) \
+		[expr round(($::s_tab($::data($robot,hdg))*\
+				 $::data($robot,range))+$::data($robot,orgy))]
 	    # check for wall collision
 	    if {$::data($robot,x)<0 || $::data($robot,x)>999} {
 		set ::data($robot,x) [expr $::data($robot,x)<0? 0 : 999]
