@@ -2,3 +2,5 @@
 
 $::r(speed) 
 
+
+hur ska alert funka?
