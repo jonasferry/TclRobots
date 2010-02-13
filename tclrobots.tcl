@@ -113,7 +113,9 @@ proc syscall {args} {
     set syscall [lrange $args 1 end]
     puts "Syscall $robot: $syscall"
 
-    if {[lindex $syscall 0] eq "rand"} {
+    if {[lindex $syscall 0] eq "dputs"} {
+        puts [lrange $syscall 1 end]
+    } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
     } else {
         set ::data($robot,syscall,$::tick) $syscall
@@ -123,8 +125,7 @@ proc syscall {args} {
 
 proc sysScanner {robot} {
 
-    if {($::tick > 0) &&
-        ($::data($robot,syscall,$::tick) eq \
+    if {($::data($robot,syscall,$::tick) eq \
              $::data($robot,syscall,[- $::tick 1]))} {
 
         set deg [lindex $::data($robot,syscall,$::tick) 1]
@@ -143,7 +144,7 @@ proc sysScanner {robot} {
             set d2  [expr ($deg-$d+360)%360]
             set f   [expr $d1<$d2?$d1:$d2]
             if {$f<=$res} {
-                set $::data($target,ping) $::data($robot,num)
+                set ::data($target,ping) $::data($robot,num)
                 set dist [expr round(hypot($x,$y))]
                 if {$dist<$near} {
                     set derr [expr $::parms(errdist)*$res]
@@ -178,7 +179,11 @@ proc sysDsp {robot} {
 }
 
 proc sysAlert {robot} {
-    set ::data($robot,alert) [lindex $::data($robot,syscall,$::tick) 1]
+    set alertproc ${robot}alert
+    interp alias {} $alertproc $::data($robot,interp) \
+        [lindex $::data($robot,syscall,$::tick) 1]
+    set ::data($robot,alert) $alertproc
+    set ::data($robot,sysreturn,$::tick) 1
 }
 
 proc sysCannon {robot} {
@@ -350,7 +355,8 @@ proc initRobots {} {
         # barrel temp, affected by cannon fire
         set ::data($robot,btemp) 0
         # request from robot slave interp to master
-        set ::data($robot,syscall,0) {}
+        # tick -1 is set to {} to handle scanner charging in tick 0
+        set ::data($robot,syscall,-1) {}
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
 
@@ -609,13 +615,25 @@ proc tick {} {
 }
 
 proc runRobots {} {
+set ::apa 0
     while {$::running == 1} {
         foreach robot $::robots {
             if {$::data($robot,status)} {
-                if {$::data($robot,ping) ne {}} {
-                    puts "notify robot it's been scanned";exit
-                    set $::data($robot,ping) {}
-                } else {
+                set ::data($robot,syscall,$::tick) {}
+                if {($::data($robot,alert) ne {}) && \
+                        ($::data($robot,ping) ne {})} {
+
+                    $::data($robot,alert) $::data($robot,ping)
+                    set ::data($robot,ping) {}
+
+                    puts "alerted $robot at $::tick"
+                    set ::apa 1
+                }
+
+                if {$::data($robot,syscall,$::tick) eq {}} {
+                    if {$::apa} {
+                        puts "sysreturn $robot: $::data($robot,sysreturn,[- $::tick 1]) at $::tick";exit
+                    }
                     ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
                 }
             }

@@ -4,3 +4,8 @@ $::r(speed)
 
 
 hur ska alert funka?
+
+
+syscall loc_x
+
+isf sysreturn loc_x kommer alert
