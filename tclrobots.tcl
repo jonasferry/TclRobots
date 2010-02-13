@@ -79,8 +79,8 @@ set ::parms(cancool) -1
 # cannon heat index where scanner is inop
 set ::parms(scanbad) 35
 
-set parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
-set parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
 
 set outfile ""
 
@@ -102,7 +102,7 @@ srand [expr ([pid]*[file atime /dev/tty])%65536]
 
 # Return random integer 1-max
 proc rand {max} {
-    return [expr {int(rand()*$max) + 1}]
+    return [expr {int(rand()*$max)}]
 }
 
 # Handle syscalls from robots
@@ -313,7 +313,7 @@ proc initRobots {} {
         # robot desired   "
         set ::data($robot,dspeed)	0
         # robot current heading
-        set ::data($robot,hdg) [rand 359]
+        set ::data($robot,hdg) [rand 360]
         # robot desired   "
         set ::data($robot,dhdg) $::data($robot,hdg)
         # robot direction of turn (+/-)
