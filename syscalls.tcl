@@ -2,8 +2,8 @@ proc ping_check {val} {
     if {[lindex $val 0] eq "alert"} {
         #  ping_proc:        dsp:
         [lindex $val 1] [lindex $val 2]
+        set val [lrange $val 3 end]
     }
-    set val [lrange $val 3 end]
     return $val
 }
 
