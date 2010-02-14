@@ -352,7 +352,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
 proc show_robots {} {
     #  global c_tab s_tab parms
     set i 0
-    foreach robot $::robots {
+    foreach robot $::allRobots {
         # check robots
         if {$::data($robot,status)} {
             .c delete r$::data($robot,num)
@@ -389,7 +389,7 @@ proc show_robots {} {
 #
 
 proc show_scan {} {
-    foreach robot $::robots {
+    foreach robot $::activeRobots {
         if {[.c find withtag s$::data($robot,name)] != ""} {
             return
         } elseif {$::data($robot,status)} {
@@ -478,18 +478,21 @@ proc start {} {
     #  }
 
     # get robot filenames from window
-    set ::robots ""
+    set ::allRobots ""
     set lst .f2.fr.l1
     for {set i 0} {$i < $::numList} {incr i} {
         # Give the robots names like r0, r1, etc.
         set robot r$i
         # Update list of robots
-        lappend ::robots $robot
+        lappend ::allRobots $robot
         # Read
         set f [open [$lst get $i]]
         set ::data($robot,code) [read $f]
         close $f
     }
+
+    # At the start of the game all robots are active
+    set ::activeRobots $::allRobots
 
     set dot_geom [winfo geom .]
     set dot_geom [split $dot_geom +]
@@ -497,8 +500,8 @@ proc start {} {
     set dot_y [lindex $dot_geom 2]
 
     # pick random starting quadrant, colors and init robots
-    set i [rand [llength $::robots]]
-    foreach robot $::robots {
+    set i [rand [llength $::allRobots]]
+    foreach robot $::allRobots {
         # Pick a random color
         set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
         # Cycle through the four robot icon arrow shapes
@@ -547,20 +550,18 @@ proc start {} {
         set num_team 0
         set diffteam ""
         set win_color black
-        foreach robot $::robots {
-            if {$::data($robot,status)} {
-                #disable_robot $robot 0
-                incr alive
-                lappend winner $::data($robot,name)
-                set win_color $::data($robot,color)
-                if {$::data($robot,team) != ""} {
-                    if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
-                        lappend diffteam $::data($robot,team)
-                        incr num_team
-                    }
-                } else {
+        foreach robot $::activeRobots {
+            #disable_robot $robot 0
+            incr alive
+            lappend winner $::data($robot,name)
+            set win_color $::data($robot,color)
+            if {$::data($robot,team) != ""} {
+                if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
+                    lappend diffteam $::data($robot,team)
                     incr num_team
                 }
+            } else {
+                incr num_team
             }
         }
 
@@ -728,7 +729,7 @@ proc halt {} {
     set ::running 0
     .l configure -text "Stopping battle, standby"
     update
-    foreach robot $::robots {
+    foreach robot $::allRobots {
         if {$::data($robot,status)} {
             #disable_robot $robot 0
         }

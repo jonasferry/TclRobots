@@ -134,8 +134,8 @@ proc sysScanner {robot} {
         set dsp   0
         set dmg   0
         set near  9999
-        foreach target $::robots {
-            if {"$target" == "$robot" || !$::data($robot,status)} { continue }
+        foreach target $::activeRobots {
+            if {"$target" == "$robot"} { continue }
             set x [expr $::data($target,x)-$::data($robot,x)]
             set y [expr $::data($target,y)-$::data($robot,y)]
             set d [expr round(57.2958*atan2($y,$x))]
@@ -276,7 +276,7 @@ proc sysData {robot} {
 
 proc initRobots {} {
 
-    foreach robot $::robots {
+    foreach robot $::allRobots {
         set ::data($robot,interp) [interp create -safe]
 
         #set name [file tail $fn]
@@ -376,7 +376,9 @@ proc initRobots {} {
 # Disable robot
 #########
 proc disable_robot {robot} {
-#    interp delete $::data($robot,interp)
+    interp delete $::data($robot,interp)
+    set index [lsearch -exact $::activeRobots $robot]
+    set ::activeRobots [lreplace $::activeRobots $index $index]
     set ::data($robot,syscall,$::tick) {}
 }
 
@@ -400,7 +402,7 @@ proc up_damage {robot} {
 proc updateRobots {} {
     set num_miss 0
     set num_rob  0
-    foreach robot $::robots {
+    foreach robot $::activeRobots {
         # check all flying missiles
         if {$::data($robot,mstate)} {
             incr num_miss
@@ -429,7 +431,7 @@ proc updateRobots {} {
                 after 1 "show_explode $robot"
 
                 # assign damage to all within explosion ranges
-                foreach target $::robots {
+                foreach target $::activeRobots {
                     if {!$::data($target,status)} {
                         continue
                     }
@@ -560,7 +562,7 @@ proc updateRobots {} {
     # check for robot health
     set diffteam ""
     set num_team 0
-    foreach robot $::robots {
+    foreach robot $::activeRobots {
         if {$::data($robot,status)} {
             if {$::data($robot,damage)>=100} {
                 set ::data($robot,status) 0
@@ -591,7 +593,7 @@ proc updateRobots {} {
 }
 
 proc act {} {
-    foreach robot $::robots {
+    foreach robot $::activeRobots {
         if {$::data($robot,status)} {
             set currentSyscall $::data($robot,syscall,$::tick)
             switch [lindex $currentSyscall 0] {
@@ -615,27 +617,18 @@ proc tick {} {
 }
 
 proc runRobots {} {
-set ::apa 0
     while {$::running == 1} {
-        foreach robot $::robots {
-            if {$::data($robot,status)} {
-                set ::data($robot,syscall,$::tick) {}
-                if {($::data($robot,alert) ne {}) && \
-                        ($::data($robot,ping) ne {})} {
+        foreach robot $::activeRobots {
+            set ::data($robot,syscall,$::tick) {}
+            if {($::data($robot,alert) ne {}) && \
+                    ($::data($robot,ping) ne {})} {
 
-                    $::data($robot,alert) $::data($robot,ping)
-                    set ::data($robot,ping) {}
+                $::data($robot,alert) $::data($robot,ping)
+                set ::data($robot,ping) {}
+            }
 
-                    puts "alerted $robot at $::tick"
-                    set ::apa 1
-                }
-
-                if {$::data($robot,syscall,$::tick) eq {}} {
-                    if {$::apa} {
-                        puts "sysreturn $robot: $::data($robot,sysreturn,[- $::tick 1]) at $::tick";exit
-                    }
-                    ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-                }
+            if {$::data($robot,syscall,$::tick) eq {}} {
+                ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
             }
         }
         act
@@ -674,7 +667,8 @@ if {$gui} {
     set ::nowin 0
     gui
 } else {
-    set ::robots {r1}
+    set ::allRobots {r1}
+    set ::activeRobots $::allRobots
 
     main
 }
