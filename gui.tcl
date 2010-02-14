@@ -127,8 +127,8 @@ proc choose_file {win filename} {
             set dir  $d
         }
     }
-    set idx [expr [string length [file dirname [file dirname $dir]] ]+1]
-    .f2.fr.l1 xview $idx
+    set index [expr [string length [file dirname [file dirname $dir]] ]+1]
+    .f2.fr.l1 xview $index
 }
 
 
@@ -153,10 +153,10 @@ proc choose_all {} {
 # remove_file
 #
 proc remove_file {} {
-    set idx -1
-    catch {set idx [.f2.fr.l1 curselection]}
-    if {$idx >= 0} {
-        .f2.fr.l1 delete $idx
+    set index -1
+    catch {set index [.f2.fr.l1 curselection]}
+    if {$index >= 0} {
+        .f2.fr.l1 delete $index
         incr  ::numList -1
     }
 }
@@ -167,8 +167,8 @@ proc remove_file {} {
 # remove_all
 #
 proc remove_all {} {
-    set idx $::numList
-    if {$idx > 0} {
+    set index $::numList
+    if {$index > 0} {
         .f2.fr.l1 delete 0 end
         set ::numList 0
     }
@@ -221,9 +221,9 @@ proc fillLst {win filt dir} {
 
     $win.l.lst yview 0
 
-    set idx [expr [string length [file dirname [file dirname $dir]] ]+1]
+    set index [expr [string length [file dirname [file dirname $dir]] ]+1]
 
-    $win.l.lst xview $idx
+    $win.l.lst xview $index
 }
 
 
@@ -237,8 +237,8 @@ proc selInsert {win pathname} {
 
     $win.sel delete 0 end
     $win.sel insert 0 $pathname
-    set idx [expr [string length [file dirname [file dirname $pathname]] ]+1]
-    $win.sel xview $idx
+    set index [expr [string length [file dirname [file dirname $pathname]] ]+1]
+    $win.sel xview $index
     $win.sel select from 0
 }
 
@@ -514,12 +514,15 @@ proc start {} {
         set winy [expr $dot_y+(($i-1)*145)]
         set winy [expr (($i-1)*145)]
 
-        init
+
 
         set ::data($robot,color) $color
 
         incr i
     }
+
+    # Run tclrobots.tcl init to setup robots
+    init
 
     pack forget .f2
     pack .c -side top -expand 1 -fill both

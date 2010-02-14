@@ -6,12 +6,8 @@ source gui.tcl
 #########
 # set general tclrobots environment parameters
 #########
-# number milliseconds robots wait on sys call
-set ::parms(do_wait) 100
-# millisecond tick
-set ::parms(tick)	100
-# simulation clock tick
-set ::parms(simtick) 500
+# milliseconds per tick
+set ::parms(tick) 100
 # meters of possible error on scan resolution
 set ::parms(errdist) 10
 # distance traveled at 100% per tick
@@ -46,6 +42,9 @@ set ::parms(rate,2) 40
 set ::parms(rate,3) 30
 #  "   "   "   "    "   "   "    "   > 75
 set ::parms(rate,4) 20
+# robot start health
+#set ::parms(health) 100
+set ::parms(health) 20
 # diameter of direct missile damage
 set ::parms(dia0) 6
 #     "    "  maximum   "      "
@@ -54,17 +53,17 @@ set ::parms(dia1) 10
 set ::parms(dia2) 20
 #     "    "  minimum   "      "
 set ::parms(dia3) 40
-# %damage within range 0
-set ::parms(hit0) 25
+# damage within range 0
+set ::parms(hit0) -25
 #    "       "     "   1
-set ::parms(hit1) 12
+set ::parms(hit1) -12
 #    "       "     "   2
-set ::parms(hit2) 7
+set ::parms(hit2) -7
 #    "       "     "   3
-set ::parms(hit3) 3
+set ::parms(hit3) -3
 #    "    from collision into wall
-set ::parms(coll) 5
-# %speed when heat builds
+set ::parms(coll) -5
+# speed when heat builds
 set ::parms(heatsp) 35
 # max heat index, sets speed to heatsp
 set ::parms(heatmax) 200
@@ -110,11 +109,13 @@ proc syscall {args} {
     set robot [lindex $args 0]
     set result 0
 
+    puts "args: $args"
+
     set syscall [lrange $args 1 end]
     puts "Syscall $robot: $syscall"
 
     if {[lindex $syscall 0] eq "dputs"} {
-        puts [lrange $syscall 1 end]
+        puts [lrange $args 2 end]
     } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
     } else {
@@ -131,9 +132,9 @@ proc sysScanner {robot} {
         set deg [lindex $::data($robot,syscall,$::tick) 1]
         set res [lindex $::data($robot,syscall,$::tick) 2]
 
-        set dsp   0
-        set dmg   0
-        set near  9999
+        set dsp    0
+        set health 0
+        set near   9999
         foreach target $::activeRobots {
             if {"$target" == "$robot"} { continue }
             set x [expr $::data($target,x)-$::data($robot,x)]
@@ -154,8 +155,9 @@ proc sysScanner {robot} {
                     set near [expr $dist $fud1 $terr $fud2 \
                                   $::data($robot,btemp)]
                     if {$near<1} {set near 1}
-                    set dsp  $::data($robot,num)
-                    set dmg  $::data($robot,damage)
+                    set dsp    $::data($robot,num)
+                    set health $::data($robot,health)
+                    puts "dsp: $dsp; health: $health"
                 }
             }
         }
@@ -164,7 +166,7 @@ proc sysScanner {robot} {
             set ::data($robot,sig) "0 0"
             set val 0
         } else {
-            set ::data($robot,sig) "$dsp $dmg"
+            set ::data($robot,sig) "$dsp $health"
             set val [expr $near==9999?0:$near]
         }
         set ::data($robot,sysreturn,$::tick) $val
@@ -179,10 +181,10 @@ proc sysDsp {robot} {
 }
 
 proc sysAlert {robot} {
-    set alertproc ${robot}alert
-    interp alias {} $alertproc $::data($robot,interp) \
-        [lindex $::data($robot,syscall,$::tick) 1]
-    set ::data($robot,alert) $alertproc
+#    set alertproc ${robot}alert
+#    interp alias {} $alertproc $::data($robot,interp) \
+#        [lindex $::data($robot,syscall,$::tick) 1]
+    set ::data($robot,alert) [lindex $::data($robot,syscall,$::tick) 1]
     set ::data($robot,sysreturn,$::tick) 1
 }
 
@@ -235,15 +237,15 @@ proc sysDrive {robot} {
     set d2  [expr ($deg-$::data($robot,hdg)+360)%360]
     set d   [expr $d1<$d2?$d1:$d2]
 
-    set ::data($robot,dhdg)   $deg
+    set ::data($robot,dhdg) $deg
     set ::data($robot,dspeed) \
 	[expr $::data($robot,hflag) && \
 	     $spd>$::parms(heatsp) ? $::parms(heatsp) : $spd]
 
     # shutdown drive if turning too fast at current speed
-    set idx [expr int($d/25)]
-    if {$idx>3} {set idx 3}
-    if {$::data($robot,speed)>$::parms(turn,$idx)} {
+    set index [expr int($d/25)]
+    if {$index>3} {set index 3}
+    if {$::data($robot,speed)>$::parms(turn,$index)} {
 	set ::data($robot,dspeed) 0
 	set ::data($robot,dhdg) $::data($robot,hdg)
     } else {
@@ -265,7 +267,7 @@ proc sysData {robot} {
     set val 0
 
     switch $::data($robot,syscall,$::tick) {
-        damage {set val $::data($robot,damage)}
+        health {set val $::data($robot,health)}
         speed  {set val $::data($robot,speed)}
         heat   {set val $::data($robot,heat)}
         loc_x  {set val $::data($robot,x)}
@@ -274,15 +276,17 @@ proc sysData {robot} {
     set ::data($robot,sysreturn,$::tick) $val
 }
 
-proc initRobots {} {
+set ::rb 0
 
+proc initRobots {} {
     foreach robot $::allRobots {
+
         set ::data($robot,interp) [interp create -safe]
 
         #set name [file tail $fn]
         set name $robot
-        set x [/ [rand 999] $::scale]
-        set y [/ [rand 999] $::scale]
+        set x [/ [rand 1000] $::scale]
+        set y [/ [rand 1000] $::scale]
 
         # generate a new signature
         set newsig [rand 65535]
@@ -306,8 +310,8 @@ proc initRobots {} {
         set ::data($robot,orgy) $y
         # robot current range on this heading
         set ::data($robot,range) 0
-        # robot current damage
-        set ::data($robot,damage) 0
+        # robot current health
+        set ::data($robot,health) $::parms(health)
         # robot current speed
         set ::data($robot,speed) 0
         # robot desired   "
@@ -368,7 +372,6 @@ proc initRobots {} {
             ${robot}Run [list apply [list {} $::data($robot,code)]]
 
         interp alias {} ${robot}Run $::data($robot,interp) ${robot}Run
-
     }
 }
 
@@ -440,13 +443,13 @@ proc updateRobots {} {
                                               $::data($target,y))]
                     if {$d<$::parms(dia3)} {
                         if {$d<$::parms(dia0)} {
-                            incr ::data($target,damage) $::parms(hit0)
+                            incr ::data($target,health) $::parms(hit0)
                         } elseif {$d<$::parms(dia1)} {
-                            incr ::data($target,damage) $::parms(hit1)
+                            incr ::data($target,health) $::parms(hit1)
                         } elseif {$d<$::parms(dia2)} {
-                            incr ::data($target,damage) $::parms(hit2)
+                            incr ::data($target,health) $::parms(hit2)
                         } else {
-                            incr ::data($target,damage) $::parms(hit3)
+                            incr ::data($target,health) $::parms(hit3)
                         }
                         up_damage $target
                     }
@@ -543,7 +546,7 @@ proc updateRobots {} {
                 set ::data($robot,range)  0
                 set ::data($robot,speed)  0
                 set ::data($robot,dspeed) 0
-                incr ::data($robot,damage) $::parms(coll)
+                incr ::data($robot,health) $::parms(coll)
                 up_damage $robot
             }
             if {$::data($robot,y)<0 || $::data($robot,y)>999} {
@@ -553,7 +556,7 @@ proc updateRobots {} {
                 set ::data($robot,range)  0
                 set ::data($robot,speed)  0
                 set ::data($robot,dspeed) 0
-                incr ::data($robot,damage) $::parms(coll)
+                incr ::data($robot,health) $::parms(coll)
                 up_damage $robot
             }
         }
@@ -564,9 +567,9 @@ proc updateRobots {} {
     set num_team 0
     foreach robot $::activeRobots {
         if {$::data($robot,status)} {
-            if {$::data($robot,damage)>=100} {
+            if {$::data($robot,health) <= 0 } {
                 set ::data($robot,status) 0
-                set ::data($robot,damage) 100
+                set ::data($robot,health) 0
                 up_damage $robot
                 disable_robot $robot
                 #append finish "$::data($robot,name) team($::data($robot,team)) dead at tick: $::tick\n"
@@ -602,7 +605,7 @@ proc act {} {
                 alert   {sysAlert   $robot}
                 cannon  {sysCannon  $robot}
                 drive   {sysDrive   $robot}
-                damage  -
+                health  -
                 speed   -
                 heat    -
                 loc_x   -
@@ -619,17 +622,21 @@ proc tick {} {
 proc runRobots {} {
     while {$::running == 1} {
         foreach robot $::activeRobots {
-            set ::data($robot,syscall,$::tick) {}
             if {($::data($robot,alert) ne {}) && \
                     ($::data($robot,ping) ne {})} {
-
-                $::data($robot,alert) $::data($robot,ping)
+                # Prepend alert data to sysreturn no notify robot it's
+                # been scanned.
+                set ::data($robot,sysreturn,[- $::tick 1]) \
+                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
+                
+                puts "tick: $::tick"
+                puts "ping: $::data($robot,ping)"
+                puts "sysreturn: $::data($robot,sysreturn,[- $::tick 1])"
+                
+# Robot is notified; reset alert request
                 set ::data($robot,ping) {}
             }
-
-            if {$::data($robot,syscall,$::tick) eq {}} {
-                ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-            }
+            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
         }
         act
 
@@ -657,7 +664,8 @@ proc gui {} {
 }
 
 proc main {} {
-    init
+# Removed to avoid double call from GUI
+#    init
     coroutine runRobotsCo runRobots
 }
 

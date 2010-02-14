@@ -1,62 +1,71 @@
+proc ping_check {val} {
+    if {[lindex $val 0] eq "alert"} {
+        #  ping_proc:        dsp:
+        [lindex $val 1] [lindex $val 2]
+    }
+    set val [lrange $val 3 end]
+    return $val
+}
+
 ### Basic commands
 ## 2 ticks
 #scanner degree resolution
 proc scanner {degree resolution} {
     syscall scanner $degree $resolution
-    yield
+    ping_check [yield]
     syscall scanner $degree $resolution
-    yield
+    return [ping_check [yield]]
 }
 ## 1 tick
 #dsp
 proc dsp {} {
     syscall dsp
-    yield
+    return [ping_check [yield]]
 }
 #alert proc-name
 proc alert {procname} {
     syscall alert $procname
-    yield
+    return [ping_check [yield]]
 }
 #cannon degree range
 proc cannon {degree range} {
     syscall cannon $degree $range
-    yield
+    return [ping_check [yield]]
 }
 #damage
 proc damage {} {
     syscall damage
-    yield
+    return [ping_check [yield]]
 }
 #drive degree speed
 proc drive {degree speed} {
     syscall drive $degree $speed
-    yield
+    return [ping_check [yield]]
 }
 #speed
 proc speed {} {
     syscall speed
-    yield
+    return [ping_check [yield]]
 }
 #heat
 proc heat {} {
     syscall heat
-    yield
+    return [ping_check [yield]]
 }
 #loc_x
 proc loc_x {} {
     syscall loc_x
-    yield
+    return [ping_check [yield]]
 }
 #loc_y
 proc loc_y {} {
     syscall loc_y
-    yield
+    return [ping_check [yield]]
 }
 #tick
 proc tick {} {
     syscall tick
-    yield
+    return [ping_check [yield]]
 }
 
 ## Team commands
@@ -64,7 +73,7 @@ proc tick {} {
 #team_declare teamname
 proc team_declare {teamname} {
     syscall team_declare $teamname
-    yield
+    return [ping_check [yield]]
 }
 # 0 ticks
 #team_send data
@@ -79,8 +88,8 @@ proc team_get {} {
 ## Convenience commands
 # 0 ticks
 #dputs args
-proc dputs {args} {
-    syscall dputs $args
+proc dputs {msg} {
+    syscall dputs $msg
 }
 #rand max
 proc rand {max} {

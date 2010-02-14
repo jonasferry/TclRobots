@@ -13,6 +13,12 @@ set dir [rand 360]
 set nothing 0
 set closest 0
 
+proc I_was_scanned {who} {
+  dputs "$who scanned me"
+}
+
+alert I_was_scanned
+
 # start of main code
 
 while {1} {
