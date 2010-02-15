@@ -1,8 +1,6 @@
 namespace import ::tcl::mathop::*
 namespace import ::tcl::mathfunc::*
 
-source gui.tcl
-
 #########
 # set general tclrobots environment parameters
 #########
@@ -44,7 +42,7 @@ set ::parms(rate,3) 30
 set ::parms(rate,4) 20
 # robot start health
 #set ::parms(health) 100
-set ::parms(health) 20
+set ::parms(health) 20; #for debugging
 # diameter of direct missile damage
 set ::parms(dia0) 6
 #     "    "  maximum   "      "
@@ -97,7 +95,8 @@ for {set i 0} {$i<360} {incr i} {
 # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
 
 # Set random seed
-srand [expr ([pid]*[file atime /dev/tty])%65536]
+set ::seed [expr ([pid]*[file atime /dev/tty])]
+srand $::seed
 
 # Return random integer 1-max
 proc rand {max} {
@@ -363,6 +362,8 @@ proc initRobots {} {
         set ::data($robot,syscall,-1) {}
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
+        # set random color
+        set ::data($robot,color) [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
@@ -572,7 +573,7 @@ proc updateRobots {} {
                 set ::data($robot,health) 0
                 up_damage $robot
                 disable_robot $robot
-                #append finish "$::data($robot,name) team($::data($robot,team)) dead at tick: $::tick\n"
+                append ::finish "$::data($robot,name) team($::data($robot,team)) dead at tick: $::tick\n"
             } else {
                 incr num_rob
                 if {$::data($robot,team) != ""} {
@@ -591,8 +592,6 @@ proc updateRobots {} {
     if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
         set ::running 0
     }
-    show_robots
-    show_scan
 }
 
 proc act {} {
@@ -628,12 +627,8 @@ proc runRobots {} {
                 # been scanned.
                 set ::data($robot,sysreturn,[- $::tick 1]) \
                     "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
-                
-                puts "tick: $::tick"
-                puts "ping: $::data($robot,ping)"
-                puts "sysreturn: $::data($robot,sysreturn,[- $::tick 1])"
-                
-# Robot is notified; reset alert request
+
+                # Robot is notified; reset alert request
                 set ::data($robot,ping) {}
             }
             ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
@@ -642,6 +637,11 @@ proc runRobots {} {
 
         updateRobots
 
+        if {$::gui} {
+            show_robots
+            show_scan
+        }
+
         tick
 
         after $::parms(tick) [info coroutine]
@@ -649,9 +649,89 @@ proc runRobots {} {
     }
 }
 
+proc findWinner {} {
+    set ::finish ""
+    set alive 0
+    set winner ""
+    set num_team 0
+    set diffteam ""
+    set win_color black
+    foreach robot $::activeRobots {
+        disable_robot $robot
+        incr alive
+        lappend winner $::data($robot,name)
+        set win_color $::data($robot,color)
+        if {$::data($robot,team) != ""} {
+            if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
+                lappend diffteam $::data($robot,team)
+                incr num_team
+            }
+        } else {
+            incr num_team
+        }
+    }
+    
+    switch $alive {
+        0 {
+            set msg "No robots left alive"
+            puts $msg
+        }
+        1 {
+            if {[string length $diffteam] > 0} {
+                set diffteam "Team $diffteam"
+            }
+            set msg "\nWinner!\n\n$diffteam\n$winner\n"
+            puts $msg
+        }
+        default {
+            # check for teams
+            if {$num_team == 1} {
+                set msg "Winner!\n\nTeam $diffteam\n$winner"
+                puts $msg
+            } else {
+                set msg "Tie:\n\n$winner"
+                puts $msg
+            }
+        }
+    }
+    set msg2 [join [split $msg \n] " "]
+    set score "score: "
+    set points 1
+    foreach l [split $::finish \n] {
+        set n [lindex $l 0]
+        if {[string length $n] == 0} {continue}
+        set l [string last _ $n]
+        if {$l > 0} {incr l -1; set n [string range $n 0 $l]}
+        append score "$n = $points  "
+        incr points
+    }
+    foreach n $winner {
+        set l [string last _ $n]
+        if {$l > 0} {incr l -1; set n [string range $n 0 $l]}
+        append score "$n = $points  "
+    }
+    catch {write_file $outfile \
+               "$players\n$finish\n$msg2\n\n$score\n\n\n"}
+}
+
 proc init {} {
     set ::tick 0
-    set ::scale 2 ;# Side = 1000 / 2 = 500; Use later for resizing arena
+
+    set ::allRobots {}
+
+    for {set i 0} {$i < [llength $::robotFiles]} {incr i} {
+        # Give the robots names like r0, r1, etc.
+        set robot r$i
+        # Update list of robots
+        lappend ::allRobots $robot
+        # Read
+        set f [open [lindex $::robotFiles $i]]
+        set ::data($robot,code) [read $f]
+        close $f
+    }
+
+    # At the start of the game all robots are active
+    set ::activeRobots $::allRobots
 
     initRobots
     act
@@ -664,22 +744,76 @@ proc gui {} {
 }
 
 proc main {} {
-# Removed to avoid double call from GUI
-#    init
+    init
+    set ::running 1
     coroutine runRobotsCo runRobots
+    vwait ::running
+    puts "activerobots: $::activeRobots"
+    findWinner
+    puts "seed: $::seed"
 }
 
 set gui 1
 
+set ::scale 2 ;# Side = 1000 / 2 = 500; Use later for resizing arena
+
+
 if {$gui} {
     set ::nowin 0
+    source gui.tcl
     gui
 } else {
-    set ::allRobots {r1}
-    set ::activeRobots $::allRobots
-
-    main
+    set ::parms(tick) 0
+    for {set i 0} {$i < 3} {incr i} {
+        lappend ::robotFiles charger.tr
+    }
+    puts "Running time [/ [lindex [time main] 0] 1000000.0] seconds"
 }
 
 
+#############################################################################
+# do it!
+# main line code
 
+# check for command line args, run tournament if any 
+
+set nowin 0
+set arg_tlimit  10
+set arg_outfile "results.out"
+set ::robotFiles   ""
+set tourn_type  0
+set ::numList   0
+
+if 0 {
+while {[llength $argv] > 0} {
+  set arg  [lindex $argv 0]
+  set argv [lrange $argv 1 end]
+  switch -glob -- $arg  {
+    -nowin {
+        set nowin 1
+    }
+    default {
+      if {[file isfile [pwd]/$arg]} {
+          lappend ::robotFiles [pwd]/$arg
+          incr ::numList
+      } else {
+        puts "'$arg' not found, skipping"
+      }
+    }
+  }
+}
+
+
+set ::robotFiles {charger.tr charger.tr}
+set ::numList 2
+
+# check for tournament, two or more files on command line
+if {[llength $::robotFiles] >= 2} {
+    set tourn_type 4
+    set ::parms(tick)    0
+
+    set tlimit $arg_tlimit
+    set outfile $arg_outfile
+    main
+}
+}

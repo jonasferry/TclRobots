@@ -478,51 +478,11 @@ proc start {} {
     #  }
 
     # get robot filenames from window
-    set ::allRobots ""
     set lst .f2.fr.l1
+
     for {set i 0} {$i < $::numList} {incr i} {
-        # Give the robots names like r0, r1, etc.
-        set robot r$i
-        # Update list of robots
-        lappend ::allRobots $robot
-        # Read
-        set f [open [$lst get $i]]
-        set ::data($robot,code) [read $f]
-        close $f
+        lappend ::robotFiles [$lst get $i]
     }
-
-    # At the start of the game all robots are active
-    set ::activeRobots $::allRobots
-
-    set dot_geom [winfo geom .]
-    set dot_geom [split $dot_geom +]
-    set dot_x [lindex $dot_geom 1]
-    set dot_y [lindex $dot_geom 2]
-
-    # pick random starting quadrant, colors and init robots
-    set i [rand [llength $::allRobots]]
-    foreach robot $::allRobots {
-        # Pick a random color
-        set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
-        # Cycle through the four robot icon arrow shapes
-        set quad [lindex $quads [% $i 4]]
-
-        set x [expr [lindex $quad 0]+[rand 300]]
-        set y [expr [lindex $quad 1]+[rand 300]]
-
-        set winx [expr $dot_x+540]
-        set winy [expr $dot_y+(($i-1)*145)]
-        set winy [expr (($i-1)*145)]
-
-
-
-        set ::data($robot,color) $color
-
-        incr i
-    }
-
-    # Run tclrobots.tcl init to setup robots
-    init
 
     pack forget .f2
     pack .c -side top -expand 1 -fill both
@@ -538,12 +498,11 @@ proc start {} {
     .f1.b5 configure -state disabled
     #  start_robots
 
-    set ::running 1
-
     main
 
-    vwait running
+#    vwait running
 
+    if 0 {
     # find winnner
     if {$halted} {
         .l configure -text "Battle halted"
@@ -614,7 +573,7 @@ proc start {} {
             tk_dialog2 .winner "Results" $msg "-image iconfn" 0 dismiss
         }
     }
-
+}
     #  set ::execCmd "kill_wishes \"$robots\""
     .f1.b1 configure -state normal -text "Reset"
 
