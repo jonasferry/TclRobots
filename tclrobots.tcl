@@ -738,11 +738,6 @@ proc init {} {
     tick
 }
 
-proc gui {} {
-    main_win
-    update
-}
-
 proc main {} {
     init
     set ::running 1
