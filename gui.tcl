@@ -9,7 +9,7 @@ package require Tk
 #
 
 proc about {} {
-    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 1994,1996\nTom Poindexter\ntpoindex@nyx.net\n\nVersion 2.0\nFebruary, 1996\n" "-image iconfn" 0 dismiss
+    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas@tclrobots.org\n\nVersion 3.0\nFebruary, 2010\n" "-image iconfn" 0 dismiss
 
 }
 
@@ -118,17 +118,17 @@ proc main_win {} {
 #
 proc choose_file {win filename} {
     set listsize $::numList
-    .f2.fr.l1 insert end $filename
+    $::robotList_lb insert end $filename
     incr ::numList
     set dir $filename
     for {set i 0} {$i <= $listsize} {incr i} {
-        set d [.f2.fr.l1 get $i]
+        set d [$::robotList_lb get $i]
         if {[string length $d] > [string length $dir]} {
             set dir  $d
         }
     }
     set index [expr [string length [file dirname [file dirname $dir]] ]+1]
-    .f2.fr.l1 xview $index
+    $::robotList_lb xview $index
 }
 
 
@@ -154,9 +154,9 @@ proc choose_all {} {
 #
 proc remove_file {} {
     set index -1
-    catch {set index [.f2.fr.l1 curselection]}
+    catch {set index [.f2.fr.f.lb curselection]}
     if {$index >= 0} {
-        .f2.fr.l1 delete $index
+        .f2.fr.f.lb delete $index
         incr  ::numList -1
     }
 }
@@ -169,7 +169,7 @@ proc remove_file {} {
 proc remove_all {} {
     set index $::numList
     if {$index > 0} {
-        .f2.fr.l1 delete 0 end
+        .f2.fr.f.lb delete 0 end
         set ::numList 0
     }
 }
@@ -467,7 +467,7 @@ proc start {} {
     set halted  0
     set quads $::parms(quads)
 
-    .l configure -text "Initializing..."
+    $::info_l configure -text "Initializing..."
 
     # clean up robots
     #  foreach robot $::robots {
@@ -478,26 +478,25 @@ proc start {} {
     #  }
 
     # get robot filenames from window
-    set lst .f2.fr.l1
+    set lst $::robotList_lb
 
     for {set i 0} {$i < $::numList} {incr i} {
         lappend ::robotFiles [$lst get $i]
     }
 
-    pack forget .f2
-    pack .c -side top -expand 1 -fill both
+    grid forget .f2
+    grid .c -column 0 -row 2 -sticky nsew
     draw_arena
 
     # start robots
-    .l configure -text "Running"
+    $::info_l configure -text "Running"
     set ::execCmd halt
-    .f1.b1 configure -state normal    -text "Halt"
-    .f1.b2 configure -state disabled
-    .f1.b3 configure -state disabled
-    .f1.b4 configure -state disabled
-    .f1.b5 configure -state disabled
+    $::run_b   configure -state normal    -text "Halt"
+    $::sim_b   configure -state disabled
+    $::tourn_b configure -state disabled
+    $::about_b configure -state disabled
+    $::quit_b  configure -state disabled
     #  start_robots
-
     main
 
 #    vwait running
@@ -575,7 +574,7 @@ proc start {} {
     }
 }
     #  set ::execCmd "kill_wishes \"$robots\""
-    .f1.b1 configure -state normal -text "Reset"
+    $::run_b configure -state normal -text "Reset"
 
 }
 
@@ -689,7 +688,7 @@ proc tk_dialog2 {w title text bitmap default args} {
 proc halt {} {
     #    global execCmd halted running
     set ::running 0
-    .l configure -text "Stopping battle, standby"
+    $::info_l configure -text "Stopping battle, standby"
     update
     foreach robot $::allRobots {
         if {$::data($robot,status)} {
@@ -698,11 +697,11 @@ proc halt {} {
     }
     set ::halted 1
     set ::execCmd reset
-    .f1.b1 configure -state normal -text "Reset"
-    .f1.b2 configure -state disabled
-    .f1.b3 configure -state disabled
-    .f1.b4 configure -state disabled
-    .f1.b5 configure -state disabled
+    $::run_b   configure -state normal -text "Reset"
+    $::sim_b   configure -state disabled
+    $::tourn_b configure -state disabled
+    $::about_b configure -state disabled
+    $::quit_b  configure -state disabled
 }
 
 
@@ -716,15 +715,15 @@ proc reset {} {
     global execCmd
     .c delete all
     set execCmd start
-    .f1.b1 configure -text "Run Battle"
-    pack forget .c
-    pack .f2 -side top -expand 1 -fill both
-    .l configure -text "Select robot files for battle" -fg black
-    .f1.b1 configure -state normal
-    .f1.b2 configure -state normal
-    .f1.b3 configure -state normal
-    .f1.b4 configure -state normal
-    .f1.b5 configure -state normal
+    $::run_b configure -text "Run Battle"
+    grid forget .c
+    grid .f2 -column 0 -row 2 -sticky nsew
+    .l configure -text "Select robot files for battle"
+    $::run_b   configure -state normal
+    $::sim_b   configure -state normal
+    $::tourn_b configure -state normal
+    $::about_b configure -state normal
+    $::quit_b  configure -state normal
 }
 
 
@@ -767,35 +766,148 @@ set tr_icon {
 image create bitmap iconfn -data $::tr_icon -background ""
 
 proc gui {} {
-#    main_win
-#    update
+set old 0
 
-    set ::execCmd start
+    if {$old} {
+        main_win
+        update
+    } else {
+        set ::execCmd start
 
-    # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
-    catch {destroy .iconm}
-    toplevel .iconm
-    grid [label .iconm.i -image iconfn]
+        # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
+        catch {destroy .iconm}
+        toplevel .iconm
+        grid [label .iconm.i -image iconfn]
 
-    wm title . "TclRobots"
-    wm iconwindow . .iconm
-    wm iconname . TclRobots
-    wm protocol . WM_DELETE_WINDOW "catch {.f1.b5 invoke}"
+        wm title . "TclRobots"
+        wm iconwindow . .iconm
+        wm iconname . TclRobots
+        wm protocol . WM_DELETE_WINDOW "catch {.f1.b5 invoke}"
 
-    set ::f1_f    [ttk::frame .f1]
-    set ::run_b   [ttk::button .f1.b1 -text "Run Battle" -width 12 \
-                       -command {eval $::execCmd}]
-    set ::sim_b   [ttk::button .f1.b2 -text "Simulator.." -command sim]
-    set ::tourn_b [ttk::button .f1.b3 -text "Tournament.." -command tournament]
-    set ::about_b [ttk::button .f1.b4 -text "About.." -command about]
-    set ::quit_b  [ttk::button .f1.b5 -text "Quit" \
-                       -command "cleanUp; destroy ."]
+        # Create and grid the outer content frame
+#        grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
+#        foreach w [winfo children .f1] {grid configure $w -padx 5 -pady 5}
 
-    grid $::run_b   -column 2  -row 2 -sticky nsew
-    grid $::sim_b   -column 4  -row 2 -sticky nsew
-    grid $::tourn_b -column 6  -row 2 -sticky nsew
-    grid $::about_b -column 8  -row 2 -sticky nsew
-    grid $::quit_b  -column 10 -row 2 -sticky nsew
+        # Create button frame and buttons
+        set ::buttons_f [ttk::frame .f1]
+        set ::run_b     [ttk::button .f1.b1 -text "Run Battle" \
+                             -command {eval $::execCmd}]
+        set ::sim_b     [ttk::button .f1.b2 -text "Simulator" -command sim]
+        set ::tourn_b   [ttk::button .f1.b3 -text "Tournament" \
+                             -command tournament]
+        set ::about_b   [ttk::button .f1.b4 -text "About" -command about]
+        set ::quit_b    [ttk::button .f1.b5 -text "Quit" \
+                             -command "destroy ."]
 
-    grid $::f1_f -column 2 -row 2 -sticky nsew
+        # Grid button frame and buttons
+        grid $::buttons_f -column 0 -row 0 -sticky nsew
+        grid $::run_b     -column 0 -row 0 -sticky nsew
+        grid $::sim_b     -column 1 -row 0 -sticky nsew
+        grid $::tourn_b   -column 2 -row 0 -sticky nsew
+        grid $::about_b   -column 3 -row 0 -sticky nsew
+        grid $::quit_b    -column 4 -row 0 -sticky nsew
+
+        # The info label
+        set ::info_l [ttk::label .l -relief raised \
+                          -text "Select robot files for battle"]
+
+        # The contents frame contains two frames
+        set cnt_f [ttk::frame .f2 -width 520 -height 520]
+
+        # Contents left frame
+        set cntL_f [ttk::frame .f2.fl -relief sunken -borderwidth 3]
+
+        # Contents right frame
+        set cntR_f [ttk::frame .f2.fr -relief sunken -borderwidth 3]
+
+        # The file selection box
+        set files_fb [fileBox .f2.fl "Select" * "" [pwd] choose_file]
+
+        # The robot list info label
+        set robotList_l  [ttk::label .f2.fr.l -text "Robot files selected"]
+
+        # A frame with the robot list and a scrollbar
+        set robotList_f  [ttk::frame .f2.fr.f]
+
+        # The robot list
+        set ::robotList_lb [listbox .f2.fr.f.lb -relief sunken  \
+                                -yscrollcommand ".f2.fr.f.s set" \
+                                -selectmode single]
+
+        # The scrollbar
+        set ::robotList_s  [ttk::scrollbar .f2.fr.f.s \
+                              -command "$::robotList_lb yview"]
+
+        # A frame with the two remove buttons
+        set remove_f     [ttk::frame  .f2.fr.r]
+
+        # Remove single file
+        set remove_b     [ttk::button .f2.fr.r.b1 -text " Remove " \
+                              -command remove_file]
+
+        # Remove all files
+        set removeAll_b  [ttk::button .f2.fr.r.b2 -text " Remove All " \
+                                -command remove_all]
+
+        grid $::info_l -column 0 -row 1 -sticky nsew
+        grid $cnt_f    -column 0 -row 2 -sticky nsew
+        grid $cntL_f   -column 0 -row 0 -sticky nsew
+        grid $cntR_f   -column 1 -row 0 -sticky nsew
+#        grid $::fileBox_fb   -column 0 -row 0 -sticky nsew
+
+        grid $robotList_l    -column 0 -row 0 -sticky nsew
+        grid $robotList_f    -column 0 -row 1 -sticky nsew
+        grid $::robotList_lb -column 0 -row 0 -sticky nsew
+        grid $::robotList_s  -column 1 -row 0 -sticky nsew
+        grid $remove_f       -column 0 -row 2 -sticky nsew
+        grid $remove_b       -column 0 -row 0 -sticky nsew
+        grid $removeAll_b    -column 1 -row 0 -sticky nsew
+
+        # The battle field canvas
+        canvas .c -width 520 -height 520  -scrollregion "-10 -10 510 510"
+
+        wm geom . 524x574
+    }
+}
+
+if 0 {
+My initialization code, then, looks something like this:
+
+    proc main {} {
+        ...
+        widgets
+        widgets.layout
+        ....
+    }
+
+    proc widgets {} {
+        widgets.menubar
+        widgets.toolbar
+        widgets.statusbar
+        widgets.main
+    }
+    proc widgets.toolbar {} {
+        global widgets
+        set widgets(toolbar) .toolbar
+        button $widgets(toolbar).cut ...
+        button $widgets(toolbar).copy ...
+        ...
+        pack $widgets(toolbar).cut $widgets(toolbar).copy \
+            -side left
+    }
+    ...
+    proc widgets.layout {} {
+        global widgets
+        global options
+        . configure -menu $widgets(menubar)
+        grid $widgets(toolbar) -row 0 -column ...
+        grid $widgets(main) -row 1 -column ...
+        grid $widgets(statusbar) -row 2 -column ...
+        if {!$options(-showtoolbar)} {
+            grid remove $widgets(toolbar)
+        }
+        ....
+    }
+
+In reality I pass in the toplevel window to each of the procs so that, in theory, I can reparent the widgets if later I choose to embed them in a larger program. I left that out of this example to make the example a little easier to understand.
 }
