@@ -786,17 +786,16 @@ set old 0
 
         # Create and grid the outer content frame
 #        grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
-#        foreach w [winfo children .f1] {grid configure $w -padx 5 -pady 5}
 
         # Create button frame and buttons
         set ::buttons_f [ttk::frame .f1]
-        set ::run_b     [ttk::button .f1.b1 -text "Run Battle" \
+        set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
                              -command {eval $::execCmd}]
-        set ::sim_b     [ttk::button .f1.b2 -text "Simulator" -command sim]
-        set ::tourn_b   [ttk::button .f1.b3 -text "Tournament" \
+        set ::sim_b     [ttk::button .f1.b1 -text "Simulator" -command sim]
+        set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                              -command tournament]
-        set ::about_b   [ttk::button .f1.b4 -text "About" -command about]
-        set ::quit_b    [ttk::button .f1.b5 -text "Quit" \
+        set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
+        set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
                              -command "destroy ."]
 
         # Grid button frame and buttons
@@ -806,6 +805,11 @@ set old 0
         grid $::tourn_b   -column 2 -row 0 -sticky nsew
         grid $::about_b   -column 3 -row 0 -sticky nsew
         grid $::quit_b    -column 4 -row 0 -sticky nsew
+
+        for {set i 0} {$i <= 4} {incr i} {
+            grid columnconfigure .f1 $i -weight 1
+        }
+        grid rowconfigure .f1 0 -weight 1
 
         # The info label
         set ::info_l [ttk::label .l -relief raised \
@@ -853,7 +857,6 @@ set old 0
         grid $cnt_f    -column 0 -row 2 -sticky nsew
         grid $cntL_f   -column 0 -row 0 -sticky nsew
         grid $cntR_f   -column 1 -row 0 -sticky nsew
-#        grid $::fileBox_fb   -column 0 -row 0 -sticky nsew
 
         grid $robotList_l    -column 0 -row 0 -sticky nsew
         grid $robotList_f    -column 0 -row 1 -sticky nsew
@@ -862,6 +865,9 @@ set old 0
         grid $remove_f       -column 0 -row 2 -sticky nsew
         grid $remove_b       -column 0 -row 0 -sticky nsew
         grid $removeAll_b    -column 1 -row 0 -sticky nsew
+
+        grid rowconfigure .f2.fr 0 -weight 1
+        grid rowconfigure .f2.fr 1 -weight 1
 
         # The battle field canvas
         canvas .c -width 520 -height 520  -scrollregion "-10 -10 510 510"
