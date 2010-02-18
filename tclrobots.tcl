@@ -275,7 +275,11 @@ proc sysData {robot} {
     set ::data($robot,sysreturn,$::tick) $val
 }
 
-set ::rb 0
+proc brightness color {
+    foreach {r g b} [winfo rgb . $color] break
+    set max [lindex [winfo rgb . white] 0]
+    expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
+ } ;#RS, after [Kevin Kenny]
 
 proc initRobots {} {
     foreach robot $::allRobots {
@@ -362,8 +366,14 @@ proc initRobots {} {
         set ::data($robot,syscall,-1) {}
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
-        # set random color
-        set ::data($robot,color) [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
+        # set random color; starting with white then randomize
+        set color #FFFFFF
+        while {[brightness $color] > 0.5} {
+            # Randomize until brightness low enough;
+            # we want to see the robots
+            set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
+        }
+        set ::data($robot,color) $color
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
@@ -638,6 +648,7 @@ proc runRobots {} {
         updateRobots
 
         if {$::gui} {
+            show_arena
             show_robots
             show_scan
         }
@@ -673,28 +684,28 @@ proc findWinner {} {
     
     switch $alive {
         0 {
-            set msg "No robots left alive"
-            puts $msg
+            set ::win_msg "No robots left alive"
+            puts $::win_msg
         }
         1 {
             if {[string length $diffteam] > 0} {
                 set diffteam "Team $diffteam"
             }
-            set msg "\nWinner!\n\n$diffteam\n$winner\n"
-            puts $msg
+            set ::win_msg "\nWinner!\n\n$diffteam\n$winner\n"
+            puts $::win_msg
         }
         default {
             # check for teams
             if {$num_team == 1} {
-                set msg "Winner!\n\nTeam $diffteam\n$winner"
-                puts $msg
+                set ::win_msg "Winner!\n\nTeam $diffteam\n$winner"
+                puts $::win_msg
             } else {
-                set msg "Tie:\n\n$winner"
-                puts $msg
+                set ::win_msg "Tie:\n\n$winner"
+                puts $::win_msg
             }
         }
     }
-    set msg2 [join [split $msg \n] " "]
+    set ::win_msg2 [join [split $::win_msg \n] " "]
     set score "score: "
     set points 1
     foreach l [split $::finish \n] {
@@ -711,7 +722,7 @@ proc findWinner {} {
         append score "$n = $points  "
     }
     catch {write_file $outfile \
-               "$players\n$finish\n$msg2\n\n$score\n\n\n"}
+               "$players\n$finish\n$::win_msg2\n\n$score\n\n\n"}
 }
 
 proc init {} {

@@ -57,7 +57,7 @@ proc main_win {} {
 
     set ::numList 0
     set ::execCmd start
-    set me [winfo name .]
+#    set me [winfo name .]
 
     option add *highlightThickness 0
 
@@ -345,12 +345,50 @@ proc fileBox {win txt filt initfile startdir execproc} {
 
 ###############################################################################
 #
+# clean up all left overs
+#
+#
+
+proc clean_up {} {
+    .l configure -text "Standby, cleaning up any left overs...."
+    update
+
+    foreach robot $::activeRobots {
+        disable_robot $robot
+    }
+}
+
+###############################################################################
+#
+# update canvas and find current width
+#
+#
+
+proc show_arena {} {
+    set $::scale [/ 1000 [winfo width .f1]]
+    set side [/ 1000 $::scale]
+
+    .c create line 0     0     0     $side
+    .c create line 0     0     $side 0
+    .c create line $side 0     $side $side
+    .c create line 0     $side $side $side
+
+    set ::robotHealth {}
+    set index 0
+    foreach robot $::allRobots {
+        lappend ::robotHealth "$robot $::data($robot,health)"
+        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+        incr index
+    }
+}
+
+###############################################################################
+#
 # update canvas with position of missiles and robots
 #
 #
 
 proc show_robots {} {
-    #  global c_tab s_tab parms
     set i 0
     foreach robot $::allRobots {
         # check robots
@@ -442,20 +480,6 @@ proc show_explode {robot} {
 
 ###############################################################################
 #
-# draw arena boundry
-#
-#
-
-proc draw_arena {} {
-    set side [/ 1000 $::scale]
-    .c create line 0     0     0     $side
-    .c create line 0     0     $side 0
-    .c create line $side 0     $side $side
-    .c create line 0     $side $side $side
-}
-
-###############################################################################
-#
 # start a match
 #
 #
@@ -479,6 +503,7 @@ proc start {} {
 
     # get robot filenames from window
     set lst $::robotList_lb
+    set ::robotFiles {}
 
     for {set i 0} {$i < $::numList} {incr i} {
         lappend ::robotFiles [$lst get $i]
@@ -486,7 +511,22 @@ proc start {} {
 
     grid forget .f2
     grid .c -column 0 -row 2 -sticky nsew
-    draw_arena
+    
+    grid .h -column 1 -row 2 -sticky nsew
+
+#        grid columnconfigure .c all -weight 1
+#        grid rowconfigure .c all -weight 1
+
+#        bind .c <Configure> {
+#            if {%w < %h} {
+#                set $::scale [/ 1000 %w]
+#            } else {
+#                set $::scale [/ 1000 %h]
+#            }
+#        }
+
+
+#    show_arena
 
     # start robots
     $::info_l configure -text "Running"
@@ -499,83 +539,16 @@ proc start {} {
     #  start_robots
     main
 
-#    vwait running
-
-    if 0 {
     # find winnner
     if {$halted} {
         .l configure -text "Battle halted"
     } else {
-        set alive 0
-        set winner ""
-        set num_team 0
-        set diffteam ""
-        set win_color black
-        foreach robot $::activeRobots {
-            #disable_robot $robot 0
-            incr alive
-            lappend winner $::data($robot,name)
-            set win_color $::data($robot,color)
-            if {$::data($robot,team) != ""} {
-                if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
-                    lappend diffteam $::data($robot,team)
-                    incr num_team
-                }
-            } else {
-                incr num_team
-            }
-        }
-
-        switch $alive {
-            0 {
-                set msg "No robots left alive"
-                .l configure -text $msg
-            }
-            1 {
-                if {[string length $diffteam] > 0} {
-                    set diffteam "Team $diffteam"
-                }
-                set msg "Winner!\n\n$diffteam\n$winner"
-                .l configure -text "$winner wins!" -fg $win_color
-            }
-            default {
-                # check for teams
-                if {$num_team == 1} {
-                    set msg "Winner!\n\nTeam $diffteam\n$winner"
-                    .l configure -text "Team: $diffteam : $winner wins!"
-                } else {
-                    set msg "Tie:\n\n$winner"
-                    .l configure -text "Tie: $winner"
-                }
-            }
-        }
-        if {$::nowin} {
-            set msg2 [join [split $msg \n] " "]
-            set score "score: "
-            set points 1
-            foreach l [split $finish \n] {
-                set n [lindex $l 0]
-                if {[string length $n] == 0} {continue}
-                set l [string last _ $n]
-                if {$l > 0} {incr l -1; set n [string range $n 0 $l]}
-                append score "$n = $points  "
-                incr points
-            }
-            foreach n $winner {
-                set l [string last _ $n]
-                if {$l > 0} {incr l -1; set n [string range $n 0 $l]}
-                append score "$n = $points  "
-            }
-            catch {write_file $outfile \
-                       "$players\n$finish\n$msg2\n\n$score\n\n\n"}
-        } else {
-            tk_dialog2 .winner "Results" $msg "-image iconfn" 0 dismiss
-        }
+        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-}
+    
     #  set ::execCmd "kill_wishes \"$robots\""
     $::run_b configure -state normal -text "Reset"
-
+    
 }
 
 # standard tk_dialog modified to use -image on label
@@ -712,11 +685,13 @@ proc halt {} {
 #
 
 proc reset {} {
-    global execCmd
+    clean_up
+
     .c delete all
-    set execCmd start
+    set ::execCmd start
     $::run_b configure -text "Run Battle"
     grid forget .c
+    grid forget .h
     grid .f2 -column 0 -row 2 -sticky nsew
     .l configure -text "Select robot files for battle"
     $::run_b   configure -state normal
@@ -785,7 +760,7 @@ set old 0
         wm protocol . WM_DELETE_WINDOW "catch {.f1.b5 invoke}"
 
         # Create and grid the outer content frame
-#        grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
+        grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
 
         # Create button frame and buttons
         set ::buttons_f [ttk::frame .f1]
@@ -806,10 +781,7 @@ set old 0
         grid $::about_b   -column 3 -row 0 -sticky nsew
         grid $::quit_b    -column 4 -row 0 -sticky nsew
 
-        for {set i 0} {$i <= 4} {incr i} {
-            grid columnconfigure .f1 $i -weight 1
-        }
-        grid rowconfigure .f1 0 -weight 1
+        grid columnconfigure $::buttons_f all -weight 1
 
         # The info label
         set ::info_l [ttk::label .l -relief raised \
@@ -866,13 +838,23 @@ set old 0
         grid $remove_b       -column 0 -row 0 -sticky nsew
         grid $removeAll_b    -column 1 -row 0 -sticky nsew
 
-        grid rowconfigure .f2.fr 0 -weight 1
-        grid rowconfigure .f2.fr 1 -weight 1
+#        grid columnconfigure .f2 all -weight 1
+#        grid rowconfigure .f2 all -weight 1
+
+
+#        grid rowconfigure .f2.fr 0 -weight 1
+        grid rowconfigure $cntR_f 1 -weight 1
+        grid rowconfigure $robotList_f 0 -weight 1
+
 
         # The battle field canvas
         canvas .c -width 520 -height 520  -scrollregion "-10 -10 510 510"
 
-        wm geom . 524x574
+        # The robot health list
+        set ::robotHealth {a b c}
+        set ::robotHealth_lb [listbox .h -listvariable ::robotHealth]
+
+
     }
 }
 
