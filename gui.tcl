@@ -55,7 +55,7 @@ proc main_win {} {
 
     image create bitmap iconfn -data $tr_icon -background ""
 
-    set ::numList 0
+    set ::numlist 0
     set ::execCmd start
 #    set me [winfo name .]
 
@@ -117,18 +117,18 @@ proc main_win {} {
 # choose_file
 #
 proc choose_file {win filename} {
-    set listsize $::numList
-    $::robotList_lb insert end $filename
-    incr ::numList
+    set listsize $::numlist
+    $::robotlist_lb insert end $filename
+    incr ::numlist
     set dir $filename
     for {set i 0} {$i <= $listsize} {incr i} {
-        set d [$::robotList_lb get $i]
+        set d [$::robotlist_lb get $i]
         if {[string length $d] > [string length $dir]} {
             set dir  $d
         }
     }
     set index [expr [string length [file dirname [file dirname $dir]] ]+1]
-    $::robotList_lb xview $index
+    $::robotlist_lb xview $index
 }
 
 
@@ -157,7 +157,7 @@ proc remove_file {} {
     catch {set index [.f2.fr.f.lb curselection]}
     if {$index >= 0} {
         .f2.fr.f.lb delete $index
-        incr  ::numList -1
+        incr  ::numlist -1
     }
 }
 
@@ -167,10 +167,10 @@ proc remove_file {} {
 # remove_all
 #
 proc remove_all {} {
-    set index $::numList
+    set index $::numlist
     if {$index > 0} {
-        .f2.fr.f.lb delete 0 end
-        set ::numList 0
+        $::robotlist_lb delete 0 end
+        set ::numlist 0
     }
 }
 
@@ -493,7 +493,7 @@ proc distinct_colors {n} {
     }
     set lum_increment [expr .7 / $lum_steps]
 
-    for {set l 1.0} {$l > 0.3} {set l [expr {$l - $lum_increment}]} {
+    for {set l 1.0} {$l > 0.4} {set l [expr {$l - $lum_increment}]} {
         for {set h 0.0} {$h < 1.0} {set h [expr {$h + $hue_increment}]} {
             lappend rc [hls2tk $h $l $s]
             incr nn
@@ -540,6 +540,43 @@ proc hls2rgb {h l s} {
     return [list $r $g $b]
 }
 
+
+
+if 0 {
+##+##########################################################################
+ #
+ # pastel -- returns a "pastel" color. Code is from X Windows tool xcolorize
+ # Pick "random" color in a subspace of the HSV color model and convert to RGB.
+ #
+ proc pastel {} {
+    set rand [expr {rand() * 262144}]
+    set h [fmod $rand 360]
+    set rand [expr {$rand / 359.3}]
+    set s [expr {([fmod $rand 9] + 12) / 100.0}]
+    set v 1
+
+    # Convert to rgb space
+    if {$h == 360} { set h 0 }
+    set h [expr {$h/60}]
+    set i [expr {int(floor($h))}]
+    set f [expr {$h - $i}]
+    set p1 [expr {$v*(1-$s)}]
+    set p2 [expr {$v*(1-($s*$f))}]
+    set p3 [expr {$v*(1-($s*(1-$f)))}]
+    switch -- $i {
+        0 { set r $v  ; set g $p3 ; set b $p1 }
+        1 { set r $p2 ; set g $v  ; set b $p1 }
+        2 { set r $p1 ; set g $v  ; set b $p3 }
+        3 { set r $p1 ; set g $p2 ; set b $v  }
+        4 { set r $p3 ; set g $p1 ; set b $v  }
+        5 { set r $v  ; set g $p1 ; set b $p2 }
+    }
+    foreach a {r g b} { set $a [expr {int ([set $a] * 255)}] }
+    return [format "\#%02x%02x%02x" $r $g $b]
+ }
+}
+
+
 ###############################################################################
 #
 # start a match
@@ -564,10 +601,10 @@ proc start {} {
     #  }
 
     # get robot filenames from window
-    set lst $::robotList_lb
+    set lst $::robotlist_lb
     set ::robotFiles {}
 
-    for {set i 0} {$i < $::numList} {incr i} {
+    for {set i 0} {$i < $::numlist} {incr i} {
         lappend ::robotFiles [$lst get $i]
     }
 
@@ -850,35 +887,35 @@ set old 0
         grid columnconfigure $::buttons_f all -weight 1
 
         # The info label
-        set ::info_l [ttk::label .l -relief raised \
+        set ::info_l [ttk::label .l \
                           -text "Select robot files for battle"]
 
         # The contents frame contains two frames
         set ::sel_f [ttk::frame .f2 -width 520 -height 520]
 
         # Contents left frame
-        set selL_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
+        set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
 
         # Contents right frame
-        set selR_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
+        set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
 
         # The file selection box
         set files_fb [fileBox $::sel_f.fl "Select" * "" [pwd] choose_file]
 
         # The robot list info label
-        set robotList_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
+        set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
 
         # A frame with the robot list and a scrollbar
-        set robotList_f  [ttk::frame $::sel_f.fr.f]
+        set robotlist_f  [ttk::frame $::sel_f.fr.f]
 
         # The robot list
-        set ::robotList_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
-                                -yscrollcommand ".f2.fr.f.s set" \
+        set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
+                                -yscrollcommand "$::sel_f.fr.f.s set" \
                                 -selectmode single]
 
         # The scrollbar
-        set ::robotList_s  [ttk::scrollbar $::sel_f.fr.f.s \
-                              -command "$::robotList_lb yview"]
+        set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
+                              -command "$::robotlist_lb yview"]
 
         # A frame with the two remove buttons
         set remove_f     [ttk::frame  $::sel_f.fr.r]
@@ -888,31 +925,36 @@ set old 0
                               -command remove_file]
 
         # Remove all files
-        set removeAll_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
+        set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
                                 -command remove_all]
 
-        grid $::info_l -column 0 -row 1 -sticky nsew
-        grid $::sel_f    -column 0 -row 2 -sticky nsew
-        grid $selL_f   -column 0 -row 0 -sticky nsew
-        grid $selR_f   -column 1 -row 0 -sticky nsew
+        grid $::info_l       -column 0 -row 1 -sticky nsew
+        grid $::sel_f        -column 0 -row 2 -sticky nsew
+        grid $sel0_f         -column 0 -row 0 -sticky nsew
+        grid $sel1_f         -column 1 -row 0 -sticky nsew
 
-        grid $robotList_l    -column 0 -row 0 -sticky nsew
-        grid $robotList_f    -column 0 -row 1 -sticky nsew
-        grid $::robotList_lb -column 0 -row 0 -sticky nsew
-        grid $::robotList_s  -column 1 -row 0 -sticky nsew
+        grid $robotlist_l    -column 0 -row 0 -sticky nsew
+        grid $robotlist_f    -column 0 -row 1 -sticky nsew
+        grid $::robotlist_lb -column 0 -row 0 -sticky nsew
+        grid $::robotlist_s  -column 1 -row 0 -sticky nsew
         grid $remove_f       -column 0 -row 2 -sticky nsew
         grid $remove_b       -column 0 -row 0 -sticky nsew
-        grid $removeAll_b    -column 1 -row 0 -sticky nsew
+        grid $removeall_b    -column 1 -row 0 -sticky nsew
 
-        grid rowconfigure $selR_f 1 -weight 1
-        grid rowconfigure $robotList_f 0 -weight 1
+        grid rowconfigure $::sel_f       0 -weight 1
+        grid rowconfigure $sel1_f        1 -weight 1
+        grid rowconfigure $robotlist_f all -weight 1
+
+        #grid rowconfigure $sel1_f 1 -weight 1
+        #grid rowconfigure $robotlist_f 0 -weight 1
 
         # The contents frame contains two frames
         set ::game_f [ttk::frame .f3 -width 520 -height 520]
 
         # The battle field canvas
         set ::arena_c [canvas $::game_f.c -width 520 -height 520 \
-                           -scrollregion "-10 -10 510 510"]
+                           -scrollregion "-10 -10 510 510" \
+                          -background white]
 
         # The robot health list
         set ::robotHealth {}

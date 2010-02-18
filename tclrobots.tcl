@@ -365,8 +365,12 @@ proc initRobots {} {
         #set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
         #set ::data($robot,color) $color
 
+        # Colors as far away as possible from each other visually
         set ::data($robot,color) [lindex $::colors $color_num]
         incr color_num
+
+        # Pastel color
+        #set ::data($robot,color) [pastel]
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
@@ -781,7 +785,7 @@ set arg_tlimit  10
 set arg_outfile "results.out"
 set ::robotFiles   ""
 set tourn_type  0
-set ::numList   0
+set ::numlist   0
 
 if 0 {
 while {[llength $argv] > 0} {
@@ -794,7 +798,7 @@ while {[llength $argv] > 0} {
     default {
       if {[file isfile [pwd]/$arg]} {
           lappend ::robotFiles [pwd]/$arg
-          incr ::numList
+          incr ::numlist
       } else {
         puts "'$arg' not found, skipping"
       }
@@ -804,7 +808,7 @@ while {[llength $argv] > 0} {
 
 
 set ::robotFiles {charger.tr charger.tr}
-set ::numList 2
+set ::numlist 2
 
 # check for tournament, two or more files on command line
 if {[llength $::robotFiles] >= 2} {
