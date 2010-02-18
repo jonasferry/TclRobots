@@ -103,7 +103,7 @@ proc main_win {} {
     pack .f2.fr.l1  -side left  -expand 1 -fill both
 
     pack .f2.fl .f2.fr -side left -expand 1 -fill both -padx 10 -pady 10
-    canvas .c -width 520 -height 520  -scrollregion "-10 -10 510 510"
+    canvas $::arena_c -width 520 -height 520  -scrollregion "-10 -10 510 510"
 
     pack .f1 .l  -side top -fill both
     pack .f2 -side top -expand 1 -fill both
@@ -368,10 +368,10 @@ proc show_arena {} {
     set $::scale [/ 1000 [winfo width .f1]]
     set side [/ 1000 $::scale]
 
-    .c create line 0     0     0     $side
-    .c create line 0     0     $side 0
-    .c create line $side 0     $side $side
-    .c create line 0     $side $side $side
+    $::arena_c create line 0     0     0     $side
+    $::arena_c create line 0     0     $side 0
+    $::arena_c create line $side 0     $side $side
+    $::arena_c create line 0     $side $side $side
 
     set ::robotHealth {}
     set index 0
@@ -393,11 +393,11 @@ proc show_robots {} {
     foreach robot $::allRobots {
         # check robots
         if {$::data($robot,status)} {
-            .c delete r$::data($robot,num)
+            $::arena_c delete r$::data($robot,num)
             set x [expr $::data($robot,x)/$::scale]
             set y [expr (1000-$::data($robot,y))/$::scale]
             set arrow [lindex $::parms(shapes) [% $i 4]]
-            .c create line $x $y \
+            $::arena_c create line $x $y \
                 [expr $x+($::c_tab($::data($robot,hdg))*5)] \
                 [expr $y-($::s_tab($::data($robot,hdg))*5)] \
                 -fill $::data($robot,color) \
@@ -405,16 +405,16 @@ proc show_robots {} {
         }
         # check missiles
         if {$::data($robot,mstate)} {
-            .c delete m$::data($robot,num)
+            $::arena_c delete m$::data($robot,num)
             set x [expr $::data($robot,mx)/$::scale]
             set y [expr (1000-$::data($robot,my))/$::scale]
-            .c create oval [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
+            $::arena_c create oval [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
                 -fill black -tags m$::data($robot,num)
         }
         incr i
     }
     #delete all previous scans
-    .c delete scan
+    $::arena_c delete scan
     update
 }
 
@@ -428,7 +428,7 @@ proc show_robots {} {
 
 proc show_scan {} {
     foreach robot $::activeRobots {
-        if {[.c find withtag s$::data($robot,name)] != ""} {
+        if {[$::arena_c find withtag s$::data($robot,name)] != ""} {
             return
         } elseif {$::data($robot,status)} {
             if {([lindex $::data($robot,syscall,$::tick) 0] eq "scanner") && \
@@ -441,7 +441,7 @@ proc show_scan {} {
 
                 set x [expr $::data($robot,x)/2]
                 set y [expr (1000-$::data($robot,y))/2]
-                .c create arc [expr $x-350] [expr $y-350] [expr $x+350] \
+                $::arena_c create arc [expr $x-350] [expr $y-350] [expr $x+350] \
                     [expr $y+350] -start [expr $deg-$res] \
                     -extent [expr 2*$res + 1] -fill "" \
                     -outline $::data($robot,color) -stipple gray50 -width 1 \
@@ -460,22 +460,84 @@ proc show_scan {} {
 #
 
 proc show_explode {robot} {
-    .c delete m$::data($robot,num)
+    $::arena_c delete m$::data($robot,num)
     set x [expr $::data($robot,mx)/2]
     set y [expr (1000-$::data($robot,my))/2]
 
-    .c create oval [expr $x-10] [expr $y-10] [expr $x+10] [expr $y+10] \
+    $::arena_c create oval [expr $x-10] [expr $y-10] [expr $x+10] [expr $y+10] \
         -outline yellow -fill yellow  -width 1 \
         -tags e$::data($robot,num)
-    .c create oval [expr $x-5] [expr $y-5] [expr $x+5] [expr $y+5] \
+    $::arena_c create oval [expr $x-5] [expr $y-5] [expr $x+5] [expr $y+5] \
         -outline orange -fill orange  -width 1  \
         -tags e$::data($robot,num)
-    .c create oval [expr $x-3] [expr $y-3] [expr $x+3] [expr $y+3] \
+    $::arena_c create oval [expr $x-3] [expr $y-3] [expr $x+3] [expr $y+3] \
         -outline red    -fill red     -width 1  \
         -tags e$::data($robot,num)
 
     update
-    after 100 ".c delete e$::data($robot,num)"
+    after 100 "$::arena_c delete e$::data($robot,num)"
+}
+
+#
+# Returns a list of colors
+#
+proc distinct_colors {n} {
+    set nn 1
+    set hue_increment .15
+    set s 1.0 ;# non-variable saturation
+
+    set lum_steps [expr $n * $hue_increment]
+    set int_lum_steps [expr int($lum_steps)]
+    if {$lum_steps > $int_lum_steps} { ;# round up
+        set lum_steps [expr $int_lum_steps + 1]
+    }
+    set lum_increment [expr .7 / $lum_steps]
+
+    for {set l 1.0} {$l > 0.3} {set l [expr {$l - $lum_increment}]} {
+        for {set h 0.0} {$h < 1.0} {set h [expr {$h + $hue_increment}]} {
+            lappend rc [hls2tk $h $l $s]
+            incr nn
+            if {$nn > $n} { return $rc }
+        }
+    }
+    return $rc
+}
+
+proc hls2tk {h l s} {
+    set rgb [hls2rgb $h $l $s]
+    foreach c $rgb {
+        set intc [expr {int($c * 256)}]
+        if {$intc == 256} { set intc 255 }
+        set c1 [format %1X $intc]
+        if {[string length $c1] == 1} {set c1 "0$c1"}
+        append init $c1
+    }
+    return #$init
+}
+
+proc hls2rgb {h l s} {
+    # h, l and s are floats between 0.0 and 1.0, ditto for r, g and b
+    # h = 0   => red
+    # h = 1/3 => green
+    # h = 2/3 => blue
+
+    set h6 [expr {($h-floor($h))*6}]
+    set r [expr {  $h6 <= 3 ? 2-$h6
+                            : $h6-4}]
+    set g [expr {  $h6 <= 2 ? $h6
+                            : $h6 <= 5 ? 4-$h6
+                            : $h6-6}]
+    set b [expr {  $h6 <= 1 ? -$h6
+                            : $h6 <= 4 ? $h6-2
+                            : 6-$h6}]
+    set r [expr {$r < 0.0 ? 0.0 : $r > 1.0 ? 1.0 : double($r)}]
+    set g [expr {$g < 0.0 ? 0.0 : $g > 1.0 ? 1.0 : double($g)}]
+    set b [expr {$b < 0.0 ? 0.0 : $b > 1.0 ? 1.0 : double($b)}]
+
+    set r [expr {(($r-1)*$s+1)*$l}]
+    set g [expr {(($g-1)*$s+1)*$l}]
+    set b [expr {(($b-1)*$s+1)*$l}]
+    return [list $r $g $b]
 }
 
 ###############################################################################
@@ -509,10 +571,12 @@ proc start {} {
         lappend ::robotFiles [$lst get $i]
     }
 
-    grid forget .f2
-    grid .c -column 0 -row 2 -sticky nsew
+    grid forget $::sel_f
+    grid $::game_f -column 0 -row 2 -sticky nsew
+
+#    grid .c -column 0 -row 2 -sticky nsew
     
-    grid .h -column 1 -row 2 -sticky nsew
+#    grid .h -column 1 -row 2 -sticky nsew
 
 #        grid columnconfigure .c all -weight 1
 #        grid rowconfigure .c all -weight 1
@@ -536,6 +600,9 @@ proc start {} {
     $::tourn_b configure -state disabled
     $::about_b configure -state disabled
     $::quit_b  configure -state disabled
+
+    set ::colors [distinct_colors [llength $::robotFiles]]
+
     #  start_robots
     main
 
@@ -687,13 +754,12 @@ proc halt {} {
 proc reset {} {
     clean_up
 
-    .c delete all
+    $::arena_c delete all
     set ::execCmd start
     $::run_b configure -text "Run Battle"
-    grid forget .c
-    grid forget .h
-    grid .f2 -column 0 -row 2 -sticky nsew
-    .l configure -text "Select robot files for battle"
+    grid forget $::game_f
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+    $::info_l configure -text "Select robot files for battle"
     $::run_b   configure -state normal
     $::sim_b   configure -state normal
     $::tourn_b configure -state normal
@@ -788,47 +854,47 @@ set old 0
                           -text "Select robot files for battle"]
 
         # The contents frame contains two frames
-        set cnt_f [ttk::frame .f2 -width 520 -height 520]
+        set ::sel_f [ttk::frame .f2 -width 520 -height 520]
 
         # Contents left frame
-        set cntL_f [ttk::frame .f2.fl -relief sunken -borderwidth 3]
+        set selL_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
 
         # Contents right frame
-        set cntR_f [ttk::frame .f2.fr -relief sunken -borderwidth 3]
+        set selR_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
 
         # The file selection box
-        set files_fb [fileBox .f2.fl "Select" * "" [pwd] choose_file]
+        set files_fb [fileBox $::sel_f.fl "Select" * "" [pwd] choose_file]
 
         # The robot list info label
-        set robotList_l  [ttk::label .f2.fr.l -text "Robot files selected"]
+        set robotList_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
 
         # A frame with the robot list and a scrollbar
-        set robotList_f  [ttk::frame .f2.fr.f]
+        set robotList_f  [ttk::frame $::sel_f.fr.f]
 
         # The robot list
-        set ::robotList_lb [listbox .f2.fr.f.lb -relief sunken  \
+        set ::robotList_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
                                 -yscrollcommand ".f2.fr.f.s set" \
                                 -selectmode single]
 
         # The scrollbar
-        set ::robotList_s  [ttk::scrollbar .f2.fr.f.s \
+        set ::robotList_s  [ttk::scrollbar $::sel_f.fr.f.s \
                               -command "$::robotList_lb yview"]
 
         # A frame with the two remove buttons
-        set remove_f     [ttk::frame  .f2.fr.r]
+        set remove_f     [ttk::frame  $::sel_f.fr.r]
 
         # Remove single file
-        set remove_b     [ttk::button .f2.fr.r.b1 -text " Remove " \
+        set remove_b     [ttk::button $::sel_f.fr.r.b1 -text " Remove " \
                               -command remove_file]
 
         # Remove all files
-        set removeAll_b  [ttk::button .f2.fr.r.b2 -text " Remove All " \
+        set removeAll_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
                                 -command remove_all]
 
         grid $::info_l -column 0 -row 1 -sticky nsew
-        grid $cnt_f    -column 0 -row 2 -sticky nsew
-        grid $cntL_f   -column 0 -row 0 -sticky nsew
-        grid $cntR_f   -column 1 -row 0 -sticky nsew
+        grid $::sel_f    -column 0 -row 2 -sticky nsew
+        grid $selL_f   -column 0 -row 0 -sticky nsew
+        grid $selR_f   -column 1 -row 0 -sticky nsew
 
         grid $robotList_l    -column 0 -row 0 -sticky nsew
         grid $robotList_f    -column 0 -row 1 -sticky nsew
@@ -838,64 +904,21 @@ set old 0
         grid $remove_b       -column 0 -row 0 -sticky nsew
         grid $removeAll_b    -column 1 -row 0 -sticky nsew
 
-#        grid columnconfigure .f2 all -weight 1
-#        grid rowconfigure .f2 all -weight 1
-
-
-#        grid rowconfigure .f2.fr 0 -weight 1
-        grid rowconfigure $cntR_f 1 -weight 1
+        grid rowconfigure $selR_f 1 -weight 1
         grid rowconfigure $robotList_f 0 -weight 1
 
+        # The contents frame contains two frames
+        set ::game_f [ttk::frame .f3 -width 520 -height 520]
 
         # The battle field canvas
-        canvas .c -width 520 -height 520  -scrollregion "-10 -10 510 510"
+        set ::arena_c [canvas $::game_f.c -width 520 -height 520 \
+                           -scrollregion "-10 -10 510 510"]
 
         # The robot health list
-        set ::robotHealth {a b c}
-        set ::robotHealth_lb [listbox .h -listvariable ::robotHealth]
+        set ::robotHealth {}
+        set ::robotHealth_lb [listbox $::game_f.h -listvariable ::robotHealth]
 
-
+        grid $::arena_c        -column 0 -row 0 -sticky nsew
+        grid $::robotHealth_lb -column 1 -row 0 -sticky nsew
     }
-}
-
-if 0 {
-My initialization code, then, looks something like this:
-
-    proc main {} {
-        ...
-        widgets
-        widgets.layout
-        ....
-    }
-
-    proc widgets {} {
-        widgets.menubar
-        widgets.toolbar
-        widgets.statusbar
-        widgets.main
-    }
-    proc widgets.toolbar {} {
-        global widgets
-        set widgets(toolbar) .toolbar
-        button $widgets(toolbar).cut ...
-        button $widgets(toolbar).copy ...
-        ...
-        pack $widgets(toolbar).cut $widgets(toolbar).copy \
-            -side left
-    }
-    ...
-    proc widgets.layout {} {
-        global widgets
-        global options
-        . configure -menu $widgets(menubar)
-        grid $widgets(toolbar) -row 0 -column ...
-        grid $widgets(main) -row 1 -column ...
-        grid $widgets(statusbar) -row 2 -column ...
-        if {!$options(-showtoolbar)} {
-            grid remove $widgets(toolbar)
-        }
-        ....
-    }
-
-In reality I pass in the toplevel window to each of the procs so that, in theory, I can reparent the widgets if later I choose to embed them in a larger program. I left that out of this example to make the example a little easier to understand.
 }

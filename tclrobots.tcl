@@ -275,42 +275,7 @@ proc sysData {robot} {
     set ::data($robot,sysreturn,$::tick) $val
 }
 
-if 0 {
-proc brightness color {
-    foreach {r g b} [winfo rgb . $color] break
-    set max [lindex [winfo rgb . white] 0]
-    expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
- } ;#RS, after [Kevin Kenny]
-}
-
-#
-# Same as distinctLabels2, but it returns a list
-# of colors rather than drawing buttons
-#
-proc distinct_colors {n} {
-    set nn 1
-    set hue_increment .15
-    set s 1.0 ;# non-variable saturation
-
-    set lum_steps [expr $n * $hue_increment]
-    set int_lum_steps [expr int($lum_steps)]
-    if {$lum_steps > $int_lum_steps} { ;# round up
-        set lum_steps [expr $int_lum_steps + 1]
-    }
-    set lum_increment [expr .7 / $lum_steps]
-
-    for {set l 1.0} {$l > 0.3} {set l [expr {$l - $lum_increment}]} {
-        for {set h 0.0} {$h < 1.0} {set h [expr {$h + $hue_increment}]} {
-            lappend rc [hls2tk $h $l $s]
-            incr nn
-            if {$nn > $n} { return $rc }
-        }
-    }
-    return $rc
-}
-
 proc initRobots {} {
-    set colors [distinct_colors [llength $::allRobots]]
     set color_num 0
 
     foreach robot $::allRobots {
@@ -397,18 +362,10 @@ proc initRobots {} {
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
         # set random color; starting with white then randomize
+        #set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
+        #set ::data($robot,color) $color
 
-        if 0 {
-        set color #FFFFFF
-        while {[brightness $color] > 0.5} {
-            # Randomize until brightness low enough;
-            # we want to see the robots
-            set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
-        }
-        set ::data($robot,color) $color
-        }
-
-        set ::data($robot,color) [lindex $colors $color_num]
+        set ::data($robot,color) [lindex $::colors $color_num]
         incr color_num
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
