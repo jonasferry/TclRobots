@@ -365,6 +365,13 @@ proc clean_up {} {
 #
 
 proc show_arena {} {
+    set w [winfo width  .]
+    set h [winfo height .]
+
+    puts "w $w, h $h"
+
+    #$::arena_c configure -width [- $w 200] -height [- $h 100]
+
     set $::scale [/ 1000 [winfo width .f1]]
     set side [/ 1000 $::scale]
 
@@ -850,20 +857,10 @@ set old 0
         main_win
         update
     } else {
-        set ::execCmd start
-
-        # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
-        catch {destroy .iconm}
-        toplevel .iconm
-        grid [label .iconm.i -image iconfn]
-
-        wm title . "TclRobots"
-        wm iconwindow . .iconm
-        wm iconname . TclRobots
-        wm protocol . WM_DELETE_WINDOW "catch {.f1.b5 invoke}"
-
         # Create and grid the outer content frame
         grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
+
+        set ::execCmd start
 
         # Create button frame and buttons
         set ::buttons_f [ttk::frame .f1]
@@ -886,8 +883,18 @@ set old 0
 
         grid columnconfigure $::buttons_f all -weight 1
 
+        # make a toplevel icon window, iconwindow doesn't have transparent bg
+        catch {destroy .iconm}
+        toplevel .iconm
+        grid [label .iconm.i -image iconfn]
+
+        wm title . "TclRobots"
+        wm iconwindow . .iconm
+        wm iconname . TclRobots
+        wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
+
         # The info label
-        set ::info_l [ttk::label .l \
+        set ::info_l [ttk::label .l -relief solid \
                           -text "Select robot files for battle"]
 
         # The contents frame contains two frames
