@@ -1,7 +1,5 @@
 package require Tk
 
-#set parms(colors) {SeaGreen3 IndianRed3 orchid3 SlateBlue1}
-
 ###############################################################################
 #
 # about box
@@ -11,105 +9,6 @@ package require Tk
 proc about {} {
     tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas@tclrobots.org\n\nVersion 3.0\nFebruary, 2010\n" "-image iconfn" 0 dismiss
 
-}
-
-
-###############################################################################
-#
-# set up main window
-#
-#
-
-proc main_win {} {
-
-    # define our battle tank icon used in the About popup
-    set tr_icon {
-        #define tr_width 48
-        #define tr_height 48
-        static char tr_bits[] = {
-        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x0f, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00, 0x70, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe1, 0x00, 0x00, 0x00,
-        0x00, 0x00, 0xff, 0x07, 0x00, 0x00, 0x00, 0x00, 0xe1, 0x07, 0x00, 0x00,
-        0x00, 0x00, 0xe0, 0x06, 0x00, 0x00, 0x00, 0x00, 0x70, 0x06, 0x00, 0x00,
-        0x00, 0x00, 0x38, 0x06, 0x00, 0x00, 0x00, 0x00, 0x1e, 0x06, 0x00, 0x00,
-        0x00, 0x00, 0x0f, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
-        0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00,
-        0x00, 0x00, 0xfe, 0xff, 0x01, 0x00, 0x00, 0x00, 0xff, 0xff, 0x03, 0x00,
-        0x80, 0x87, 0x03, 0x00, 0x07, 0x00, 0x80, 0xbf, 0x01, 0x50, 0x06, 0x00,
-        0x00, 0xfc, 0x0f, 0x00, 0x06, 0x00, 0x00, 0xe0, 0x3f, 0x28, 0x06, 0x00,
-        0x00, 0x80, 0x39, 0x00, 0x06, 0x00, 0x00, 0x80, 0x01, 0x14, 0x06, 0x00,
-        0x00, 0x80, 0x0f, 0xc0, 0x07, 0x00, 0x00, 0x00, 0xff, 0xff, 0x03, 0x00,
-        0x00, 0x00, 0xfc, 0xff, 0x00, 0x00, 0x00, 0xfc, 0xff, 0xff, 0x7f, 0x00,
-        0x00, 0xfe, 0xff, 0xff, 0xff, 0x00, 0x00, 0x07, 0x00, 0x00, 0xc0, 0x01,
-        0x00, 0x07, 0x00, 0x00, 0xc0, 0x01, 0x80, 0xff, 0xff, 0xff, 0xff, 0x03,
-        0xc0, 0xff, 0xff, 0xff, 0xff, 0x07, 0xf0, 0x7f, 0x30, 0x0c, 0xfc, 0x1f,
-        0xf0, 0x7d, 0x30, 0x0c, 0x7c, 0x1f, 0x38, 0xe0, 0x00, 0x00, 0x0e, 0x38,
-        0x38, 0xe0, 0x00, 0x00, 0x0e, 0x38, 0x3c, 0xe2, 0x01, 0x00, 0x8f, 0x78,
-        0x1c, 0xc7, 0x01, 0x00, 0xc7, 0x71, 0x3c, 0xe2, 0x01, 0x00, 0x8f, 0x78,
-        0x38, 0xe0, 0x00, 0x00, 0x0e, 0x38, 0x38, 0xe0, 0x00, 0x00, 0x0e, 0x38,
-        0xf0, 0x7d, 0x30, 0x0c, 0x7c, 0x1f, 0xf0, 0x7f, 0x30, 0x0c, 0xfc, 0x1f,
-        0xc0, 0xff, 0xff, 0xff, 0xff, 0x07, 0x00, 0xff, 0xff, 0xff, 0xff, 0x01};
-    }
-
-    image create bitmap iconfn -data $tr_icon -background ""
-
-    set ::numlist 0
-    set ::execCmd start
-#    set me [winfo name .]
-
-    option add *highlightThickness 0
-
-    # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
-    catch {destroy .iconm}
-    toplevel .iconm
-    pack [label .iconm.i -image iconfn]
-
-    wm title . "TclRobots"
-    wm iconwindow . .iconm
-    wm iconname . TclRobots
-    wm protocol . WM_DELETE_WINDOW "catch {.f1.b5 invoke}"
-
-    frame .f1
-    button .f1.b1 -text "Run Battle" -width 12     -command {eval $::execCmd}
-    button .f1.b2 -text "Simulator.."    -command sim
-    button .f1.b3 -text "Tournament.."   -command tournament
-    button .f1.b4 -text "About.."        -command about
-    #  button .f1.b5 -text "Quit"           -command "clean_up; destroy ."
-    button .f1.b5 -text "Quit"           -command "destroy ."
-    pack .f1.b1 .f1.b2 .f1.b3 .f1.b4 .f1.b5 -side left -expand 1 -fill both
-
-    label .l -relief raised -text {Select robot files for battle}
-
-    frame .f2 -width 520 -height 520
-
-    frame .f2.fl -relief sunken -borderwidth 3
-    frame .f2.fr -relief sunken -borderwidth 3
-
-    fileBox .f2.fl "Select" * "" [pwd] choose_file
-
-    label .f2.fr.lab  -text "Robot files selected"
-    listbox .f2.fr.l1 -relief sunken  -yscrollcommand ".f2.fr.s set" \
-		-selectmode single
-    scrollbar .f2.fr.s -command ".f2.fr.l1 yview"
-    frame  .f2.fr.fb
-    button .f2.fr.fb.b1 -text " Remove "     -command remove_file
-    button .f2.fr.fb.b2 -text " Remove All " -command remove_all
-    pack .f2.fr.fb.b1 .f2.fr.fb.b2 -side left -padx 5 -pady 5
-    pack .f2.fr.lab -side top  -fill x
-    pack .f2.fr.fb  -side bottom -fill x
-    pack .f2.fr.s   -side right -fill y
-    pack .f2.fr.l1  -side left  -expand 1 -fill both
-
-    pack .f2.fl .f2.fr -side left -expand 1 -fill both -padx 10 -pady 10
-    canvas $::arena_c -width 520 -height 520  -scrollregion "-10 -10 510 510"
-
-    pack .f1 .l  -side top -fill both
-    pack .f2 -side top -expand 1 -fill both
-
-    wm geom . 524x574
-    update
 }
 
 ###############################################################################
@@ -365,27 +264,39 @@ proc clean_up {} {
 #
 
 proc show_arena {} {
-    set w [winfo width  .]
-    set h [winfo height .]
+    set w [winfo width  $::arena_c]
+    set h [winfo height $::arena_c]
 
-    puts "w $w, h $h"
+    set ::scale [/ 1 [/ 1000.0 $h]]
+    set ::border 10
+    set ::side [- [int [* 1000 $::scale]] [* 2 $::border]]
 
-    #$::arena_c configure -width [- $w 200] -height [- $h 100]
+    incr ::hej
+    if {$::hej > 0} {
+        puts "scale $::scale"
+        puts "side $::side"
+        #exit
+    }
 
-    set $::scale [/ 1000 [winfo width .f1]]
-    set side [/ 1000 $::scale]
+    set b  $::border
+    set sb [+ $::side $::border]
+    $::arena_c configure -scrollregion "-$b -$b $sb $sb"
 
-    $::arena_c create line 0     0     0     $side
-    $::arena_c create line 0     0     $side 0
-    $::arena_c create line $side 0     $side $side
-    $::arena_c create line 0     $side $side $side
+    $::arena_c delete wall
 
-    set ::robotHealth {}
-    set index 0
-    foreach robot $::allRobots {
-        lappend ::robotHealth "$robot $::data($robot,health)"
-        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
-        incr index
+    $::arena_c create line 0       0       0       $::side -tags wall
+    $::arena_c create line 0       0       $::side 0       -tags wall
+    $::arena_c create line $::side 0       $::side $::side -tags wall
+    $::arena_c create line 0       $::side $::side $::side -tags wall
+}
+
+proc border_check {coord} {
+    if {$coord < $::border} {
+        return $::border
+    } elseif {$coord > $::side} {
+        return $::side
+    } else {
+        return $coord
     }
 }
 
@@ -401,8 +312,9 @@ proc show_robots {} {
         # check robots
         if {$::data($robot,status)} {
             $::arena_c delete r$::data($robot,num)
-            set x [expr $::data($robot,x)/$::scale]
-            set y [expr (1000-$::data($robot,y))/$::scale]
+            set x [border_check [* $::data($robot,x) $::scale]]
+            set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
+            puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
             set arrow [lindex $::parms(shapes) [% $i 4]]
             $::arena_c create line $x $y \
                 [expr $x+($::c_tab($::data($robot,hdg))*5)] \
@@ -413,9 +325,10 @@ proc show_robots {} {
         # check missiles
         if {$::data($robot,mstate)} {
             $::arena_c delete m$::data($robot,num)
-            set x [expr $::data($robot,mx)/$::scale]
-            set y [expr (1000-$::data($robot,my))/$::scale]
-            $::arena_c create oval [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
+            set x [border_check [* $::data($robot,mx) $::scale]]
+            set y [border_check [* [- 1000 $::data($robot,my)] $::scale]]
+            $::arena_c create oval \
+                [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
                 -fill black -tags m$::data($robot,num)
         }
         incr i
@@ -444,12 +357,16 @@ proc show_scan {} {
 
                 set deg [lindex $::data($robot,syscall,$::tick) 1]
                 set res [lindex $::data($robot,syscall,$::tick) 2]
-                puts "deg: $deg, res: $res"
+                #puts "deg: $deg, res: $res"
 
-                set x [expr $::data($robot,x)/2]
-                set y [expr (1000-$::data($robot,y))/2]
-                $::arena_c create arc [expr $x-350] [expr $y-350] [expr $x+350] \
-                    [expr $y+350] -start [expr $deg-$res] \
+                set x [border_check [* $::data($robot,x) $::scale]]
+                set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
+                puts "scan $robot $x $y"
+                set val [* [* 350 $::scale] 2]
+                $::arena_c create arc \
+                    [- $x $val] [- $y $val] \
+                    [+ $x $val] [+ $y $val] \
+                    -start [expr $deg-$res] \
                     -extent [expr 2*$res + 1] -fill "" \
                     -outline $::data($robot,color) -stipple gray50 -width 1 \
                     -tags "scan s$::data($robot,num) "
@@ -468,21 +385,36 @@ proc show_scan {} {
 
 proc show_explode {robot} {
     $::arena_c delete m$::data($robot,num)
-    set x [expr $::data($robot,mx)/2]
-    set y [expr (1000-$::data($robot,my))/2]
+    set x [* $::data($robot,mx) $::scale]
+    set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    $::arena_c create oval [expr $x-10] [expr $y-10] [expr $x+10] [expr $y+10] \
+    set val [* 20 $::scale]
+    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
         -outline yellow -fill yellow  -width 1 \
         -tags e$::data($robot,num)
-    $::arena_c create oval [expr $x-5] [expr $y-5] [expr $x+5] [expr $y+5] \
+
+    set val [* 10 $::scale]
+    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
         -outline orange -fill orange  -width 1  \
         -tags e$::data($robot,num)
-    $::arena_c create oval [expr $x-3] [expr $y-3] [expr $x+3] [expr $y+3] \
+
+    set val [* 6 $::scale]
+    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
         -outline red    -fill red     -width 1  \
         -tags e$::data($robot,num)
 
     update
     after 100 "$::arena_c delete e$::data($robot,num)"
+}
+
+proc show_health {} {
+    set ::robotHealth {}
+    set index 0
+    foreach robot $::allRobots {
+        lappend ::robotHealth "$robot $::data($robot,health)"
+        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+        incr index
+    }
 }
 
 #
@@ -547,50 +479,14 @@ proc hls2rgb {h l s} {
     return [list $r $g $b]
 }
 
-
-
-if 0 {
-##+##########################################################################
- #
- # pastel -- returns a "pastel" color. Code is from X Windows tool xcolorize
- # Pick "random" color in a subspace of the HSV color model and convert to RGB.
- #
- proc pastel {} {
-    set rand [expr {rand() * 262144}]
-    set h [fmod $rand 360]
-    set rand [expr {$rand / 359.3}]
-    set s [expr {([fmod $rand 9] + 12) / 100.0}]
-    set v 1
-
-    # Convert to rgb space
-    if {$h == 360} { set h 0 }
-    set h [expr {$h/60}]
-    set i [expr {int(floor($h))}]
-    set f [expr {$h - $i}]
-    set p1 [expr {$v*(1-$s)}]
-    set p2 [expr {$v*(1-($s*$f))}]
-    set p3 [expr {$v*(1-($s*(1-$f)))}]
-    switch -- $i {
-        0 { set r $v  ; set g $p3 ; set b $p1 }
-        1 { set r $p2 ; set g $v  ; set b $p1 }
-        2 { set r $p1 ; set g $v  ; set b $p3 }
-        3 { set r $p1 ; set g $p2 ; set b $v  }
-        4 { set r $p3 ; set g $p1 ; set b $v  }
-        5 { set r $v  ; set g $p1 ; set b $p2 }
-    }
-    foreach a {r g b} { set $a [expr {int ([set $a] * 255)}] }
-    return [format "\#%02x%02x%02x" $r $g $b]
- }
-}
-
-
 ###############################################################################
 #
 # start a match
 #
 #
 
-proc start {} {
+proc init_arena {} {
+    set ::mode "arena"
     set finish ""
     set players "battle: "
     set ::running 0
@@ -598,14 +494,6 @@ proc start {} {
     set quads $::parms(quads)
 
     $::info_l configure -text "Initializing..."
-
-    # clean up robots
-    #  foreach robot $::robots {
-    #      set r(status) 0
-    #      set r(mstate) 0
-    #      set r(name)   ""
-    #      set r(pid)    -1
-    #  }
 
     # get robot filenames from window
     set lst $::robotlist_lb
@@ -617,24 +505,7 @@ proc start {} {
 
     grid forget $::sel_f
     grid $::game_f -column 0 -row 2 -sticky nsew
-
-#    grid .c -column 0 -row 2 -sticky nsew
-    
-#    grid .h -column 1 -row 2 -sticky nsew
-
-#        grid columnconfigure .c all -weight 1
-#        grid rowconfigure .c all -weight 1
-
-#        bind .c <Configure> {
-#            if {%w < %h} {
-#                set $::scale [/ 1000 %w]
-#            } else {
-#                set $::scale [/ 1000 %h]
-#            }
-#        }
-
-
-#    show_arena
+    show_arena
 
     # start robots
     $::info_l configure -text "Running"
@@ -656,10 +527,10 @@ proc start {} {
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-    
+
     #  set ::execCmd "kill_wishes \"$robots\""
     $::run_b configure -state normal -text "Reset"
-    
+
 }
 
 # standard tk_dialog modified to use -image on label
@@ -799,7 +670,7 @@ proc reset {} {
     clean_up
 
     $::arena_c delete all
-    set ::execCmd start
+    set ::execCmd init_arena
     $::run_b configure -text "Run Battle"
     grid forget $::game_f
     grid $::sel_f -column 0 -row 2 -sticky nsew
@@ -812,10 +683,200 @@ proc reset {} {
 }
 
 
+###############################################################################
+#
+# start the simulator
+#
+#
 
-##################
-# NEW GUI
-##################
+proc sim {} {
+#  global rob1 rob2 rob3 rob4 parms running halted ticks execCmd
+#  global step numList bgColor
+
+    if {$::mode eq {}} {
+        set ::mode "init_sim"
+        set halted  0
+        set ticks   0
+        set color red
+        .l configure -text "Simulator"
+
+        # get robot filenames from window
+        set lst $::robotlist_lb
+        set ::robotFiles {}
+
+        for {set i 0} {$i < $::numlist} {incr i} {
+            lappend ::robotFiles [$lst get $i]
+        }
+
+        grid forget $::sel_f
+        grid $::game_f -column 0 -row 2 -sticky nsew
+        show_arena
+
+        puts check
+
+        # start robots
+        .l configure -text "Running Simulator"
+        set ::execCmd reset
+
+        $::run_b   configure -state disabled
+        $::sim_b   configure -state disabled
+        $::tourn_b configure -state disabled
+        $::about_b configure -state disabled
+        $::quit_b  configure -state disabled
+
+        #  start_robots
+        puts check0
+        set ::colors [distinct_colors [llength $::robotFiles]]
+        main
+        puts check1
+    } elseif {$::mode eq "init_sim"} {
+        set ::mode sim
+
+        # setup target
+        set robot target
+        lappend ::allRobots target
+        lappend ::activeRobots target
+
+        set ::data($robot,name)    target_0
+        set ::data($robot,status)  1
+        set ::data($robot,num)     1
+        set ::data($robot,color)   black
+        set ::data($robot,x)       500
+        set ::data($robot,y)       500
+        set ::data($robot,health)  100
+        set ::data($robot,speed)   0
+        set ::data($robot,dspeed)  0
+        set ::data($robot,hdg)     0
+        set ::data($robot,dhdg)    0
+        set ::data($robot,mstate)  0
+        set ::data($robot,reload)  0
+        set ::data($robot,hflag)   0
+        set ::data($robot,heat)    0
+        set ::data($robot,team)    "target"
+        set ::data($robot,btemp)   0
+
+        # start physics package
+        #show_robots
+
+    } elseif {$::mode eq "sim"} {
+        set ::mode "arena"
+        puts arena;exit
+    } else {
+        # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
+        catch {destroy .icons}
+        toplevel .icons
+        pack [label .icons.i -image iconfn]
+
+        # create toplevel simulator debug window
+        set step 1
+        catch {destroy .debug}
+        toplevel .debug
+        wm title .debug "Simulator Probe"
+        wm iconwindow .debug .icons
+        wm iconname .debug "TclRobots Sim"
+        wm group .debug .
+        wm group . .debug
+        wm protocol .debug WM_DELETE_WINDOW "catch {.debug.f1.end invoke}"
+        incr i
+        set winx [expr $dot_x+540]
+        set winy [expr $dot_y+(($i-1)*145)]
+        wm geom .debug +${winx}+$winy
+        frame .debug.f1 -relief raised -borderwidth 2
+        checkbutton .debug.f1.cb -text "Step syscalls" -variable step -anchor w \
+            -command do_step -relief raised
+        button .debug.f1.step -text "Single Step" -command do_single
+        button .debug.f1.damage -text "5% Hit"    -command "incr rob1(damage) 5"
+        button .debug.f1.ping   -text "Scan"      -command "set rob1(ping) 1"
+        button .debug.f1.end -text "Close" \
+            -command "trace vdelete rob1(hflag) w set_h_bg
+	               set ::data($robot,status) 0; clean_up; reset; destroy .debug"
+        pack .debug.f1.cb .debug.f1.step .debug.f1.damage .debug.f1.ping \
+            .debug.f1.end  -side left -pady 5 -padx 3
+
+        frame .debug.f2 -relief raised -borderwidth 2
+        label .debug.f2.l1 -text "X:" -anchor e -width 8
+        entry .debug.f2.x -width 7 -textvariable rob1(x)  -relief sunken
+        label .debug.f2.l2 -text "Y:"  -anchor e -width 8
+        entry .debug.f2.y -width 7 -textvariable rob1(y)  -relief sunken
+        label .debug.f2.l3 -text "Heat:"  -anchor e -width 8
+        entry .debug.f2.h -width 7 -textvariable rob1(heat)  -relief sunken
+        pack .debug.f2.l1 .debug.f2.x  .debug.f2.l2 .debug.f2.y \
+            .debug.f2.l3 .debug.f2.h -side left -pady 5 -padx 1
+
+        set bgColor [.debug.f2.h cget -bg]
+        bind  .debug.f2.x <Return> {ver_range rob1(x) 0 999; \
+                                        set rob1(orgx) $rob1(x) ;set rob1(range) 0}
+        bind  .debug.f2.x <Leave>  {ver_range rob1(x) 0 999; \
+                                        set rob1(orgx) $rob1(x) ;set rob1(range) 0}
+        bind  .debug.f2.y <Return> {ver_range rob1(y) 0 999; \
+                                        set rob1(orgy) $rob1(y) ;set rob1(range) 0}
+        bind  .debug.f2.y <Leave>  {ver_range rob1(y) 0 999; \
+                                        set rob1(orgy) $rob1(y) ;set rob1(range) 0}
+        bind  .debug.f2.h <Return> {ver_range rob1(heat) 0 200}
+        bind  .debug.f2.h <Leave>  {ver_range rob1(heat) 0 200}
+        trace variable rob1(hflag) w set_h_bg
+
+        frame .debug.fb -relief raised -borderwidth 2
+        label .debug.fb.l4 -text "Speed:" -anchor e -width 8
+        entry .debug.fb.s -width 7 -textvariable rob1(speed) -relief sunken
+        label .debug.fb.l5 -text "Heading:" -anchor e -width 8
+        entry .debug.fb.h -width 7 -textvariable rob1(hdg) -relief sunken
+        label .debug.fb.l6 -text "Damage:" -anchor e -width 8
+        entry .debug.fb.d -width 7 -textvariable rob1(damage) -relief sunken
+        pack .debug.fb.l4 .debug.fb.s  .debug.fb.l5 .debug.fb.h \
+            .debug.fb.l6 .debug.fb.d  -side left -pady 5 -padx 1
+        bind  .debug.fb.s <Return> {ver_range rob1(speed) 0 100; \
+                                        set rob1(dspeed) $rob1(speed)}
+        bind  .debug.fb.s <Leave>  {ver_range rob1(speed) 0 100; \
+                                        set rob1(dspeed) $rob1(speed)}
+        bind  .debug.fb.h <Return> {ver_range rob1(hdg) 0 359; \
+                                        set rob1(dhdg) $rob1(hdg) ;set rob1(range) 0; \
+                                        set rob1(orgx) $rob1(x); set rob1(orgy) $rob1(y)}
+        bind  .debug.fb.h <Leave> {ver_range rob1(hdg) 0 359; \
+                                       set rob1(dhdg) $rob1(hdg) ;set rob1(range) 0; \
+                                       set rob1(orgx) $rob1(x); set rob1(orgy) $rob1(y)}
+        bind  .debug.fb.d <Return> {ver_range rob1(damage) 0 100}
+        bind  .debug.fb.d <Leave>  {ver_range rob1(damage) 0 100}
+
+        frame .debug.f3 -relief raised -borderwidth 2
+        label .debug.f3.l1 -text "Last syscall: " -anchor e
+        label .debug.f3.s -width 20 -textvariable rob1(syscall) -anchor w
+        label .debug.f3.l3 -text "Tick:" -anchor e -width 6
+        label .debug.f3.t -width 5 -textvariable ticks -anchor w -width 5
+        label .debug.f3.l4 -text "Barrel:" -anchor e -width 6
+        label .debug.f3.b -width 5 -textvariable rob1(btemp) -anchor w -width 5
+        pack .debug.f3.l1 .debug.f3.s .debug.f3.l3 .debug.f3.t  \
+            .debug.f3.l4 .debug.f3.b  -side left -pady 5 -padx 2
+
+        frame .debug.f4 -relief raised -borderwidth 2
+        label .debug.f4.l1 -text "Variable: " -anchor e
+        entry .debug.f4.var -width 10 -relief sunken
+        label .debug.f4.l2 -text "Value: " -anchor e
+        entry .debug.f4.val -width 10 -relief sunken
+        button .debug.f4.examine -text " Examine " -command examine
+        button .debug.f4.set     -text " Set "     -command setval
+        pack .debug.f4.l1 .debug.f4.var .debug.f4.l2 .debug.f4.val \
+            .debug.f4.examine .debug.f4.set -side left -pady 5 -padx 2
+        bind .debug.f4.var <Key-Return> ".debug.f4.examine invoke"
+        bind .debug.f4.val <Key-Return> ".debug.f4.set     invoke"
+
+        pack .debug.f1 .debug.f2 .debug.fb .debug.f3 .debug.f4 -side top -fill x
+
+        # override binding for Any-Keypress, but save others
+        foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
+                       .debug.fb.h .debug.fb.d} {
+            set cur_bind [bind Entry]
+            foreach c $cur_bind {
+                bind $e $c "[bind Entry $c] ; return -code break"
+            }
+            bind $e <KeyPress> {num_only %W %A}
+        }
+
+        # set initial step state
+        do_step
+    }
+}
+
 
 # define our battle tank icon used in the About popup
 set tr_icon {
@@ -850,124 +911,135 @@ set tr_icon {
 
 image create bitmap iconfn -data $::tr_icon -background ""
 
+proc init_gui {} {
+    # Create and grid the outer content frame
+    # The button row
+    grid columnconfigure . 0 -weight 1
+    # The content frames sel and game
+    grid rowconfigure    . 2 -weight 1
+
+    set ::execCmd init_arena
+    set ::mode {}
+
+    # Create button frame and buttons
+    set ::buttons_f [ttk::frame .f1]
+    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
+                         -command {eval $::execCmd}]
+    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
+                         -command sim]
+    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
+                         -command tournament]
+    set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
+    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
+                         -command "destroy ."]
+
+    # Grid button frame and buttons
+    grid $::buttons_f -column 0 -row 0 -sticky nsew
+    grid $::run_b     -column 0 -row 0 -sticky nsew
+    grid $::sim_b     -column 1 -row 0 -sticky nsew
+    grid $::tourn_b   -column 2 -row 0 -sticky nsew
+    grid $::about_b   -column 3 -row 0 -sticky nsew
+    grid $::quit_b    -column 4 -row 0 -sticky nsew
+
+    grid columnconfigure $::buttons_f all -weight 1
+
+    # make a toplevel icon window, iconwindow doesn't have transparent bg
+    catch {destroy .iconm}
+    toplevel .iconm
+    grid [label .iconm.i -image iconfn]
+
+    wm title . "TclRobots"
+    wm iconwindow . .iconm
+    wm iconname . TclRobots
+    wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
+
+    # The info label
+    set ::info_l [ttk::label .l -relief solid \
+                      -text "Select robot files for battle"]
+
+    # The contents frame contains two frames
+    set ::sel_f [ttk::frame .f2 -width 520 -height 520]
+
+    # Contents left frame
+    set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
+
+    # Contents right frame
+    set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
+
+    # The file selection box
+    set files_fb [fileBox $::sel_f.fl "Select" * "" [pwd] choose_file]
+
+    # The robot list info label
+    set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
+
+    # A frame with the robot list and a scrollbar
+    set robotlist_f  [ttk::frame $::sel_f.fr.f]
+
+    # The robot list
+    set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
+                            -yscrollcommand "$::sel_f.fr.f.s set" \
+                            -selectmode single]
+
+    # The scrollbar
+    set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
+                            -command "$::robotlist_lb yview"]
+
+    # A frame with the two remove buttons
+    set remove_f     [ttk::frame  $::sel_f.fr.r]
+
+    # Remove single file
+    set remove_b     [ttk::button $::sel_f.fr.r.b1 -text " Remove " \
+                          -command remove_file]
+
+    # Remove all files
+    set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
+                          -command remove_all]
+
+    grid $::info_l       -column 0 -row 1 -sticky nsew
+    grid $::sel_f        -column 0 -row 2 -sticky nsew
+    grid $sel0_f         -column 0 -row 0 -sticky nsew
+    grid $sel1_f         -column 1 -row 0 -sticky nsew
+
+    grid $robotlist_l    -column 0 -row 0 -sticky nsew
+    grid $robotlist_f    -column 0 -row 1 -sticky nsew
+    grid $::robotlist_lb -column 0 -row 0 -sticky nsew
+    grid $::robotlist_s  -column 1 -row 0 -sticky nsew
+    grid $remove_f       -column 0 -row 2 -sticky nsew
+    grid $remove_b       -column 0 -row 0 -sticky nsew
+    grid $removeall_b    -column 1 -row 0 -sticky nsew
+
+    grid rowconfigure $::sel_f       0 -weight 1
+    grid columnconfigure $::sel_f    0 -weight 1
+    grid rowconfigure $sel1_f        1 -weight 1
+    grid rowconfigure $robotlist_f all -weight 1
+
+    # The contents frame contains two frames
+    set ::game_f [ttk::frame .f3 -width 520 -height 520]
+
+    # The battle field canvas
+    set ::arena_c [canvas $::game_f.c -background white]
+    bind $::arena_c <Configure> {show_arena}
+
+    # The robot health list
+    set ::robotHealth {}
+    set ::robotHealth_lb [listbox $::game_f.h -listvariable ::robotHealth]
+
+    grid $::arena_c        -column 0 -row 0 -sticky nsew
+    grid $::robotHealth_lb -column 1 -row 0 -sticky nsew
+    grid columnconfigure $::game_f 0 -weight 1
+    grid rowconfigure    $::game_f 0 -weight 1
+}
+
 proc gui {} {
-set old 0
-
-    if {$old} {
-        main_win
-        update
+    if {$::mode eq "arena"} {
+        show_robots
+        show_scan
+        show_health
+    } elseif {[eq $::mode "init_sim"] || \
+                  [eq $::mode "sim"]} {
+        puts "gui: $::mode"
+       sim
     } else {
-        # Create and grid the outer content frame
-        grid columnconfigure . 0 -weight 1; grid rowconfigure . 0 -weight 1
-
-        set ::execCmd start
-
-        # Create button frame and buttons
-        set ::buttons_f [ttk::frame .f1]
-        set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
-                             -command {eval $::execCmd}]
-        set ::sim_b     [ttk::button .f1.b1 -text "Simulator" -command sim]
-        set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
-                             -command tournament]
-        set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
-        set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
-                             -command "destroy ."]
-
-        # Grid button frame and buttons
-        grid $::buttons_f -column 0 -row 0 -sticky nsew
-        grid $::run_b     -column 0 -row 0 -sticky nsew
-        grid $::sim_b     -column 1 -row 0 -sticky nsew
-        grid $::tourn_b   -column 2 -row 0 -sticky nsew
-        grid $::about_b   -column 3 -row 0 -sticky nsew
-        grid $::quit_b    -column 4 -row 0 -sticky nsew
-
-        grid columnconfigure $::buttons_f all -weight 1
-
-        # make a toplevel icon window, iconwindow doesn't have transparent bg
-        catch {destroy .iconm}
-        toplevel .iconm
-        grid [label .iconm.i -image iconfn]
-
-        wm title . "TclRobots"
-        wm iconwindow . .iconm
-        wm iconname . TclRobots
-        wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
-
-        # The info label
-        set ::info_l [ttk::label .l -relief solid \
-                          -text "Select robot files for battle"]
-
-        # The contents frame contains two frames
-        set ::sel_f [ttk::frame .f2 -width 520 -height 520]
-
-        # Contents left frame
-        set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
-
-        # Contents right frame
-        set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
-
-        # The file selection box
-        set files_fb [fileBox $::sel_f.fl "Select" * "" [pwd] choose_file]
-
-        # The robot list info label
-        set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
-
-        # A frame with the robot list and a scrollbar
-        set robotlist_f  [ttk::frame $::sel_f.fr.f]
-
-        # The robot list
-        set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
-                                -yscrollcommand "$::sel_f.fr.f.s set" \
-                                -selectmode single]
-
-        # The scrollbar
-        set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
-                              -command "$::robotlist_lb yview"]
-
-        # A frame with the two remove buttons
-        set remove_f     [ttk::frame  $::sel_f.fr.r]
-
-        # Remove single file
-        set remove_b     [ttk::button $::sel_f.fr.r.b1 -text " Remove " \
-                              -command remove_file]
-
-        # Remove all files
-        set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
-                                -command remove_all]
-
-        grid $::info_l       -column 0 -row 1 -sticky nsew
-        grid $::sel_f        -column 0 -row 2 -sticky nsew
-        grid $sel0_f         -column 0 -row 0 -sticky nsew
-        grid $sel1_f         -column 1 -row 0 -sticky nsew
-
-        grid $robotlist_l    -column 0 -row 0 -sticky nsew
-        grid $robotlist_f    -column 0 -row 1 -sticky nsew
-        grid $::robotlist_lb -column 0 -row 0 -sticky nsew
-        grid $::robotlist_s  -column 1 -row 0 -sticky nsew
-        grid $remove_f       -column 0 -row 2 -sticky nsew
-        grid $remove_b       -column 0 -row 0 -sticky nsew
-        grid $removeall_b    -column 1 -row 0 -sticky nsew
-
-        grid rowconfigure $::sel_f       0 -weight 1
-        grid rowconfigure $sel1_f        1 -weight 1
-        grid rowconfigure $robotlist_f all -weight 1
-
-        #grid rowconfigure $sel1_f 1 -weight 1
-        #grid rowconfigure $robotlist_f 0 -weight 1
-
-        # The contents frame contains two frames
-        set ::game_f [ttk::frame .f3 -width 520 -height 520]
-
-        # The battle field canvas
-        set ::arena_c [canvas $::game_f.c -width 520 -height 520 \
-                           -scrollregion "-10 -10 510 510" \
-                          -background white]
-
-        # The robot health list
-        set ::robotHealth {}
-        set ::robotHealth_lb [listbox $::game_f.h -listvariable ::robotHealth]
-
-        grid $::arena_c        -column 0 -row 0 -sticky nsew
-        grid $::robotHealth_lb -column 1 -row 0 -sticky nsew
+        puts "Mode Error";exit
     }
 }

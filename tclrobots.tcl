@@ -108,10 +108,10 @@ proc syscall {args} {
     set robot [lindex $args 0]
     set result 0
 
-    puts "args: $args"
+    #puts "args: $args"
 
     set syscall [lrange $args 1 end]
-    puts "Syscall $robot: $syscall"
+    #puts "Syscall $robot: $syscall"
 
     if {[lindex $syscall 0] eq "dputs"} {
         puts [lrange $args 2 end]
@@ -275,7 +275,7 @@ proc sysData {robot} {
     set ::data($robot,sysreturn,$::tick) $val
 }
 
-proc initRobots {} {
+proc init_robots {} {
     set color_num 0
 
     foreach robot $::allRobots {
@@ -283,8 +283,8 @@ proc initRobots {} {
 
         #set name [file tail $fn]
         set name $robot
-        set x [/ [rand 1000] $::scale]
-        set y [/ [rand 1000] $::scale]
+        set x [rand 1000]
+        set y [rand 1000]
 
         # generate a new signature
         set newsig [rand 65535]
@@ -361,16 +361,9 @@ proc initRobots {} {
         set ::data($robot,syscall,-1) {}
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
-        # set random color; starting with white then randomize
-        #set color [format #%06x [expr {int(rand() * 0xFFFFFF)}]]
-        #set ::data($robot,color) $color
-
-        # Colors as far away as possible from each other visually
+        # Set colors as far away as possible from each other visually
         set ::data($robot,color) [lindex $::colors $color_num]
         incr color_num
-
-        # Pastel color
-        #set ::data($robot,color) [pastel]
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
@@ -413,7 +406,7 @@ proc up_damage {robot} {
 proc updateRobots {} {
     set num_miss 0
     set num_rob  0
-    foreach robot $::activeRobots {
+    foreach robot $::allRobots {
         # check all flying missiles
         if {$::data($robot,mstate)} {
             incr num_miss
@@ -439,7 +432,9 @@ proc updateRobots {} {
                         [expr ($::s_tab($::data($robot,mhdg))*\
                                        $::data($robot,mdist))+\
                                  $::data($robot,morgy)]
-                after 1 "show_explode $robot"
+                if {$::gui} {
+                    after 1 "show_explode $robot"
+                }
 
                 # assign damage to all within explosion ranges
                 foreach target $::activeRobots {
@@ -645,9 +640,7 @@ proc runRobots {} {
         updateRobots
 
         if {$::gui} {
-            show_arena
-            show_robots
-            show_scan
+            gui
         }
 
         tick
@@ -657,7 +650,7 @@ proc runRobots {} {
     }
 }
 
-proc findWinner {} {
+proc find_winner {} {
     set ::finish ""
     set alive 0
     set winner ""
@@ -741,7 +734,7 @@ proc init {} {
     # At the start of the game all robots are active
     set ::activeRobots $::allRobots
 
-    initRobots
+    init_robots
     act
     tick
 }
@@ -752,19 +745,16 @@ proc main {} {
     coroutine runRobotsCo runRobots
     vwait ::running
     puts "activerobots: $::activeRobots"
-    findWinner
+    find_winner
     puts "seed: $::seed"
 }
 
 set gui 1
 
-set ::scale 2 ;# Side = 1000 / 2 = 500; Use later for resizing arena
-
-
 if {$gui} {
     set ::nowin 0
     source gui.tcl
-    gui
+    init_gui
 } else {
     set ::parms(tick) 0
     for {set i 0} {$i < 3} {incr i} {
