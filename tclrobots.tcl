@@ -403,7 +403,7 @@ proc up_damage {robot} {
 #########
 # update position of missiles and robots, assess damage
 #########
-proc updateRobots {} {
+proc update_robots {} {
     set num_miss 0
     set num_rob  0
     foreach robot $::allRobots {
@@ -637,7 +637,7 @@ proc runRobots {} {
         }
         act
 
-        updateRobots
+        update_robots
 
         if {$::gui} {
             gui

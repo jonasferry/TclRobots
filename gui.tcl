@@ -486,7 +486,6 @@ proc hls2rgb {h l s} {
 #
 
 proc init_arena {} {
-    set ::mode "arena"
     set finish ""
     set players "battle: "
     set ::running 0
@@ -682,202 +681,6 @@ proc reset {} {
     $::quit_b  configure -state normal
 }
 
-
-###############################################################################
-#
-# start the simulator
-#
-#
-
-proc sim {} {
-#  global rob1 rob2 rob3 rob4 parms running halted ticks execCmd
-#  global step numList bgColor
-
-    if {$::mode eq {}} {
-        set ::mode "init_sim"
-        set halted  0
-        set ticks   0
-        set color red
-        .l configure -text "Simulator"
-
-        # get robot filenames from window
-        set lst $::robotlist_lb
-        set ::robotFiles {}
-
-        for {set i 0} {$i < $::numlist} {incr i} {
-            lappend ::robotFiles [$lst get $i]
-        }
-
-        grid forget $::sel_f
-        grid $::game_f -column 0 -row 2 -sticky nsew
-        show_arena
-
-        puts check
-
-        # start robots
-        .l configure -text "Running Simulator"
-        set ::execCmd reset
-
-        $::run_b   configure -state disabled
-        $::sim_b   configure -state disabled
-        $::tourn_b configure -state disabled
-        $::about_b configure -state disabled
-        $::quit_b  configure -state disabled
-
-        #  start_robots
-        puts check0
-        set ::colors [distinct_colors [llength $::robotFiles]]
-        main
-        puts check1
-    } elseif {$::mode eq "init_sim"} {
-        set ::mode sim
-
-        # setup target
-        set robot target
-        lappend ::allRobots target
-        lappend ::activeRobots target
-
-        set ::data($robot,name)    target_0
-        set ::data($robot,status)  1
-        set ::data($robot,num)     1
-        set ::data($robot,color)   black
-        set ::data($robot,x)       500
-        set ::data($robot,y)       500
-        set ::data($robot,health)  100
-        set ::data($robot,speed)   0
-        set ::data($robot,dspeed)  0
-        set ::data($robot,hdg)     0
-        set ::data($robot,dhdg)    0
-        set ::data($robot,mstate)  0
-        set ::data($robot,reload)  0
-        set ::data($robot,hflag)   0
-        set ::data($robot,heat)    0
-        set ::data($robot,team)    "target"
-        set ::data($robot,btemp)   0
-
-        # start physics package
-        #show_robots
-
-    } elseif {$::mode eq "sim"} {
-        set ::mode "arena"
-        puts arena;exit
-    } else {
-        # make a toplevel icon window, iconwindow doesn't have transparent bg :-(
-        catch {destroy .icons}
-        toplevel .icons
-        pack [label .icons.i -image iconfn]
-
-        # create toplevel simulator debug window
-        set step 1
-        catch {destroy .debug}
-        toplevel .debug
-        wm title .debug "Simulator Probe"
-        wm iconwindow .debug .icons
-        wm iconname .debug "TclRobots Sim"
-        wm group .debug .
-        wm group . .debug
-        wm protocol .debug WM_DELETE_WINDOW "catch {.debug.f1.end invoke}"
-        incr i
-        set winx [expr $dot_x+540]
-        set winy [expr $dot_y+(($i-1)*145)]
-        wm geom .debug +${winx}+$winy
-        frame .debug.f1 -relief raised -borderwidth 2
-        checkbutton .debug.f1.cb -text "Step syscalls" -variable step -anchor w \
-            -command do_step -relief raised
-        button .debug.f1.step -text "Single Step" -command do_single
-        button .debug.f1.damage -text "5% Hit"    -command "incr rob1(damage) 5"
-        button .debug.f1.ping   -text "Scan"      -command "set rob1(ping) 1"
-        button .debug.f1.end -text "Close" \
-            -command "trace vdelete rob1(hflag) w set_h_bg
-	               set ::data($robot,status) 0; clean_up; reset; destroy .debug"
-        pack .debug.f1.cb .debug.f1.step .debug.f1.damage .debug.f1.ping \
-            .debug.f1.end  -side left -pady 5 -padx 3
-
-        frame .debug.f2 -relief raised -borderwidth 2
-        label .debug.f2.l1 -text "X:" -anchor e -width 8
-        entry .debug.f2.x -width 7 -textvariable rob1(x)  -relief sunken
-        label .debug.f2.l2 -text "Y:"  -anchor e -width 8
-        entry .debug.f2.y -width 7 -textvariable rob1(y)  -relief sunken
-        label .debug.f2.l3 -text "Heat:"  -anchor e -width 8
-        entry .debug.f2.h -width 7 -textvariable rob1(heat)  -relief sunken
-        pack .debug.f2.l1 .debug.f2.x  .debug.f2.l2 .debug.f2.y \
-            .debug.f2.l3 .debug.f2.h -side left -pady 5 -padx 1
-
-        set bgColor [.debug.f2.h cget -bg]
-        bind  .debug.f2.x <Return> {ver_range rob1(x) 0 999; \
-                                        set rob1(orgx) $rob1(x) ;set rob1(range) 0}
-        bind  .debug.f2.x <Leave>  {ver_range rob1(x) 0 999; \
-                                        set rob1(orgx) $rob1(x) ;set rob1(range) 0}
-        bind  .debug.f2.y <Return> {ver_range rob1(y) 0 999; \
-                                        set rob1(orgy) $rob1(y) ;set rob1(range) 0}
-        bind  .debug.f2.y <Leave>  {ver_range rob1(y) 0 999; \
-                                        set rob1(orgy) $rob1(y) ;set rob1(range) 0}
-        bind  .debug.f2.h <Return> {ver_range rob1(heat) 0 200}
-        bind  .debug.f2.h <Leave>  {ver_range rob1(heat) 0 200}
-        trace variable rob1(hflag) w set_h_bg
-
-        frame .debug.fb -relief raised -borderwidth 2
-        label .debug.fb.l4 -text "Speed:" -anchor e -width 8
-        entry .debug.fb.s -width 7 -textvariable rob1(speed) -relief sunken
-        label .debug.fb.l5 -text "Heading:" -anchor e -width 8
-        entry .debug.fb.h -width 7 -textvariable rob1(hdg) -relief sunken
-        label .debug.fb.l6 -text "Damage:" -anchor e -width 8
-        entry .debug.fb.d -width 7 -textvariable rob1(damage) -relief sunken
-        pack .debug.fb.l4 .debug.fb.s  .debug.fb.l5 .debug.fb.h \
-            .debug.fb.l6 .debug.fb.d  -side left -pady 5 -padx 1
-        bind  .debug.fb.s <Return> {ver_range rob1(speed) 0 100; \
-                                        set rob1(dspeed) $rob1(speed)}
-        bind  .debug.fb.s <Leave>  {ver_range rob1(speed) 0 100; \
-                                        set rob1(dspeed) $rob1(speed)}
-        bind  .debug.fb.h <Return> {ver_range rob1(hdg) 0 359; \
-                                        set rob1(dhdg) $rob1(hdg) ;set rob1(range) 0; \
-                                        set rob1(orgx) $rob1(x); set rob1(orgy) $rob1(y)}
-        bind  .debug.fb.h <Leave> {ver_range rob1(hdg) 0 359; \
-                                       set rob1(dhdg) $rob1(hdg) ;set rob1(range) 0; \
-                                       set rob1(orgx) $rob1(x); set rob1(orgy) $rob1(y)}
-        bind  .debug.fb.d <Return> {ver_range rob1(damage) 0 100}
-        bind  .debug.fb.d <Leave>  {ver_range rob1(damage) 0 100}
-
-        frame .debug.f3 -relief raised -borderwidth 2
-        label .debug.f3.l1 -text "Last syscall: " -anchor e
-        label .debug.f3.s -width 20 -textvariable rob1(syscall) -anchor w
-        label .debug.f3.l3 -text "Tick:" -anchor e -width 6
-        label .debug.f3.t -width 5 -textvariable ticks -anchor w -width 5
-        label .debug.f3.l4 -text "Barrel:" -anchor e -width 6
-        label .debug.f3.b -width 5 -textvariable rob1(btemp) -anchor w -width 5
-        pack .debug.f3.l1 .debug.f3.s .debug.f3.l3 .debug.f3.t  \
-            .debug.f3.l4 .debug.f3.b  -side left -pady 5 -padx 2
-
-        frame .debug.f4 -relief raised -borderwidth 2
-        label .debug.f4.l1 -text "Variable: " -anchor e
-        entry .debug.f4.var -width 10 -relief sunken
-        label .debug.f4.l2 -text "Value: " -anchor e
-        entry .debug.f4.val -width 10 -relief sunken
-        button .debug.f4.examine -text " Examine " -command examine
-        button .debug.f4.set     -text " Set "     -command setval
-        pack .debug.f4.l1 .debug.f4.var .debug.f4.l2 .debug.f4.val \
-            .debug.f4.examine .debug.f4.set -side left -pady 5 -padx 2
-        bind .debug.f4.var <Key-Return> ".debug.f4.examine invoke"
-        bind .debug.f4.val <Key-Return> ".debug.f4.set     invoke"
-
-        pack .debug.f1 .debug.f2 .debug.fb .debug.f3 .debug.f4 -side top -fill x
-
-        # override binding for Any-Keypress, but save others
-        foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
-                       .debug.fb.h .debug.fb.d} {
-            set cur_bind [bind Entry]
-            foreach c $cur_bind {
-                bind $e $c "[bind Entry $c] ; return -code break"
-            }
-            bind $e <KeyPress> {num_only %W %A}
-        }
-
-        # set initial step state
-        do_step
-    }
-}
-
-
 # define our battle tank icon used in the About popup
 set tr_icon {
     #define tr_width 48
@@ -919,14 +722,13 @@ proc init_gui {} {
     grid rowconfigure    . 2 -weight 1
 
     set ::execCmd init_arena
-    set ::mode {}
 
     # Create button frame and buttons
     set ::buttons_f [ttk::frame .f1]
     set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
                          -command {eval $::execCmd}]
     set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
-                         -command sim]
+                         -command {source simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                          -command tournament]
     set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
@@ -1031,15 +833,7 @@ proc init_gui {} {
 }
 
 proc gui {} {
-    if {$::mode eq "arena"} {
-        show_robots
-        show_scan
-        show_health
-    } elseif {[eq $::mode "init_sim"] || \
-                  [eq $::mode "sim"]} {
-        puts "gui: $::mode"
-       sim
-    } else {
-        puts "Mode Error";exit
-    }
+    show_robots
+    show_scan
+    show_health
 }
