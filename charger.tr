@@ -22,6 +22,7 @@ alert I_was_scanned
 # start of main code
 
 while {1} {
+      dputs $dir
 
   # look for an opponet
   set rng [scanner $dir 10]

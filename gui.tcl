@@ -267,16 +267,15 @@ proc show_arena {} {
     set w [winfo width  $::arena_c]
     set h [winfo height $::arena_c]
 
-    set ::scale [/ 1 [/ 1000.0 $h]]
-    set ::border 10
-    set ::side [- [int [* 1000 $::scale]] [* 2 $::border]]
-
-    incr ::hej
-    if {$::hej > 0} {
-        puts "scale $::scale"
-        puts "side $::side"
-        #exit
+    if {$w < $h} {
+        set val $w
+    } else {
+        set val $h
     }
+
+    set ::scale  [/ 1 [/ 1000.0 $val]]
+    set ::border 10
+    set ::side   [- [int [* 1000 $::scale]] [* 2 $::border]]
 
     set b  $::border
     set sb [+ $::side $::border]
@@ -314,7 +313,7 @@ proc show_robots {} {
             $::arena_c delete r$::data($robot,num)
             set x [border_check [* $::data($robot,x) $::scale]]
             set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
-            puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
+            #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
             set arrow [lindex $::parms(shapes) [% $i 4]]
             $::arena_c create line $x $y \
                 [expr $x+($::c_tab($::data($robot,hdg))*5)] \
@@ -361,7 +360,7 @@ proc show_scan {} {
 
                 set x [border_check [* $::data($robot,x) $::scale]]
                 set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
-                puts "scan $robot $x $y"
+                #puts "scan $robot $x $y"
                 set val [* [* 350 $::scale] 2]
                 $::arena_c create arc \
                     [- $x $val] [- $y $val] \
@@ -413,12 +412,32 @@ proc show_health {} {
     foreach robot $::allRobots {
         lappend ::robotHealth "$robot $::data($robot,health)"
         $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+        if {[brightness $::data($robot,color)] > 0.5} {
+            $::robotHealth_lb itemconfigure $index -background black
+        }
         incr index
     }
 }
 
+proc brightness color {
+    foreach {r g b} [winfo rgb . $color] break
+    set max [lindex [winfo rgb . white] 0]
+    expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
+ } ;#RS, after [Kevin Kenny]
+
+proc show_msg {robot msg} {
+    lappend ::robotMsg "$robot: $msg"
+    $::robotMsg_lb itemconfigure end -foreground $::data($robot,color)
+
+    if {[brightness $::data($robot,color)] > 0.5} {
+        $::robotMsg_lb itemconfigure end -background black
+    }
+
+    $::robotMsg_lb see end
+}
+
 #
-# Returns a list of colors
+# Returns a list of colors. From http://wiki.tcl.tk/666
 #
 proc distinct_colors {n} {
     set nn 1
@@ -432,7 +451,7 @@ proc distinct_colors {n} {
     }
     set lum_increment [expr .7 / $lum_steps]
 
-    for {set l 1.0} {$l > 0.4} {set l [expr {$l - $lum_increment}]} {
+    for {set l 1.0} {$l > 0.3} {set l [expr {$l - $lum_increment}]} {
         for {set h 0.0} {$h < 1.0} {set h [expr {$h + $hue_increment}]} {
             lappend rc [hls2tk $h $l $s]
             incr nn
@@ -506,6 +525,10 @@ proc init_arena {} {
     grid $::game_f -column 0 -row 2 -sticky nsew
     show_arena
 
+    # Clear message boxes
+    set ::robotHealth {}
+    set ::robotMsg    {}
+
     # start robots
     $::info_l configure -text "Running"
     set ::execCmd halt
@@ -535,7 +558,7 @@ proc init_arena {} {
 # standard tk_dialog modified to use -image on label
 
 proc tk_dialog2 {w title text bitmap default args} {
-    if {$::nowin} return
+    if {!$::gui} return
 
     # 1. Create the top-level window and divide it into top
     # and bottom parts.
@@ -824,12 +847,21 @@ proc init_gui {} {
 
     # The robot health list
     set ::robotHealth {}
-    set ::robotHealth_lb [listbox $::game_f.h -listvariable ::robotHealth]
+    set ::robotHealth_lb [listbox $::game_f.h -background black \
+                              -listvariable ::robotHealth]
 
-    grid $::arena_c        -column 0 -row 0 -sticky nsew
-    grid $::robotHealth_lb -column 1 -row 0 -sticky nsew
+    # The robot message box
+    set ::robotMsg {}
+    set ::robotMsg_lb [listbox $::game_f.msg -background black \
+                           -listvariable ::robotMsg]
+
+    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
+    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
     grid columnconfigure $::game_f 0 -weight 1
     grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $::game_f 1 -weight 1
+
 }
 
 proc gui {} {

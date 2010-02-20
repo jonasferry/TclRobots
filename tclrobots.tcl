@@ -42,7 +42,7 @@ set ::parms(rate,3) 30
 set ::parms(rate,4) 20
 # robot start health
 #set ::parms(health) 100
-set ::parms(health) 20; #for debugging
+set ::parms(health) 40; #for debugging
 # diameter of direct missile damage
 set ::parms(dia0) 6
 #     "    "  maximum   "      "
@@ -114,7 +114,16 @@ proc syscall {args} {
     #puts "Syscall $robot: $syscall"
 
     if {[lindex $syscall 0] eq "dputs"} {
-        puts [lrange $args 2 end]
+        set msg [lrange $args 2 end]
+        if {$::gui} {
+            # Output to robot message box
+            show_msg $robot $msg
+            # Output to terminal for debugging
+            puts "$robot: $msg"
+        } else {
+            # Output to terminal
+            puts "$robot: $msg"
+        }
     } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
     } else {
@@ -156,7 +165,6 @@ proc sysScanner {robot} {
                     if {$near<1} {set near 1}
                     set dsp    $::data($robot,num)
                     set health $::data($robot,health)
-                    puts "dsp: $dsp; health: $health"
                 }
             }
         }
@@ -749,64 +757,102 @@ proc main {} {
     puts "seed: $::seed"
 }
 
-set gui 1
-
-if {$gui} {
-    set ::nowin 0
-    source gui.tcl
-    init_gui
-} else {
-    set ::parms(tick) 0
-    for {set i 0} {$i < 3} {incr i} {
-        lappend ::robotFiles charger.tr
-    }
-    puts "Running time [/ [lindex [time main] 0] 1000000.0] seconds"
-}
-
-
 #############################################################################
 # do it!
 # main line code
 
 # check for command line args, run tournament if any 
 
-set nowin 0
-set arg_tlimit  10
-set arg_outfile "results.out"
-set ::robotFiles   ""
-set tourn_type  0
-set ::numlist   0
+set ::gui        0
+set arg_tlimit   10
+set arg_outfile  "results.out"
+#set ::robotFiles {}
+set arg_files    ""
+set tourn_type   0
+set ::numlist    0
+
+foreach arg $::argv {
+    switch -glob -- $arg  {
+        -t*     {set ::tourn_type 1}
+        default {
+            if {[file isfile [pwd]/$arg]} {
+                lappend ::robotFiles [pwd]/$arg
+            } else {
+                puts "'$arg' not found, skipping"
+            }
+        }
+    }
+}
+
+if {[llength $arg_files] >= 2} {
+    # Run batch
+    set ::parms(tick) 0
+    puts "Running time [/ [lindex [time main] 0] 1000000.0] seconds"
+} else {
+    # Run GUI
+    set ::gui 1
+    source gui.tcl
+    init_gui
+}
 
 if 0 {
-while {[llength $argv] > 0} {
-  set arg  [lindex $argv 0]
-  set argv [lrange $argv 1 end]
-  switch -glob -- $arg  {
-    -nowin {
-        set nowin 1
+# check for tournament, two or more files on command line
+if {[llength $arg_files] >= 2} {
+  # if not a one-on-one and 2 or more files, set battle match
+  if {$tourn_type == 0} {
+    set tourn_type 4
+  }
+
+
+
+
+
+
+
+  wm geom . +20+20
+  if {$nowin} {
+    wm withdraw .
+    # if -nowin, then speed up game by factor of 5
+    set parms(tick)    [expr $parms(tick)/5]
+    set parms(do_wait) [expr $parms(do_wait)/5]
+    # and don't bother drawing on canvas or updating robot damage
+    proc show_scan {args} {}
+    proc show_robots {args} {}
+    proc show_explode {args} {}
+    proc up_damage {args} {}
+  }
+  main_win
+  update
+  foreach f $arg_files {
+    .f2.fr.l1 insert end $f
+  }
+  set numList [llength $arg_files]
+  set tlimit $arg_tlimit
+  set outfile $arg_outfile
+  switch $tourn_type {
+    1 {
+      tournament
+      if {$nowin} {wm withdraw .tourn}
+      update
+      do_tourn
+    }
+    4 {
+      start
     }
     default {
-      if {[file isfile [pwd]/$arg]} {
-          lappend ::robotFiles [pwd]/$arg
-          incr ::numlist
-      } else {
-        puts "'$arg' not found, skipping"
-      }
     }
   }
+  clean_up
+  update
+  destroy .
+} else {
+  # no files for tourny, run interactive
+  set nowin      0
+  set tourn_type 0
+  main_win
 }
 
+# finis
 
-set ::robotFiles {charger.tr charger.tr}
-set ::numlist 2
 
-# check for tournament, two or more files on command line
-if {[llength $::robotFiles] >= 2} {
-    set tourn_type 4
-    set ::parms(tick)    0
-
-    set tlimit $arg_tlimit
-    set outfile $arg_outfile
-    main
-}
 }
