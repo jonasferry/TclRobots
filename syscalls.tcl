@@ -32,9 +32,9 @@ proc cannon {degree range} {
     syscall cannon $degree $range
     return [ping_check [yield]]
 }
-#damage
-proc damage {} {
-    syscall damage
+#health
+proc health {} {
+    syscall health
     return [ping_check [yield]]
 }
 #drive degree speed

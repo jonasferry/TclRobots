@@ -9,7 +9,7 @@
 #  -check damage periodically, move to new location if hit
 
 set dir [rand 360]
-set dam [damage]
+set dam [health]
 set nothing 0
 set closest 0
 
@@ -23,9 +23,9 @@ proc goto {x y} {
   set hdg [expr int($rad2deg * atan2($delta_y,$delta_x))]
   if {$hdg < 0} {incr hdg 360}
 
-  dputs hdg: $hdg to $x $y
+  dputs "hdg: $hdg to $x $y"
   drive $hdg 100
-  after 1000
+  #after 1000
   # keep moving until close to desired location
   while { abs($x-[loc_x]) > 20 || abs($y-[loc_y]) > 20} {
     # if ran into wall, break
@@ -59,7 +59,7 @@ while {1} {
         cannon $dir $rng
         incr limit -4
       }
-      if {$dam+10 < [damage]} { break }
+      if {$dam-10 > [health]} { break }
     }
   } else {
     incr nothing
@@ -69,15 +69,15 @@ while {1} {
   # check for nothing found in reasonable time
   if {$nothing >= 30} {
     set nothing 0
-    set dam [damage]
+    set dam [health]
     drive $closest 100
-    after 10000 drive 0 0
+    #after 10000 drive 0 0
   }
 
   # check for damage, move when incurred 10% damage
-  if {$dam+10 <= [damage]} {
+  if {$dam-10 >= [health]} {
     goto [expr [rand 400]+300] [expr [rand 400]+300]
-    set dam [damage]
+    set dam [health]
   }
 
 

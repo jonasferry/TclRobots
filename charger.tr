@@ -14,7 +14,7 @@ set nothing 0
 set closest 0
 
 proc I_was_scanned {who} {
-  dputs "$who scanned me"
+#  dputs "$who scanned me"
 }
 
 alert I_was_scanned
@@ -22,8 +22,6 @@ alert I_was_scanned
 # start of main code
 
 while {1} {
-      dputs $dir
-
   # look for an opponet
   set rng [scanner $dir 10]
 

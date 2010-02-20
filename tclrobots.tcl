@@ -42,7 +42,7 @@ set ::parms(rate,3) 30
 set ::parms(rate,4) 20
 # robot start health
 #set ::parms(health) 100
-set ::parms(health) 40; #for debugging
+set ::parms(health) 100; #for debugging
 # diameter of direct missile damage
 set ::parms(dia0) 6
 #     "    "  maximum   "      "
@@ -284,13 +284,14 @@ proc sysData {robot} {
 }
 
 proc init_robots {} {
-    set color_num 0
-
+    set file_index 0
     foreach robot $::allRobots {
         set ::data($robot,interp) [interp create -safe]
 
-        #set name [file tail $fn]
-        set name $robot
+        set name [file tail [lindex $::robotFiles $file_index]]
+        incr file_index
+        #set name $robot
+
         set x [rand 1000]
         set y [rand 1000]
 
@@ -301,7 +302,7 @@ proc init_robots {} {
         # set robot parms
         #########
         # window name = source.file_randnumber
-        set ::data($robot,name) ${name}_$newsig
+        set ::data($robot,name) ${name}
         # the rand number as digital signature
         set ::data($robot,num) $newsig
         # robot status: 0=not used or dead, 1=running
@@ -369,9 +370,6 @@ proc init_robots {} {
         set ::data($robot,syscall,-1) {}
         # return value from master to slave interp
         set ::data($robot,sysreturn,0) {}
-        # Set colors as far away as possible from each other visually
-        set ::data($robot,color) [lindex $::colors $color_num]
-        incr color_num
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
@@ -539,10 +537,22 @@ proc update_robots {} {
         # update distance traveled on this heading
         if {$::data($robot,speed) > 0} {
             set ::data($robot,range) \
-                    [expr $::data($robot,range)+($::data($robot,speed)*\
-                                                         $::parms(sp)/100)]
+                [+ $::data($robot,range) \
+                     [/ [* $::data($robot,speed) $::parms(sp)] 100]]
+
+            # Modify range with random factor to avoid totally
+            # deterministic movement. Range is currently +- 1%.
+            # Playtesting will tell if this should be lower or higher.
+            set randfactor [/ [+ [rand 100] 1.0] 10000]
+            if {[rand 2] == 0} {
+                set randfactor [- $randfactor]
+            }
+            set ::data($robot,range) [+ $::data($robot,range) \
+                                          [* $::data($robot,range) \
+                                               $randfactor]]
+
             set ::data($robot,x) \
-                    [expr round(($::c_tab($::data($robot,hdg))*\
+                [expr round(($::c_tab($::data($robot,hdg))*\
                                          $::data($robot,range))+\
                                         $::data($robot,orgx))]
             set ::data($robot,y) \
@@ -559,6 +569,7 @@ proc update_robots {} {
                 set ::data($robot,dspeed) 0
                 incr ::data($robot,health) $::parms(coll)
                 up_damage $robot
+                puts "WALL $robot: $::data($robot,health)"
             }
             if {$::data($robot,y)<0 || $::data($robot,y)>999} {
                 set ::data($robot,y) [expr $::data($robot,y)<0? 0 : 999]
@@ -625,7 +636,11 @@ proc act {} {
 }
 
 proc tick {} {
-    incr ::tick
+    if {$::tick < $::max_ticks} {
+        incr ::tick
+    } else {
+        set ::running 0
+    }
 }
 
 proc runRobots {} {
@@ -669,7 +684,7 @@ proc find_winner {} {
         disable_robot $robot
         incr alive
         lappend winner $::data($robot,name)
-        set win_color $::data($robot,color)
+#        set win_color $::data($robot,color)
         if {$::data($robot,team) != ""} {
             if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
                 lappend diffteam $::data($robot,team)
@@ -748,7 +763,6 @@ proc init {} {
 }
 
 proc main {} {
-    init
     set ::running 1
     coroutine runRobotsCo runRobots
     vwait ::running
@@ -764,10 +778,11 @@ proc main {} {
 # check for command line args, run tournament if any 
 
 set ::gui        0
+#set ::max_ticks  6000
+set ::max_ticks  6000
 set arg_tlimit   10
 set arg_outfile  "results.out"
-#set ::robotFiles {}
-set arg_files    ""
+set ::robotFiles {}
 set tourn_type   0
 set ::numlist    0
 
@@ -784,10 +799,10 @@ foreach arg $::argv {
     }
 }
 
-if {[llength $arg_files] >= 2} {
+if {[llength $::robotFiles] >= 2} {
     # Run batch
     set ::parms(tick) 0
-    puts "Running time [/ [lindex [time main] 0] 1000000.0] seconds"
+    puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {
     # Run GUI
     set ::gui 1

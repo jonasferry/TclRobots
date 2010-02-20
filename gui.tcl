@@ -264,32 +264,38 @@ proc clean_up {} {
 #
 
 proc show_arena {} {
+    update
     set w [winfo width  $::arena_c]
     set h [winfo height $::arena_c]
 
     if {$w < $h} {
-        set val $w
+        set val [- $w 20]
     } else {
-        set val $h
+        set val [- $h 20]
     }
 
     set ::scale  [/ 1 [/ 1000.0 $val]]
-    set ::border 10
-    set ::side   [- [int [* 1000 $::scale]] [* 2 $::border]]
+    #set ::border 0
+    #set ::side   [- [int [* 1000 $::scale]] [* 2 $::border]]
+    set ::side   [int [* 1000 $::scale]]
 
-    set b  $::border
-    set sb [+ $::side $::border]
-    $::arena_c configure -scrollregion "-$b -$b $sb $sb"
+    #set b  $::border
+    #set sb [+ $::side $::border]
+    #$::arena_c configure -scrollregion "$b $b $sb $sb"
+    $::arena_c configure -scrollregion [$::arena_c bbox all]
 
     $::arena_c delete wall
 
-    $::arena_c create line 0       0       0       $::side -tags wall
-    $::arena_c create line 0       0       $::side 0       -tags wall
-    $::arena_c create line $::side 0       $::side $::side -tags wall
-    $::arena_c create line 0       $::side $::side $::side -tags wall
+    $::arena_c create line 0       0       0       $::side -tags wall -width 2
+    $::arena_c create line 0       0       $::side 0       -tags wall -width 2
+    $::arena_c create line $::side 0       $::side $::side -tags wall -width 2
+    $::arena_c create line 0       $::side $::side $::side -tags wall -width 2
 }
 
 proc border_check {coord} {
+    # Debug fix:
+    return $coord
+
     if {$coord < $::border} {
         return $::border
     } elseif {$coord > $::side} {
@@ -410,7 +416,7 @@ proc show_health {} {
     set ::robotHealth {}
     set index 0
     foreach robot $::allRobots {
-        lappend ::robotHealth "$robot $::data($robot,health)"
+        lappend ::robotHealth "$::data($robot,name) $::data($robot,health)"
         $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
         if {[brightness $::data($robot,color)] > 0.5} {
             $::robotHealth_lb itemconfigure $index -background black
@@ -538,9 +544,20 @@ proc init_arena {} {
     $::about_b configure -state disabled
     $::quit_b  configure -state disabled
 
-    set ::colors [distinct_colors [llength $::robotFiles]]
+    # Init robots
+    init
 
-    #  start_robots
+    # Give the robots colors
+    set ::colors [distinct_colors [llength $::robotFiles]]
+    set color_num 0
+
+    foreach robot $::allRobots {
+        # Set colors as far away as possible from each other visually
+        set ::data($robot,color) [lindex $::colors $color_num]
+        incr color_num
+    }
+
+    # Start game
     main
 
     # find winnner
@@ -783,7 +800,7 @@ proc init_gui {} {
                       -text "Select robot files for battle"]
 
     # The contents frame contains two frames
-    set ::sel_f [ttk::frame .f2 -width 520 -height 520]
+    set ::sel_f [ttk::frame .f2]
 
     # Contents left frame
     set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
@@ -839,7 +856,8 @@ proc init_gui {} {
     grid rowconfigure $robotlist_f all -weight 1
 
     # The contents frame contains two frames
-    set ::game_f [ttk::frame .f3 -width 520 -height 520]
+    #set ::game_f [ttk::frame .f3 -width 520 -height 520]
+    set ::game_f [ttk::frame .f3]
 
     # The battle field canvas
     set ::arena_c [canvas $::game_f.c -background white]

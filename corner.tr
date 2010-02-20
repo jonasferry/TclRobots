@@ -12,10 +12,10 @@
 set corners {{10 10} {990 10} {10 990} {990 990}  }
 set cor_dir   {0       90       270      180}
 
-set dam [damage]
+set dam [health]
 
 proc I_was_scanned {who} {
-  dputs $who scanned me
+  dputs "$who scanned me"
 }
 
 alert I_was_scanned
@@ -68,7 +68,7 @@ while {1} {
   set num_scans 5
   set dir $start
 
-  while { $num_scans > 0 && $dam+10 > [damage] } {
+  while { $num_scans > 0 && $dam-10 < [health] } {
     set rng [scanner $dir $resincr]
     if {$rng >0 && $rng <= 700} {
       set resincr 1
@@ -88,7 +88,7 @@ while {1} {
   set new_corner $test_corner
   eval goto [lindex $corners $new_corner]
   set start [lindex $cor_dir $new_corner]
-  set dam [damage]
+  set dam [health]
 }
 
 
