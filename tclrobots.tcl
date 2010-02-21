@@ -119,7 +119,7 @@ proc syscall {args} {
             # Output to robot message box
             show_msg $robot $msg
             # Output to terminal for debugging
-            puts "$robot: $msg"
+            puts "$robot: $msg ($::tick)"
         } else {
             # Output to terminal
             puts "$robot: $msg"
@@ -281,6 +281,10 @@ proc sysData {robot} {
         loc_y  {set val $::data($robot,y)}
     }
     set ::data($robot,sysreturn,$::tick) $val
+}
+
+proc sysTick {robot} {
+    set ::data($robot,sysreturn,$::tick) $::tick
 }
 
 proc init_robots {} {
@@ -630,6 +634,7 @@ proc act {} {
                 heat    -
                 loc_x   -
                 loc_y   {sysData    $robot}
+                tick    {sysTick    $robot}
             }
         }
     }
@@ -778,7 +783,6 @@ proc main {} {
 # check for command line args, run tournament if any 
 
 set ::gui        0
-#set ::max_ticks  6000
 set ::max_ticks  6000
 set arg_tlimit   10
 set arg_outfile  "results.out"
