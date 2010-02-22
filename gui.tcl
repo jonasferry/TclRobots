@@ -97,9 +97,9 @@ proc fillLst {win filt dir} {
     if {[string length $filt] == 0} {
         set filt *
     }
-    set all_list [lsort [glob -nocomplain $dir/$filt]]
+    set all_list [lsort -dictionary [glob -nocomplain $dir/$filt]]
 
-    set dlist  "$dir/../"
+    set dlist [list "$dir/../"]
     set flist ""
 
     foreach f $all_list {
@@ -137,8 +137,10 @@ proc selInsert {win pathname} {
     $win.sel delete 0 end
     $win.sel insert 0 $pathname
     set index [expr [string length [file dirname [file dirname $pathname]] ]+1]
+    #set index [$win.sel index end]
     $win.sel xview $index
-    $win.sel select from 0
+    after idle $win.sel xview $index
+    #$win.sel select range 0 0
 }
 
 
@@ -186,32 +188,31 @@ proc fileBox {win txt filt initfile startdir execproc} {
         set startdir [pwd]
     }
 
-    label $win.l1   -text "File Filter" -anchor w
-    entry $win.fil  -relief sunken
+    ttk::label $win.l1   -text "File Filter" -anchor w
+    ttk::entry $win.fil
     $win.fil insert 0 $filt
-    label $win.l2   -text "Files" -anchor w
-    frame $win.l
-    scrollbar $win.l.hor -orient horizontal -command "$win.l.lst xview" \
-	    -relief sunken
-    scrollbar $win.l.ver -orient vertical   -command "$win.l.lst yview" \
-	    -relief sunken
+    ttk::label $win.l2   -text "Files" -anchor w
+    ttk::frame $win.l
+    ttk::scrollbar $win.l.hor -orient horizontal -command "$win.l.lst xview"
+    ttk::scrollbar $win.l.ver -orient vertical   -command "$win.l.lst yview"
     listbox $win.l.lst -yscroll "$win.l.ver set" -xscroll "$win.l.hor set" \
 	    -selectmode single -relief sunken
 
-    label $win.l3   -text "Selection" -anchor w
-    scrollbar $win.scrl -orient horizontal -relief sunken \
+    ttk::label $win.l3   -text "Selection" -anchor w
+    ttk::scrollbar $win.scrl -orient horizontal \
         -command "$win.sel xview"
-    entry $win.sel  -relief sunken -xscroll "$win.scrl set"
+    ttk::entry $win.sel -xscroll "$win.scrl set"
     selInsert $win $initfile
-    pack $win.l.ver -side right -fill y
-    pack $win.l.hor -side bottom -fill x
-    pack $win.l.lst -side left   -fill both  -expand 1 -ipadx 3
+    grid $win.l.lst $win.l.ver -sticky news
+    grid $win.l.hor            -sticky we
+    grid columnconfigure $win.l $win.l.lst -weight 1
+    grid rowconfigure    $win.l $win.l.lst -weight 1
 
-    frame $win.o  -relief sunken -border 1
-    button $win.o.ok -text " $txt " -command "fileOK $win $execproc"
-    button $win.all -text " Select All " -command "choose_all"
-    button $win.filter -text " Filter " \
-        -command "fillLst $win \[$win.fil get\] \[pwd\]"
+    ttk::button $win.ok -text " $txt " -command "fileOK $win $execproc" \
+            -default active
+    ttk::button $win.all -text " Select All " -command "choose_all"
+    ttk::button $win.filter -text " Filter " \
+            -command "fillLst $win \[$win.fil get\] \[pwd\]"
 
     pack $win.l1 -side top -fill x
     pack $win.fil -side top -pady 2 -fill x -ipadx 5
@@ -220,16 +221,14 @@ proc fileBox {win txt filt initfile startdir execproc} {
     pack $win.l3 -side top -fill x
     pack $win.sel -side top -pady 5 -fill x -ipadx 5
     pack $win.scrl -side top -fill x
-    pack $win.o.ok -side left  -padx 5 -pady 5
-    pack $win.o $win.all $win.filter  -side left -padx 5 -pady 10
+    pack $win.ok $win.all $win.filter  -side left -padx 5 -pady 10
 
     bind $win.fil <KeyPress-Return> "$win.filter invoke"
-    bind $win.sel <KeyPress-Return> "$win.o.ok   invoke"
+    bind $win.sel <KeyPress-Return> "$win.ok     invoke"
     bind $win.l.lst <ButtonRelease-1> \
         "+selInsert $win \[%W get \[ %W nearest %y \] \] "
     bind $win.l.lst <Double-1> \
-        "selInsert $win \[%W get \[%W curselection\]\];  $win.o.ok invoke"
-    bind $win <1> "$win.o.ok config -relief sunken"
+        "selInsert $win \[%W get \[%W curselection\]\];  $win.ok invoke"
 
 
     fillLst $win $filt $startdir
@@ -754,7 +753,17 @@ set tr_icon {
 
 image create bitmap iconfn -data $::tr_icon -background ""
 
+proc gui_settings {} {
+    # Copy some settings from Ttk to Tk
+    set bg [ttk::style configure . -background]
+    option add *Listbox.background $bg
+    option add *Menubutton.background $bg
+    option add *Menu.background $bg
+}
+
 proc init_gui {} {
+    gui_settings
+
     # Create and grid the outer content frame
     # The button row
     grid columnconfigure . 0 -weight 1
@@ -809,7 +818,7 @@ proc init_gui {} {
     set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
 
     # The file selection box
-    set files_fb [fileBox $::sel_f.fl "Select" * "" [pwd] choose_file]
+    set files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
 
     # The robot list info label
     set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
