@@ -380,7 +380,7 @@ proc init_robots {} {
         $::data($robot,interp) invokehidden source syscalls.tcl
 
         $::data($robot,interp) eval coroutine \
-            ${robot}Run [list apply [list {} $::data($robot,code)]]
+                ${robot}Run [list uplevel \#0 $::data($robot,code)]
 
         interp alias {} ${robot}Run $::data($robot,interp) ${robot}Run
     }
