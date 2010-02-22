@@ -771,7 +771,7 @@ proc init_gui {} {
     set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
                          -command {eval $::execCmd}]
     set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
-                         -command {source simulator.tcl; init_sim}]
+                         -command {source $::thisDir/simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                          -command tournament]
     set ::about_b   [ttk::button .f1.b3 -text "About" -command about]

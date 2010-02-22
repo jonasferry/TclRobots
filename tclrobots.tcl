@@ -1,5 +1,7 @@
 namespace import ::tcl::mathop::*
 namespace import ::tcl::mathfunc::*
+set ::thisScript [file join [pwd] [info script]]
+set ::thisDir [file dirname $::thisScript]
 
 #########
 # set general tclrobots environment parameters
@@ -377,7 +379,7 @@ proc init_robots {} {
 
         interp alias $::data($robot,interp) syscall {} syscall $robot
 
-        $::data($robot,interp) invokehidden source syscalls.tcl
+        $::data($robot,interp) invokehidden source $::thisDir/syscalls.tcl
 
         $::data($robot,interp) eval coroutine \
                 ${robot}Run [list uplevel \#0 $::data($robot,code)]
@@ -810,7 +812,7 @@ if {[llength $::robotFiles] >= 2} {
 } else {
     # Run GUI
     set ::gui 1
-    source gui.tcl
+    source $::thisDir/gui.tcl
     init_gui
 }
 
