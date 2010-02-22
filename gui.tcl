@@ -343,9 +343,10 @@ proc show_robots {} {
 #
 
 proc show_scan {} {
-    #delete all previous scans
-    $::arena_c delete scan
     foreach robot $::activeRobots {
+        # Hide the scan arc by default
+        $::arena_c itemconfigure $::data($robot,scanid) -outline ""
+
         if {$::data($robot,status)} {
             lassign $::data($robot,syscall,$::tick) cmd deg res
             if {($cmd eq "scanner") && \
@@ -358,14 +359,13 @@ proc show_scan {} {
                 set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
-                $::arena_c create arc \
+                $::arena_c coords $::data($robot,scanid) \
                         [- $x $val] [- $y $val] \
-                        [+ $x $val] [+ $y $val] \
+                        [+ $x $val] [+ $y $val]
+                $::arena_c itemconfigure $::data($robot,scanid) \
                         -start [expr {$deg-$res}] \
-                        -extent [expr {2*$res + 1}] -fill "" \
-                        -outline $::data($robot,color) -stipple gray50 \
-                        -width 1 \
-                        -tags "scan s$::data($robot,num) "
+                        -extent [expr {2*$res + 1}] \
+                        -outline $::data($robot,color)
             }
         }
     }
@@ -538,7 +538,10 @@ proc init_arena {} {
     # Give the robots colors
     set ::colors [distinct_colors [llength $::robotFiles]]
 
+    # Remove old canvas items
     $::arena_c delete robot
+    $::arena_c delete scan
+
     set i 0
     foreach robot $::allRobots color $::colors {
         # Set colors as far away as possible from each other visually
@@ -550,6 +553,10 @@ proc init_arena {} {
                 -fill $::data($robot,color) \
                 -arrow last -arrowshape $::data($robot,shape) \
                 -tags "r$::data($robot,num) robot"]
+        # Precreate scan mark on canvas
+        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                -width 1 -tags "scan s$::data($robot,num)"]
 
         incr i
     }
