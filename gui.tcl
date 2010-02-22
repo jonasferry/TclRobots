@@ -26,7 +26,7 @@ proc choose_file {win filename} {
             set dir  $d
         }
     }
-    set index [expr [string length [file dirname [file dirname $dir]] ]+1]
+    set index [+ [string length [file dirname [file dirname $dir]]] 1]
     $::robotlist_lb xview $index
 }
 
@@ -40,7 +40,7 @@ proc choose_all {} {
     set lsize [$win.l.lst size]
     for {set i 0} {$i < $lsize} {incr i} {
         set f [string trim [$win.l.lst get $i]]
-        if ![string match */ $f] {
+        if {![string match */ $f]} {
             choose_file $win $f
         }
     }
@@ -103,10 +103,10 @@ proc fillLst {win filt dir} {
     set flist ""
 
     foreach f $all_list {
-        if [file isfile $f] {
+        if {[file isfile $f]} {
             lappend flist $f
         }
-        if [file isdirectory $f] {
+        if {[file isdirectory $f]} {
             lappend dlist ${f}/
         }
     }
@@ -120,7 +120,7 @@ proc fillLst {win filt dir} {
 
     $win.l.lst yview 0
 
-    set index [expr [string length [file dirname [file dirname $dir]] ]+1]
+    set index [+ [string length [file dirname [file dirname $dir]]] 1]
 
     $win.l.lst xview $index
 }
@@ -136,7 +136,7 @@ proc selInsert {win pathname} {
 
     $win.sel delete 0 end
     $win.sel insert 0 $pathname
-    set index [expr [string length [file dirname [file dirname $pathname]] ]+1]
+    set index [+ [string length [file dirname [file dirname $pathname]]] 1]
     #set index [$win.sel index end]
     $win.sel xview $index
     after idle $win.sel xview $index
@@ -158,7 +158,7 @@ proc fileOK {win execproc} {
     catch {  selInsert $win [$win.l.lst get [$win.l.lst curselection]] }
 
     set f [lindex [$win.sel get] 0]
-    if [file isdirectory $f] {
+    if {[file isdirectory $f]} {
         #set f [file dirname $f]
         #set f [file dirname $f]
         cd $f
@@ -273,7 +273,7 @@ proc show_arena {} {
         set val [- $h 20]
     }
 
-    set ::scale  [/ 1 [/ 1000.0 $val]]
+    set ::scale  [/ $val 1000.0]
     #set ::border 0
     #set ::side   [- [int [* 1000 $::scale]] [* 2 $::border]]
     set ::side   [int [* 1000 $::scale]]
@@ -281,14 +281,15 @@ proc show_arena {} {
     #set b  $::border
     #set sb [+ $::side $::border]
     #$::arena_c configure -scrollregion "$b $b $sb $sb"
-    $::arena_c configure -scrollregion [$::arena_c bbox all]
 
     $::arena_c delete wall
 
-    $::arena_c create line 0       0       0       $::side -tags wall -width 2
-    $::arena_c create line 0       0       $::side 0       -tags wall -width 2
-    $::arena_c create line $::side 0       $::side $::side -tags wall -width 2
-    $::arena_c create line 0       $::side $::side $::side -tags wall -width 2
+    # Put an invisible rectangle outside to create some padding in the bbox
+    $::arena_c create rectangle -8 -8 [+ $::side 8] [+ $::side 8] -tags wall \
+            -outline "" -fill ""
+    $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
+
+    $::arena_c configure -scrollregion [$::arena_c bbox wall]
 }
 
 proc border_check {coord} {
@@ -321,10 +322,10 @@ proc show_robots {} {
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
             set arrow [lindex $::parms(shapes) [% $i 4]]
             $::arena_c create line $x $y \
-                [expr $x+($::c_tab($::data($robot,hdg))*5)] \
-                [expr $y-($::s_tab($::data($robot,hdg))*5)] \
-                -fill $::data($robot,color) \
-                -arrow last -arrowshape $arrow -tags r$::data($robot,num)
+                    [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
+                    [expr {$y-($::s_tab($::data($robot,hdg))*5)}] \
+                    -fill $::data($robot,color) \
+                    -arrow last -arrowshape $arrow -tags r$::data($robot,num)
         }
         # check missiles
         if {$::data($robot,mstate)} {
@@ -332,14 +333,11 @@ proc show_robots {} {
             set x [border_check [* $::data($robot,mx) $::scale]]
             set y [border_check [* [- 1000 $::data($robot,my)] $::scale]]
             $::arena_c create oval \
-                [expr $x-2] [expr $y-2] [expr $x+2] [expr $y+2] \
-                -fill black -tags m$::data($robot,num)
+                    [- $x 2] [- $y 2] [+ $x 2] [+ $y 2] \
+                    -fill black -tags m$::data($robot,num)
         }
         incr i
     }
-    #delete all previous scans
-    $::arena_c delete scan
-    update
 }
 
 
@@ -351,31 +349,29 @@ proc show_robots {} {
 #
 
 proc show_scan {} {
+    #delete all previous scans
+    $::arena_c delete scan
     foreach robot $::activeRobots {
-        if {[$::arena_c find withtag s$::data($robot,name)] != ""} {
-            return
-        } elseif {$::data($robot,status)} {
-            if {([lindex $::data($robot,syscall,$::tick) 0] eq "scanner") && \
+        if {$::data($robot,status)} {
+            lassign $::data($robot,syscall,$::tick) cmd deg res
+            if {($cmd eq "scanner") && \
                     ($::data($robot,syscall,$::tick) eq \
-                         $::data($robot,syscall,[- $::tick 1]))} {
+                    $::data($robot,syscall,[- $::tick 1]))} {
 
-                set deg [lindex $::data($robot,syscall,$::tick) 1]
-                set res [lindex $::data($robot,syscall,$::tick) 2]
                 #puts "deg: $deg, res: $res"
 
                 set x [border_check [* $::data($robot,x) $::scale]]
                 set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
                 #puts "scan $robot $x $y"
-                set val [* [* 350 $::scale] 2]
+                set val [* $::parms(mismax) $::scale]
                 $::arena_c create arc \
-                    [- $x $val] [- $y $val] \
-                    [+ $x $val] [+ $y $val] \
-                    -start [expr $deg-$res] \
-                    -extent [expr 2*$res + 1] -fill "" \
-                    -outline $::data($robot,color) -stipple gray50 -width 1 \
-                    -tags "scan s$::data($robot,num) "
-
-                update
+                        [- $x $val] [- $y $val] \
+                        [+ $x $val] [+ $y $val] \
+                        -start [expr {$deg-$res}] \
+                        -extent [expr {2*$res + 1}] -fill "" \
+                        -outline $::data($robot,color) -stipple gray50 \
+                        -width 1 \
+                        -tags "scan s$::data($robot,num) "
             }
         }
     }
@@ -408,7 +404,7 @@ proc show_explode {robot} {
         -tags e$::data($robot,num)
 
     update
-    after 100 "$::arena_c delete e$::data($robot,num)"
+    after 200 "$::arena_c delete e$::data($robot,num)"
 }
 
 proc show_health {} {
@@ -417,7 +413,7 @@ proc show_health {} {
     foreach robot $::allRobots {
         lappend ::robotHealth "$::data($robot,name) $::data($robot,health)"
         $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
-        if {[brightness $::data($robot,color)] > 0.5} {
+        if {$::data($robot,brightness) > 0.5} {
             $::robotHealth_lb itemconfigure $index -background black
         }
         incr index
@@ -434,7 +430,7 @@ proc show_msg {robot msg} {
     lappend ::robotMsg "$robot: $msg"
     $::robotMsg_lb itemconfigure end -foreground $::data($robot,color)
 
-    if {[brightness $::data($robot,color)] > 0.5} {
+    if {$::data($robot,brightness) > 0.5} {
         $::robotMsg_lb itemconfigure end -background black
     }
 
@@ -449,12 +445,12 @@ proc distinct_colors {n} {
     set hue_increment .15
     set s 1.0 ;# non-variable saturation
 
-    set lum_steps [expr $n * $hue_increment]
-    set int_lum_steps [expr int($lum_steps)]
+    set lum_steps [expr {$n * $hue_increment}]
+    set int_lum_steps [int $lum_steps]
     if {$lum_steps > $int_lum_steps} { ;# round up
-        set lum_steps [expr $int_lum_steps + 1]
+        set lum_steps [+ $int_lum_steps 1]
     }
-    set lum_increment [expr .7 / $lum_steps]
+    set lum_increment [/ .7 $lum_steps]
 
     for {set l 1.0} {$l > 0.3} {set l [expr {$l - $lum_increment}]} {
         for {set h 0.0} {$h < 1.0} {set h [expr {$h + $hue_increment}]} {
@@ -471,8 +467,7 @@ proc hls2tk {h l s} {
     foreach c $rgb {
         set intc [expr {int($c * 256)}]
         if {$intc == 256} { set intc 255 }
-        set c1 [format %1X $intc]
-        if {[string length $c1] == 1} {set c1 "0$c1"}
+        set c1 [format %02X $intc]
         append init $c1
     }
     return #$init
@@ -548,12 +543,11 @@ proc init_arena {} {
 
     # Give the robots colors
     set ::colors [distinct_colors [llength $::robotFiles]]
-    set color_num 0
 
-    foreach robot $::allRobots {
+    foreach robot $::allRobots color $::colors {
         # Set colors as far away as possible from each other visually
-        set ::data($robot,color) [lindex $::colors $color_num]
-        incr color_num
+        set ::data($robot,color) $color
+        set ::data($robot,brightness) [brightness $color]
     }
 
     # Start game
@@ -631,10 +625,10 @@ proc tk_dialog2 {w title text bitmap default args} {
 
     wm withdraw $w
     update idletasks
-    set x [expr [winfo screenwidth $w]/2 - [winfo reqwidth $w]/2  - \
-               [winfo vrootx [winfo parent $w]]]
-    set y [expr [winfo screenheight $w]/2 - [winfo reqheight $w]/2  - \
-               [winfo vrooty [winfo parent $w]]]
+    set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2  - \
+            [winfo vrootx [winfo parent $w]]}]
+    set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2  - \
+            [winfo vrooty [winfo parent $w]]}]
     wm geom $w +$x+$y
     wm deiconify $w
 
@@ -891,8 +885,9 @@ proc init_gui {} {
 
 }
 
-proc gui {} {
+proc update_gui {} {
     show_robots
     show_scan
     show_health
+    update
 }

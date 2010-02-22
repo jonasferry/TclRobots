@@ -668,7 +668,7 @@ proc runRobots {} {
         update_robots
 
         if {$::gui} {
-            gui
+            update_gui
         }
 
         tick
