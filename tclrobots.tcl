@@ -414,61 +414,9 @@ proc up_damage {robot} {
 # update position of missiles and robots, assess damage
 #########
 proc update_robots {} {
-    set num_miss 0
-    set num_rob  0
     foreach robot $::allRobots {
         # check all flying missiles
-        if {$::data($robot,mstate)} {
-            incr num_miss
-            # update location of missile
-            set ::data($robot,mrange) \
-                    [expr $::data($robot,mrange)+$::parms(msp)]
-            set ::data($robot,mx) \
-                    [expr ($::c_tab($::data($robot,mhdg))*\
-                                   $::data($robot,mrange))+\
-                             $::data($robot,morgx)]
-            set ::data($robot,my) \
-                    [expr ($::s_tab($::data($robot,mhdg))*\
-                                   $::data($robot,mrange))+\
-                             $::data($robot,morgy)]
-            # check if missile reached target
-            if {$::data($robot,mrange) > $::data($robot,mdist)} {
-                set ::data($robot,mstate) 0
-                set ::data($robot,mx) \
-                        [expr ($::c_tab($::data($robot,mhdg))*\
-                                       $::data($robot,mdist))+\
-                                 $::data($robot,morgx)]
-                set ::data($robot,my) \
-                        [expr ($::s_tab($::data($robot,mhdg))*\
-                                       $::data($robot,mdist))+\
-                                 $::data($robot,morgy)]
-                if {$::gui} {
-                    after 1 "show_explode $robot"
-                }
-
-                # assign damage to all within explosion ranges
-                foreach target $::activeRobots {
-                    if {!$::data($target,status)} {
-                        continue
-                    }
-                    set d [expr hypot($::data($robot,mx)-$::data($target,x),\
-                                              $::data($robot,my)-\
-                                              $::data($target,y))]
-                    if {$d<$::parms(dia3)} {
-                        if {$d<$::parms(dia0)} {
-                            incr ::data($target,health) $::parms(hit0)
-                        } elseif {$d<$::parms(dia1)} {
-                            incr ::data($target,health) $::parms(hit1)
-                        } elseif {$d<$::parms(dia2)} {
-                            incr ::data($target,health) $::parms(hit2)
-                        } else {
-                            incr ::data($target,health) $::parms(hit3)
-                        }
-                        up_damage $target
-                    }
-                }
-            }
-        }
+        set num_miss [check_missiles $robot]
 
         # skip rest if robot dead
         if {!$::data($robot,status)} {continue}
@@ -476,119 +424,247 @@ proc update_robots {} {
         # update missile reloader
         if {$::data($robot,reload)} {incr ::data($robot,reload) -1}
 
-        # check for excessive speed, increment heat
-        if {$::data($robot,speed) > $::parms(heatsp)} {
-            incr ::data($robot,heat) \
-                    [expr round(($::data($robot,speed)-\
-                                         $::parms(heatsp))/$::parms(hrate))+1]
-            if {$::data($robot,heat) >= $::parms(heatmax)} {
-                set ::data($robot,heat) $::parms(heatmax)
-                set ::data($robot,hflag) 1
-                if {$::data($robot,dspeed) > $::parms(heatsp)} {
-                    set ::data($robot,dspeed) $::parms(heatsp)
-                }
-            }
-        } else {
-            # if overheating, apply cooling rate
-            if {$::data($robot,hflag) || $::data($robot,heat) > 0} {
-                incr ::data($robot,heat) $::parms(cooling)
-                if {$::data($robot,heat) <= 0} {
-                    set ::data($robot,hflag) 0
-                    set ::data($robot,heat) 0
-                }
-            }
-        }
-
         # check for barrel overheat, apply cooling
-        if {$::data($robot,btemp)} {
-            incr ::data($robot,btemp) $::parms(cancool)
-            if {$::data($robot,btemp) < 0} { set ::data($robot,btemp) 0 }
-        }
+        check_barrel $robot
+
+        # check for excessive speed, increment heat
+        check_speed $robot
 
         # update robot speed, moderated by acceleration
-        if {$::data($robot,speed) != $::data($robot,dspeed)} {
-            if {$::data($robot,speed) > $::data($robot,dspeed)} {
-                incr ::data($robot,speed) -$::parms(accel)
-                if {$::data($robot,speed) < $::data($robot,dspeed)} {
-                    set ::data($robot,speed) $::data($robot,dspeed)
-                }
-            } else {
-                incr ::data($robot,speed) $::parms(accel)
-                if {$::data($robot,speed) > $::data($robot,dspeed)} {
-                    set ::data($robot,speed) $::data($robot,dspeed)
-                }
-            }
-        }
+        update_speed $robot
 
         # update robot heading, moderated by turn rates
-        if {$::data($robot,hdg) != $::data($robot,dhdg)} {
-            set mrate $::parms(rate,[expr int($::data($robot,speed)/25)])
-            set d1 [expr ($::data($robot,dhdg)-$::data($robot,hdg)+360)%360]
-            set d2 [expr ($::data($robot,hdg)-$::data($robot,dhdg)+360)%360]
-            set d  [expr $d1<$d2?$d1:$d2]
-            if {$d<=$mrate} {
-                set ::data($robot,hdg) $::data($robot,dhdg)
-            } else {
-                set ::data($robot,hdg) \
-                        [expr ($::data($robot,hdg)$::data($robot,dir)$mrate+\
-                                       360)%360]
-            }
-            set ::data($robot,orgx)  $::data($robot,x)
-            set ::data($robot,orgy)  $::data($robot,y)
-            set ::data($robot,range) 0
-        }
+        update_heading $robot
 
         # update distance traveled on this heading
-        if {$::data($robot,speed) > 0} {
-            set ::data($robot,range) \
-                [+ $::data($robot,range) \
-                     [/ [* $::data($robot,speed) $::parms(sp)] 100]]
+        update_distance $robot
 
-            # Modify range with random factor to avoid totally
-            # deterministic movement. Range is currently +- 1%.
-            # Playtesting will tell if this should be lower or higher.
-            set randfactor [/ [+ [rand 100] 1.0] 10000]
-            if {[rand 2] == 0} {
-                set randfactor [- $randfactor]
-            }
-            set ::data($robot,range) [+ $::data($robot,range) \
-                                          [* $::data($robot,range) \
-                                               $randfactor]]
+        # check for wall collision
+        check_wall $robot
+    }
+    # check for robot health
+    set health_status [check_health]
 
-            set ::data($robot,x) \
-                [expr round(($::c_tab($::data($robot,hdg))*\
-                                         $::data($robot,range))+\
-                                        $::data($robot,orgx))]
-            set ::data($robot,y) \
-                    [expr round(($::s_tab($::data($robot,hdg))*\
-                                         $::data($robot,range))+\
-                                        $::data($robot,orgy))]
-            # check for wall collision
-            if {$::data($robot,x)<0 || $::data($robot,x)>999} {
-                set ::data($robot,x) [expr $::data($robot,x)<0? 0 : 999]
-                set ::data($robot,orgx)   $::data($robot,x)
-                set ::data($robot,orgy)   $::data($robot,y)
-                set ::data($robot,range)  0
-                set ::data($robot,speed)  0
-                set ::data($robot,dspeed) 0
-                incr ::data($robot,health) $::parms(coll)
-                up_damage $robot
-                puts "WALL $robot: $::data($robot,health)"
-            }
-            if {$::data($robot,y)<0 || $::data($robot,y)>999} {
-                set ::data($robot,y) [expr $::data($robot,y)<0? 0 : 999]
-                set ::data($robot,orgx)   $::data($robot,x)
-                set ::data($robot,orgy)   $::data($robot,y)
-                set ::data($robot,range)  0
-                set ::data($robot,speed)  0
-                set ::data($robot,dspeed) 0
-                incr ::data($robot,health) $::parms(coll)
-                up_damage $robot
+    set num_rob       [lindex $health_status 0]
+    set diffteam      [lindex $health_status 1]
+    set num_team      [lindex $health_status 2]
+
+    if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
+        # Stop game
+        set ::running 0
+    }
+}
+
+proc check_missiles {robot} {
+    # check all flying missiles
+    # used by update_robots
+    set num_miss 0
+
+    if {$::data($robot,mstate)} {
+        incr num_miss
+        update_missile_location $robot
+        # check if missile reached target
+        if {$::data($robot,mrange) > $::data($robot,mdist)} {
+            missile_reached_target $robot
+
+            # assign damage to all within explosion ranges
+            foreach target $::activeRobots {
+                if {!$::data($target,status)} {continue}
+                assign_missile_damage $robot $target
             }
         }
     }
+    return $num_miss
+}
 
+proc update_missile_location {robot} {
+    # update location of missile
+    # used by update_robots
+    set ::data($robot,mrange) \
+        [expr $::data($robot,mrange)+$::parms(msp)]
+    set ::data($robot,mx) \
+        [expr ($::c_tab($::data($robot,mhdg))*\
+                   $::data($robot,mrange))+\
+             $::data($robot,morgx)]
+    set ::data($robot,my) \
+        [expr ($::s_tab($::data($robot,mhdg))*\
+                   $::data($robot,mrange))+\
+             $::data($robot,morgy)]
+}
+
+proc missile_reached_target {robot} {
+    # used by update_robots
+    set ::data($robot,mstate) 0
+    set ::data($robot,mx) \
+        [expr ($::c_tab($::data($robot,mhdg))*\
+                   $::data($robot,mdist))+\
+             $::data($robot,morgx)]
+    set ::data($robot,my) \
+        [expr ($::s_tab($::data($robot,mhdg))*\
+                   $::data($robot,mdist))+\
+             $::data($robot,morgy)]
+    if {$::gui} {
+        after 1 "show_explode $robot"
+    }
+}
+
+proc assign_missile_damage {robot target} {
+    # assign damage to all within explosion ranges
+    # used by update_robots
+    set d [expr hypot($::data($robot,mx)-$::data($target,x),\
+                          $::data($robot,my)-\
+                          $::data($target,y))]
+    if {$d<$::parms(dia3)} {
+        if {$d<$::parms(dia0)} {
+            incr ::data($target,health) $::parms(hit0)
+        } elseif {$d<$::parms(dia1)} {
+            incr ::data($target,health) $::parms(hit1)
+        } elseif {$d<$::parms(dia2)} {
+            incr ::data($target,health) $::parms(hit2)
+        } else {
+            incr ::data($target,health) $::parms(hit3)
+        }
+        up_damage $target
+    }
+}
+
+proc check_barrel {robot} {
+    # check for barrel overheat, apply cooling
+    # used by update_robots
+    if {$::data($robot,btemp)} {
+        incr ::data($robot,btemp) $::parms(cancool)
+        if {$::data($robot,btemp) < 0} {
+            set ::data($robot,btemp) 0
+        }
+    }
+}
+
+proc check_speed {robot} {
+    # check for excessive speed, increment heat
+    # used by update_robots
+    if {$::data($robot,speed) > $::parms(heatsp)} {
+        incr ::data($robot,heat) \
+            [expr round(($::data($robot,speed)-\
+                             $::parms(heatsp))/$::parms(hrate))+1]
+        if {$::data($robot,heat) >= $::parms(heatmax)} {
+            set ::data($robot,heat) $::parms(heatmax)
+            set ::data($robot,hflag) 1
+            if {$::data($robot,dspeed) > $::parms(heatsp)} {
+                set ::data($robot,dspeed) $::parms(heatsp)
+            }
+        }
+    } else {
+        # if overheating, apply cooling rate
+        if {$::data($robot,hflag) || $::data($robot,heat) > 0} {
+            incr ::data($robot,heat) $::parms(cooling)
+            if {$::data($robot,heat) <= 0} {
+                set ::data($robot,hflag) 0
+                set ::data($robot,heat) 0
+            }
+        }
+    }
+}
+
+proc update_speed {robot} {
+    # update robot speed, moderated by acceleration
+    # used by update_robots
+    if {$::data($robot,speed) != $::data($robot,dspeed)} {
+        if {$::data($robot,speed) > $::data($robot,dspeed)} {
+            incr ::data($robot,speed) -$::parms(accel)
+            if {$::data($robot,speed) < $::data($robot,dspeed)} {
+                set ::data($robot,speed) $::data($robot,dspeed)
+            }
+        } else {
+            incr ::data($robot,speed) $::parms(accel)
+            if {$::data($robot,speed) > $::data($robot,dspeed)} {
+                set ::data($robot,speed) $::data($robot,dspeed)
+            }
+        }
+    }
+}
+
+proc update_heading {robot} {
+    # update robot heading, moderated by turn rates
+    # used by update_robots
+    if {$::data($robot,hdg) != $::data($robot,dhdg)} {
+        set mrate $::parms(rate,[expr int($::data($robot,speed)/25)])
+        set d1 [expr ($::data($robot,dhdg)-$::data($robot,hdg)+360)%360]
+        set d2 [expr ($::data($robot,hdg)-$::data($robot,dhdg)+360)%360]
+        set d  [expr $d1<$d2?$d1:$d2]
+        if {$d<=$mrate} {
+            set ::data($robot,hdg) $::data($robot,dhdg)
+        } else {
+            set ::data($robot,hdg) \
+                [expr ($::data($robot,hdg)$::data($robot,dir)$mrate+\
+                           360)%360]
+        }
+        set ::data($robot,orgx)  $::data($robot,x)
+        set ::data($robot,orgy)  $::data($robot,y)
+        set ::data($robot,range) 0
+    }
+}
+
+proc update_distance {robot} {
+    # update distance traveled on this heading
+    # used by update_robots
+    if {$::data($robot,speed) > 0} {
+        set ::data($robot,range) \
+            [+ $::data($robot,range) \
+                 [/ [* $::data($robot,speed) $::parms(sp)] 100]]
+
+        # Modify range with random factor to avoid totally
+        # deterministic movement. Range is currently +- 1%.
+        # Playtesting will tell if this should be lower or higher.
+        set randfactor [/ [+ [rand 100] 1.0] 10000]
+        if {[rand 2] == 0} {
+            set randfactor [- $randfactor]
+        }
+        set ::data($robot,range) [+ $::data($robot,range) \
+                                      [* $::data($robot,range) \
+                                           $randfactor]]
+
+        set ::data($robot,x) \
+            [expr round(($::c_tab($::data($robot,hdg))*\
+                             $::data($robot,range))+\
+                            $::data($robot,orgx))]
+        set ::data($robot,y) \
+            [expr round(($::s_tab($::data($robot,hdg))*\
+                             $::data($robot,range))+\
+                            $::data($robot,orgy))]
+    }
+}
+
+proc check_wall {robot} {
+    # check for wall collision
+    # used by update_robots
+    if {$::data($robot,speed) > 0} {
+        if {$::data($robot,x)<0 || $::data($robot,x)>999} {
+            set ::data($robot,x) [expr $::data($robot,x)<0? 0 : 999]
+            set ::data($robot,orgx)   $::data($robot,x)
+            set ::data($robot,orgy)   $::data($robot,y)
+            set ::data($robot,range)  0
+            set ::data($robot,speed)  0
+            set ::data($robot,dspeed) 0
+            incr ::data($robot,health) $::parms(coll)
+            up_damage $robot
+            puts "WALL $robot: $::data($robot,health)"
+        }
+        if {$::data($robot,y)<0 || $::data($robot,y)>999} {
+            set ::data($robot,y) [expr $::data($robot,y)<0? 0 : 999]
+            set ::data($robot,orgx)   $::data($robot,x)
+            set ::data($robot,orgy)   $::data($robot,y)
+            set ::data($robot,range)  0
+            set ::data($robot,speed)  0
+            set ::data($robot,dspeed) 0
+            incr ::data($robot,health) $::parms(coll)
+            up_damage $robot
+        }
+    }
+}
+
+proc check_health {} {
     # check for robot health
+    set num_rob  0
     set diffteam ""
     set num_team 0
     foreach robot $::activeRobots {
@@ -596,7 +672,7 @@ proc update_robots {} {
             if {$::data($robot,health) <= 0 } {
                 set ::data($robot,status) 0
                 set ::data($robot,health) 0
-                up_damage $robot
+                up_damage     $robot
                 disable_robot $robot
                 append ::finish "$::data($robot,name) team($::data($robot,team)) dead at tick: $::tick\n"
             } else {
@@ -613,10 +689,7 @@ proc update_robots {} {
             }
         }
     }
-
-    if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
-        set ::running 0
-    }
+    return $num_rob $diffteam $num_team
 }
 
 proc act {} {
