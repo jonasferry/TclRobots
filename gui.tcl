@@ -312,20 +312,15 @@ proc border_check {coord} {
 #
 
 proc show_robots {} {
-    set i 0
     foreach robot $::allRobots {
         # check robots
         if {$::data($robot,status)} {
-            $::arena_c delete r$::data($robot,num)
             set x [border_check [* $::data($robot,x) $::scale]]
             set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-            set arrow [lindex $::parms(shapes) [% $i 4]]
-            $::arena_c create line $x $y \
+            $::arena_c coords $::data($robot,robotid) $x $y \
                     [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
-                    [expr {$y-($::s_tab($::data($robot,hdg))*5)}] \
-                    -fill $::data($robot,color) \
-                    -arrow last -arrowshape $arrow -tags r$::data($robot,num)
+                    [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
         }
         # check missiles
         if {$::data($robot,mstate)} {
@@ -336,7 +331,6 @@ proc show_robots {} {
                     [- $x 2] [- $y 2] [+ $x 2] [+ $y 2] \
                     -fill black -tags m$::data($robot,num)
         }
-        incr i
     }
 }
 
@@ -544,10 +538,20 @@ proc init_arena {} {
     # Give the robots colors
     set ::colors [distinct_colors [llength $::robotFiles]]
 
+    $::arena_c delete robot
+    set i 0
     foreach robot $::allRobots color $::colors {
         # Set colors as far away as possible from each other visually
         set ::data($robot,color) $color
         set ::data($robot,brightness) [brightness $color]
+        # Precreate robot on canvas
+        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
+        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
+                -fill $::data($robot,color) \
+                -arrow last -arrowshape $::data($robot,shape) \
+                -tags "r$::data($robot,num) robot"]
+
+        incr i
     }
 
     # Start game
