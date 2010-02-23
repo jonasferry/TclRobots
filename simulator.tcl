@@ -118,10 +118,6 @@ proc init_sim {} {
     $::about_b configure -state disabled
     $::quit_b  configure -state disabled
 
-    # Give the robot color
-    set ::colors [distinct_colors 1]
-    set ::data(r0,color) [lindex $::colors 0]
-
     init
 
     set ::tick 0
@@ -142,11 +138,42 @@ proc init_sim {} {
 
     init_robots
 
+    # Give the robot color
+    set color [lindex [distinct_colors 1] 0]
+    set ::data(r0,color) $color
+
+    # Set colors as far away as possible from each other visually
+    set ::data(r0,color) $color
+    set ::data(r0,brightness) [brightness $color]
+    # Precreate robot on canvas
+    set ::data(r0,shape) [lindex $::parms(shapes) 0]
+    set ::data(r0,robotid) \
+        [$::arena_c create line -100 -100 -100 -100 \
+             -fill $::data(r0,color) \
+             -arrow last -arrowshape $::data(r0,shape) \
+             -tags "r$::data(r0,num) robot"]
+    # Precreate scan mark on canvas
+    set ::data(r0,scanid) \
+        [$::arena_c create arc -100 -100 -100 -100 \
+             -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+             -width 1 -tags "scan s$::data(r0,num)"]
+
     # Set target signature, make it black and place it in center of the arena
     set ::data(target,num)   1
     set ::data(target,color) black
+    set ::data(target,brightness) [brightness black]
     set ::data(target,x)     500
     set ::data(target,y)     500
+    set ::data(target,shape) [lindex $::parms(shapes) 1]
+    set ::data(target,robotid) \
+        [$::arena_c create line -100 -100 -100 -100 \
+             -fill $::data(target,color) \
+             -arrow last -arrowshape $::data(target,shape) \
+             -tags "r$::data(r0,num) robot"]
+    set ::data(target,scanid) \
+        [$::arena_c create arc -100 -100 -100 -100 \
+             -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+             -width 1 -tags "scan s$::data(target,num)"]
 
     act
     tick

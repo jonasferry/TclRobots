@@ -97,8 +97,7 @@ for {set i 0} {$i<360} {incr i} {
 # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
 
 # Set random seed
-#set ::seed [expr ([pid]*[file atime /dev/tty])]
-set ::seed 5
+set ::seed [expr ([pid]*[file atime /dev/tty])]
 srand $::seed
 
 # Return random integer 1-max
@@ -417,11 +416,11 @@ proc up_damage {robot} {
 # update position of missiles and robots, assess damage
 #########
 proc update_robots {} {
-    global allRobots data c_tab s_tab
+    global allRobots data
 
     foreach robot $allRobots {
         # check all flying missiles
-        set num_miss [check_missiles $robot $c_tab $s_tab]
+        set num_miss [check_missiles $robot]
 
         # skip rest if robot dead
         if {!$data($robot,status)} {continue}
@@ -442,7 +441,7 @@ proc update_robots {} {
         update_heading $robot
 
         # update distance traveled on this heading
-        update_distance $robot $c_tab $s_tab
+        update_distance $robot
 
         # check for wall collision
         check_wall $robot
@@ -460,33 +459,33 @@ proc update_robots {} {
     }
 }
 
-proc check_missiles {robot c_tab s_tab} {
+proc check_missiles {robot} {
     # check all flying missiles
     # used by update_robots
-    global activeRobots data parms
+    global data activeRobots
     set num_miss 0
 
     if {$data($robot,mstate)} {
         incr num_miss
-        update_missile_location $robot $parms $c_tab $s_tab
+        update_missile_location $robot
         # check if missile reached target
         if {$data($robot,mrange) > $data($robot,mdist)} {
-            missile_reached_target $robot $c_tab $s_tab
+            missile_reached_target $robot
 
             # assign damage to all within explosion ranges
             foreach target $activeRobots {
                 if {!$data($target,status)} {continue}
-                assign_missile_damage $robot $target $parms
+                assign_missile_damage $robot $target
             }
         }
     }
     return $num_miss
 }
 
-proc update_missile_location {robot c_tab s_tab} {
+proc update_missile_location {robot} {
     # update location of missile
     # used by update_robots
-    global data parms
+    global data parms c_tab s_tab
 
     set data($robot,mrange) \
         [expr $data($robot,mrange)+$parms(msp)]
@@ -500,9 +499,9 @@ proc update_missile_location {robot c_tab s_tab} {
              $data($robot,morgy)]
 }
 
-proc missile_reached_target {robot c_tab s_tab} {
+proc missile_reached_target {robot} {
     # used by update_robots
-    global data gui
+    global data gui c_tab s_tab
 
     set data($robot,mstate) 0
     set data($robot,mx) \
@@ -624,10 +623,10 @@ proc update_heading {robot} {
     }
 }
 
-proc update_distance {robot c_tab s_tab} {
+proc update_distance {robot} {
     # update distance traveled on this heading
     # used by update_robots
-    global data parms
+    global data parms c_tab s_tab
 
     if {$data($robot,speed) > 0} {
         set data($robot,range) \
@@ -764,7 +763,7 @@ proc runRobots {} {
         }
         act
 
-        puts $::report [time update_robots]
+        update_robots
 
         if {$::gui} {
             update_gui
@@ -902,12 +901,10 @@ foreach arg $::argv {
     }
 }
 
-set ::report [open time-global-report.txt w]
-
 if {[llength $::robotFiles] >= 2} {
     # Run batch
     set ::parms(tick) 0
-    puts $::report "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
+    puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {
     # Run GUI
     set ::gui 1
@@ -915,7 +912,7 @@ if {[llength $::robotFiles] >= 2} {
     init_gui
 }
 
-close $::report
+
 
 if 0 {
 # check for tournament, two or more files on command line
