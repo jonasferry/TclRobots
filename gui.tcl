@@ -381,27 +381,33 @@ proc show_scan {} {
 #
 
 proc show_explode {robot} {
+    # Delete the missile
     $::arena_c delete m$::data($robot,num)
+
     set x [* $::data($robot,mx) $::scale]
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    set val [* 20 $::scale]
-    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-        -outline yellow -fill yellow  -width 1 \
-        -tags e$::data($robot,num)
-
-    set val [* 10 $::scale]
-    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-        -outline orange -fill orange  -width 1  \
-        -tags e$::data($robot,num)
-
     set val [* 6 $::scale]
-    $::arena_c create oval [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-        -outline red    -fill red     -width 1  \
-        -tags e$::data($robot,num)
+    set id [$::arena_c create oval \
+            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+            -outline red    -fill red     -width 1  \
+            -tags e$::data($robot,num)]
+    set val [* 10 $::scale]
+    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    set val [* 20 $::scale]
+    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
 
     update
-    after 200 "$::arena_c delete e$::data($robot,num)"
+    after 100 [string map [list %id% $id %coords% $coords2] {
+        $::arena_c itemconfigure %id% -outline orange -fill orange
+        $::arena_c coords %id% %coords%
+        
+    }]
+    after 200 [string map [list %id% $id %coords% $coords3] {
+        $::arena_c itemconfigure %id% -outline yellow -fill yellow
+        $::arena_c coords %id% %coords%
+    }]
+    after 300 "$::arena_c delete e$::data($robot,num)"
 }
 
 proc show_health {} {
