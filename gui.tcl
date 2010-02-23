@@ -343,7 +343,10 @@ proc show_robots {} {
 #
 
 proc show_scan {} {
-    foreach robot $::allRobots {
+    # Hide the scan arcs by default
+    $::arena_c itemconfigure scan -outline ""
+
+    foreach robot $::activeRobots {
         # Hide the scan arc by default
         $::arena_c itemconfigure $::data($robot,scanid) -outline ""
 
