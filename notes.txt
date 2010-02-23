@@ -3,5 +3,7 @@
 
 Notes on speeding up update_robots
 seed = 5
-4 charger with ::data: Running time 1.279684 seconds
-4 charger with global: Running time 1.164468 seconds
+4 charger with ::data before update: Running time 1.279684 seconds
+4 charger with global update_robot : Running time 1.164468 seconds
+4 charger with global syscall      : Running time 1.159731 seconds
+4 charger with global sysScanner   : Running time 1.119446 seconds

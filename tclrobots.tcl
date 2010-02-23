@@ -19,9 +19,9 @@ set ::parms(mismax) 700
 # distance missiles travel per tick
 set ::parms(msp) 100
 # missile reload time in ticks
-set ::parms(mreload) [expr round(($parms(mismax)/$parms(msp))+0.5)]
+set ::parms(mreload) [round [+ [/ $parms(mismax) $parms(msp)] 0.5]]
 # missile long reload time after clip
-set ::parms(lreload) [expr $parms(mreload)*3]
+set ::parms(lreload) [* $parms(mreload) 3]
 # number of missiles per clip
 set ::parms(clip)	4
 # max turn speed < 25 deg. delta
@@ -84,40 +84,36 @@ set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
 set outfile ""
 
 # init sin & cos tables
-set pi  [expr 4*atan(1)]
-set d2r [expr 180/$pi]
+set pi  [* 4 [atan 1]]
+set d2r [/ 180 $pi]
 
 for {set i 0} {$i<360} {incr i} {
-    set ::s_tab($i) [expr sin($i/$d2r)]
-    set ::c_tab($i) [expr cos($i/$d2r)]
+    set ::s_tab($i) [sin [/ $i $d2r]]
+    set ::c_tab($i) [cos [/ $i $d2r]]
 }
 
-
-# Pick a random element from a list
-# lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
-
 # Set random seed
-set ::seed [expr ([pid]*[file atime /dev/tty])]
+#set ::seed [* [pid] [file atime /dev/tty]]
+set ::seed 5
 srand $::seed
 
 # Return random integer 1-max
 proc rand {max} {
-    return [expr {int(rand()*$max)}]
+    return [int [* [::tcl::mathfunc::rand] $max]]
 }
 
 # Handle syscalls from robots
 proc syscall {args} {
+    global data gui tick
+
     set robot [lindex $args 0]
     set result 0
 
-    #puts "args: $args"
-
     set syscall [lrange $args 1 end]
-    #puts "Syscall $robot: $syscall"
 
     if {[lindex $syscall 0] eq "dputs"} {
         set msg [lrange $args 2 end]
-        if {$::gui} {
+        if {$gui} {
             # Output to robot message box
             show_msg $robot $msg
             # Output to terminal for debugging
@@ -129,83 +125,85 @@ proc syscall {args} {
     } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
     } else {
-        set ::data($robot,syscall,$::tick) $syscall
+        set data($robot,syscall,$tick) $syscall
     }
     return $result
 }
 
 proc sysScanner {robot} {
+    global data parms tick activeRobots
 
-    if {($::data($robot,syscall,$::tick) eq \
-             $::data($robot,syscall,[- $::tick 1]))} {
+    if {($data($robot,syscall,$tick) eq \
+             $data($robot,syscall,[- $tick 1]))} {
 
-        set deg [lindex $::data($robot,syscall,$::tick) 1]
-        set res [lindex $::data($robot,syscall,$::tick) 2]
+        set deg [lindex $data($robot,syscall,$tick) 1]
+        set res [lindex $data($robot,syscall,$tick) 2]
 
         set dsp    0
         set health 0
         set near   9999
-        foreach target $::activeRobots {
+        foreach target $activeRobots {
             if {"$target" == "$robot"} { continue }
-            set x [expr $::data($target,x)-$::data($robot,x)]
-            set y [expr $::data($target,y)-$::data($robot,y)]
+            set x [expr $data($target,x)-$data($robot,x)]
+            set y [expr $data($target,y)-$data($robot,y)]
             set d [expr round(57.2958*atan2($y,$x))]
             if {$d<0} {incr d 360}
             set d1  [expr ($d-$deg+360)%360]
             set d2  [expr ($deg-$d+360)%360]
             set f   [expr $d1<$d2?$d1:$d2]
             if {$f<=$res} {
-                set ::data($target,ping) $::data($robot,num)
+                set data($target,ping) $data($robot,num)
                 set dist [expr round(hypot($x,$y))]
                 if {$dist<$near} {
-                    set derr [expr $::parms(errdist)*$res]
+                    set derr [expr $parms(errdist)*$res]
                     set terr [expr ($res>0 ? 5 : 0) + [rand $derr]]
                     set fud1  [expr [rand 2] ? \"-\" : \"+\"]
                     set fud2  [expr [rand 2] ? \"-\" : \"+\"]
                     set near [expr $dist $fud1 $terr $fud2 \
-                                  $::data($robot,btemp)]
+                                  $data($robot,btemp)]
                     if {$near<1} {set near 1}
-                    set dsp    $::data($robot,num)
-                    set health $::data($robot,health)
+                    set dsp    $data($robot,num)
+                    set health $data($robot,health)
                 }
             }
         }
         # if cannon has overheated scanner, report 0
-        if {$::data($robot,btemp) >= $::parms(scanbad)} {
-            set ::data($robot,sig) "0 0"
+        if {$data($robot,btemp) >= $parms(scanbad)} {
+            set data($robot,sig) "0 0"
             set val 0
         } else {
-            set ::data($robot,sig) "$dsp $health"
+            set data($robot,sig) "$dsp $health"
             set val [expr $near==9999?0:$near]
         }
-        set ::data($robot,sysreturn,$::tick) $val
+        set data($robot,sysreturn,$tick) $val
 
     } else {
-        set ::data($robot,sysreturn,$::tick) 0
+        set data($robot,sysreturn,$tick) 0
     }
 }
 
 proc sysDsp {robot} {
-    set ::data($robot,sysreturn,$::tick) $::data($robot,sig)
+    global data tick
+    set data($robot,sysreturn,$tick) $data($robot,sig)
 }
 
 proc sysAlert {robot} {
-#    set alertproc ${robot}alert
-#    interp alias {} $alertproc $::data($robot,interp) \
-#        [lindex $::data($robot,syscall,$::tick) 1]
-    set ::data($robot,alert) [lindex $::data($robot,syscall,$::tick) 1]
-    set ::data($robot,sysreturn,$::tick) 1
+    global data tick
+    set data($robot,alert) [lindex $data($robot,syscall,$tick) 1]
+    set data($robot,sysreturn,$tick) 1
 }
 
 proc sysCannon {robot} {
-    set deg [lindex $::data($robot,syscall,$::tick) 1]
-    set rng [lindex $::data($robot,syscall,$::tick) 2]
+    global data parms tick
+
+    set deg [lindex $data($robot,syscall,$tick) 1]
+    set rng [lindex $data($robot,syscall,$tick) 2]
 
     set val 0
 
-    if {$::data($robot,mstate)} {
+    if {$data($robot,mstate)} {
         set val 0
-    } elseif {$::data($robot,reload)} {
+    } elseif {$data($robot,reload)} {
         set val 0
     } elseif [catch {set deg [expr round($deg)]}] {
         set val -1
@@ -213,63 +211,65 @@ proc sysCannon {robot} {
         set val -1
     } elseif {($deg<0 || $deg>359)} {
         set val -1
-    } elseif {($rng<0 || $rng>$::parms(mismax))} {
+    } elseif {($rng<0 || $rng>$parms(mismax))} {
         set val -1
     } else {
-        set ::data($robot,mhdg)   $deg
-        set ::data($robot,mdist)  $rng
-        set ::data($robot,mrange) 0
-        set ::data($robot,mstate) 1
-        set ::data($robot,morgx)  $::data($robot,x)
-        set ::data($robot,morgy)  $::data($robot,y)
-        set ::data($robot,mx)     $::data($robot,x)
-        set ::data($robot,my)     $::data($robot,y)
-        incr ::data($robot,btemp) $::parms(canheat)
-        incr ::data($robot,mused)
+        set data($robot,mhdg)   $deg
+        set data($robot,mdist)  $rng
+        set data($robot,mrange) 0
+        set data($robot,mstate) 1
+        set data($robot,morgx)  $data($robot,x)
+        set data($robot,morgy)  $data($robot,y)
+        set data($robot,mx)     $data($robot,x)
+        set data($robot,my)     $data($robot,y)
+        incr data($robot,btemp) $parms(canheat)
+        incr data($robot,mused)
         # set longer reload time if used all missiles in clip
-        if {$::data($robot,mused) == $::parms(clip)} {
-            set ::data($robot,reload) $::parms(lreload)
-            set ::data($robot,mused) 0
+        if {$data($robot,mused) == $parms(clip)} {
+            set data($robot,reload) $parms(lreload)
+            set data($robot,mused) 0
         } else {
-            set ::data($robot,reload) $::parms(mreload)
+            set data($robot,reload) $parms(mreload)
         }
         set val 1
     }
-    set ::data($robot,sysreturn,$::tick) $val
+    set data($robot,sysreturn,$tick) $val
 }
 
 proc sysDrive {robot} {
-    set deg [lindex $::data($robot,syscall,$::tick) 1]
-    set spd [lindex $::data($robot,syscall,$::tick) 2]
+    global data parms tick
 
-    set d1  [expr ($::data($robot,hdg)-$deg+360)%360]
-    set d2  [expr ($deg-$::data($robot,hdg)+360)%360]
+    set deg [lindex $data($robot,syscall,$tick) 1]
+    set spd [lindex $data($robot,syscall,$tick) 2]
+
+    set d1  [% [+ [- $data($robot,hdg) $deg] 360] 360]
+    set d2  [% [+ [- $deg $data($robot,hdg)] 360] 360]
     set d   [expr $d1<$d2?$d1:$d2]
 
-    set ::data($robot,dhdg) $deg
-    set ::data($robot,dspeed) \
-	[expr $::data($robot,hflag) && \
-	     $spd>$::parms(heatsp) ? $::parms(heatsp) : $spd]
+    set data($robot,dhdg) $deg
+    set data($robot,dspeed) \
+	[expr $data($robot,hflag) && \
+	     $spd>$parms(heatsp) ? $parms(heatsp) : $spd]
 
     # shutdown drive if turning too fast at current speed
     set index [expr int($d/25)]
     if {$index>3} {set index 3}
-    if {$::data($robot,speed)>$::parms(turn,$index)} {
-	set ::data($robot,dspeed) 0
-	set ::data($robot,dhdg) $::data($robot,hdg)
+    if {$data($robot,speed)>$parms(turn,$index)} {
+	set data($robot,dspeed) 0
+	set data($robot,dhdg) $data($robot,hdg)
     } else {
-	set ::data($robot,orgx)  $::data($robot,x)
-	set ::data($robot,orgy)  $::data($robot,y)
-	set ::data($robot,range) 0
+	set data($robot,orgx)  $data($robot,x)
+	set data($robot,orgy)  $data($robot,y)
+	set data($robot,range) 0
     }
     # find direction of turn
-    if {($::data($robot,hdg)+$d+360)%360==$deg} {
-	set ::data($robot,dir) +
+    if {($data($robot,hdg)+$d+360)%360==$deg} {
+	set data($robot,dir) +
     } else {
-	set ::data($robot,dir) -
+	set data($robot,dir) -
     }
 
-    set ::data($robot,sysreturn,$::tick) $::data($robot,dspeed)
+    set data($robot,sysreturn,$tick) $data($robot,dspeed)
 }
 
 proc sysData {robot} {
@@ -846,11 +846,15 @@ proc init {} {
 
     set ::allRobots {}
 
+    # Pick a random element from a list; use this for reading code!
+    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
+
     for {set i 0} {$i < [llength $::robotFiles]} {incr i} {
         # Give the robots names like r0, r1, etc.
         set robot r$i
         # Update list of robots
         lappend ::allRobots $robot
+
         # Read
         set f [open [lindex $::robotFiles $i]]
         set ::data($robot,code) [read $f]
