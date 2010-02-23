@@ -97,7 +97,8 @@ for {set i 0} {$i<360} {incr i} {
 # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
 
 # Set random seed
-set ::seed [expr ([pid]*[file atime /dev/tty])]
+#set ::seed [expr ([pid]*[file atime /dev/tty])]
+set ::seed 5
 srand $::seed
 
 # Return random integer 1-max
@@ -416,6 +417,8 @@ proc up_damage {robot} {
 # update position of missiles and robots, assess damage
 #########
 proc update_robots {} {
+    global ::data
+
     foreach robot $::allRobots {
         # check all flying missiles
         set num_miss [check_missiles $robot]
@@ -740,7 +743,7 @@ proc runRobots {} {
         }
         act
 
-        update_robots
+        puts $::report [time update_robots]
 
         if {$::gui} {
             update_gui
@@ -878,16 +881,20 @@ foreach arg $::argv {
     }
 }
 
+set ::report [open master-report.txt w]
+
 if {[llength $::robotFiles] >= 2} {
     # Run batch
     set ::parms(tick) 0
-    puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
+    puts $::report "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {
     # Run GUI
     set ::gui 1
     source $::thisDir/gui.tcl
     init_gui
 }
+
+close $::report
 
 if 0 {
 # check for tournament, two or more files on command line
