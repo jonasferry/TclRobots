@@ -881,7 +881,7 @@ foreach arg $::argv {
     }
 }
 
-set ::report [open master-report.txt w]
+set ::report [open time-global-report.txt w]
 
 if {[llength $::robotFiles] >= 2} {
     # Run batch
