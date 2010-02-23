@@ -1,0 +1,13 @@
+TclRobots
+=========
+This is a development of Tim Poindexter's 1996 game TclRobots 2.0.
+
+From TclRobots 2.0:
+
+"TclRobots is a programming game, similar to 'Core War'.  To play
+TclRobots, you must write a Tcl program that controls a robot.  The
+robot's mission is to survive a battle with other robots."
+
+TclRobots require Tcl 8.6 since it uses coroutines.
+
+TclRobots is licensed under a BSD license. See LICENSE for information.
