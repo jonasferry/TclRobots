@@ -50,6 +50,10 @@ proc sim_robot {} {
 
         act
 
+        if {$::data(r0,sysreturn,$::tick) ne ""} {
+            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
+        }
+
         update_robots
 
         # GUI
@@ -337,7 +341,7 @@ proc init_sim {} {
     #set simctrl3_f [ttk::frame $sim_f.f3    -relief raised -borderwidth 2]
     set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
     set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
-                        -textvariable ::sim_syscall]
+                        -textvariable ::sim_syscall -anchor w]
     set tick0_l    [ttk::label $sim_f.f1.t0 -text "Tick:"]
     set tick1_l    [ttk::label $sim_f.f1.t1 -width $e_width \
                         -textvariable ::tick]
@@ -347,7 +351,7 @@ proc init_sim {} {
 
     #grid $simctrl3_f -column 0 -row 3 -sticky nsew
     grid $lastsys0_l -column 0 -row 2 -sticky nsew
-    grid $lastsys1_l -column 1 -row 2 -sticky nw
+    grid $lastsys1_l -column 1 -row 2 -sticky nwe
     grid $tick0_l    -column 2 -row 2 -sticky nsew
     grid $tick1_l    -column 3 -row 2 -sticky nw
     grid $barrel0_l  -column 4 -row 2 -sticky nsew
