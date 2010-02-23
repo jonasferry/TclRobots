@@ -1,11 +1,7 @@
 1 new tick is 500 ms old = 2 ticks/s
 
-$::r(speed) 
 
-
-hur ska alert funka?
-
-
-syscall loc_x
-
-isf sysreturn loc_x kommer alert
+Notes on speeding up update_robots
+seed = 5
+4 charger with ::data: Running time 1.279684 seconds
+4 charger with global: Running time 1.164468 seconds
