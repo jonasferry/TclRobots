@@ -97,7 +97,9 @@ proc fillLst {win filt dir} {
     if {[string length $filt] == 0} {
         set filt *
     }
-    set all_list [lsort -dictionary [glob -nocomplain $dir/$filt]]
+    set all_list [lsort -dictionary [glob -nocomplain -type d $dir/*]]
+    lappend all_list \
+            {*}[lsort -dictionary [glob -nocomplain -type f $dir/$filt]]
 
     set dlist [list "$dir/../"]
     set flist ""
