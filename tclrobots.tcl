@@ -771,6 +771,9 @@ proc check_health {} {
                 set data($robot,health) 0
                 disable_robot $robot
                 append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+                if {$::gui} {
+                    after 1 "show_die $robot"
+                }
             } else {
                 incr num_rob
                 if {$data($robot,team) != ""} {
@@ -1033,6 +1036,7 @@ if {[llength $arg_files] >= 2} {
     proc show_scan {args} {}
     proc show_robots {args} {}
     proc show_explode {args} {}
+    proc show_die {args} {}
     proc up_damage {args} {}
   }
   main_win
