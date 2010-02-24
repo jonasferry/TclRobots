@@ -110,8 +110,7 @@ proc syscall {args} {
     set syscall [lrange $args 1 end]
 
     if {[lindex $syscall 0] eq "dputs"} {
-        set msg [lrange $args 2 end]
-        sysDputs $robot $msg
+        sysDputs $robot [lrange $args 2 end]
     } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
     } elseif {[lindex $syscall 0] eq "team_send"} {
@@ -358,11 +357,13 @@ proc sysTeamGet {robot} {
 proc sysDputs {robot msg} {
     global gui
 
+    set msg [join $msg]
+
     if {$gui} {
         # Output to robot message box
         show_msg $robot $msg
         # Output to terminal for debugging
-        puts "$robot: $msg ($::tick)"
+        debug $robot: $msg ($::tick)
     } else {
         # Output to terminal
         puts "$robot: $msg"

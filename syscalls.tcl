@@ -88,8 +88,8 @@ proc team_get {} {
 ## Convenience commands
 # 0 ticks
 #dputs args
-proc dputs {msg} {
-    syscall dputs $msg
+proc dputs {args} {
+    syscall dputs $args
 }
 #rand max
 proc rand {max} {
