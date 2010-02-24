@@ -137,25 +137,51 @@ proc sysScanner {robot} {
         set health 0
         set near   9999
         foreach target $activeRobots {
-            if {"$target" == "$robot"} {continue}
+            if {"$target" == "$robot"} {
+                continue
+            }
             set x [- $data($target,x) $data($robot,x)]
             set y [- $data($target,y) $data($robot,y)]
             set d [round [* 57.2958 [atan2 $y $x]]]
-            if {$d<0} {incr d 360}
+
+            if {$d < 0} {
+                incr d 360
+            }
             set d1  [% [+ [- $d $deg] 360] 360]
             set d2  [% [+ [- $deg $d] 360] 360]
-            set f   [expr $d1<$d2?$d1:$d2]
+
+            if {$d1 < $d2} {
+                set f $d1
+            } else {
+                set f $d2
+            }
             if {$f<=$res} {
                 set data($target,ping) $data($robot,num)
                 set dist [round [hypot $x $y]]
+
                 if {$dist<$near} {
                     set derr [* $parms(errdist) $res]
-                    set terr [expr ($res>0 ? 5 : 0) + [rand $derr]]
-                    set fud1  [expr [rand 2] ? \"-\" : \"+\"]
-                    set fud2  [expr [rand 2] ? \"-\" : \"+\"]
-                    set near [expr $dist $fud1 $terr $fud2 \
-                                  $data($robot,btemp)]
-                    if {$near<1} {set near 1}
+
+                    if {$res > 0} {
+                        set terr [+ 5 [rand $derr]]
+                    } else {
+                        set terr [+ 0 [rand $derr]]
+                    }
+                    if {[rand 2]} {
+                        set fud1 -
+                    } else {
+                        set fud1 +
+                    }
+                    if {[rand 2]} {
+                        set fud2 -
+                    } else {
+                        set fud2 +
+                    }
+                    set near [$fud1 $dist [$fud2 $terr $data($robot,btemp)]]
+
+                    if {$near < 1} {
+                        set near 1
+                    }
                     set dsp    $data($robot,num)
                     set health $data($robot,health)
                 }
@@ -167,7 +193,12 @@ proc sysScanner {robot} {
             set val 0
         } else {
             set data($robot,sig) "$dsp $health"
-            set val [expr $near==9999?0:$near]
+
+            if {$near == 9999} {
+                set val 0
+            } else {
+                set val $near
+            }
         }
         set data($robot,sysreturn,$tick) $val
 
@@ -199,13 +230,13 @@ proc sysCannon {robot} {
         set val 0
     } elseif {$data($robot,reload)} {
         set val 0
-    } elseif [catch {set deg [expr round($deg)]}] {
+    } elseif [catch {set deg [round $deg]}] {
         set val -1
-    } elseif [catch {set rng [expr round($rng)]}] {
+    } elseif [catch {set rng [round $rng]}] {
         set val -1
-    } elseif {($deg<0 || $deg>359)} {
+    } elseif {($deg < 0) || ($deg > 359)} {
         set val -1
-    } elseif {($rng<0 || $rng>$parms(mismax))} {
+    } elseif {($rng < 0) || ($rng > $parms(mismax))} {
         set val -1
     } else {
         set data($robot,mhdg)   $deg
@@ -238,19 +269,27 @@ proc sysDrive {robot} {
 
     set d1  [% [+ [- $data($robot,hdg) $deg] 360] 360]
     set d2  [% [+ [- $deg $data($robot,hdg)] 360] 360]
-    set d   [expr $d1<$d2?$d1:$d2]
 
+    if {$d1 < $d2} {
+        set d $d1
+    } else {
+        set d $d2
+    }
     set data($robot,dhdg) $deg
-    set data($robot,dspeed) \
-	[expr $data($robot,hflag) && \
-	     $spd>$parms(heatsp) ? $parms(heatsp) : $spd]
 
+    if {$data($robot,hflag) && ($spd > $parms(heatsp))} {
+        set data($robot,dspeed) $parms(heatsp)
+    } else {
+        set data($robot,dspeed) $spd
+    }
     # shutdown drive if turning too fast at current speed
     set index [int [/ $d 25]]
-    if {$index>3} {set index 3}
+    if {$index > 3} {
+        set index 3
+    }
     if {$data($robot,speed) > $parms(turn,$index)} {
         set data($robot,dspeed) 0
-        set data($robot,dhdg) $data($robot,hdg)
+        set data($robot,dhdg)   $data($robot,hdg)
     } else {
         set data($robot,orgx)  $data($robot,x)
         set data($robot,orgy)  $data($robot,y)
@@ -518,14 +557,12 @@ proc update_missile_location {robot} {
     global data parms c_tab s_tab
 
     set data($robot,mrange) \
-        [expr $data($robot,mrange)+$parms(msp)]
+        [+ $data($robot,mrange) $parms(msp)]
     set data($robot,mx) \
-        [expr ($c_tab($data($robot,mhdg))*\
-                   $data($robot,mrange))+\
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
              $data($robot,morgx)]
     set data($robot,my) \
-        [expr ($s_tab($data($robot,mhdg))*\
-                   $data($robot,mrange))+\
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
              $data($robot,morgy)]
 }
 
@@ -535,12 +572,10 @@ proc missile_reached_target {robot} {
 
     set data($robot,mstate) 0
     set data($robot,mx) \
-        [expr ($c_tab($data($robot,mhdg))*\
-                   $data($robot,mdist))+\
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
              $data($robot,morgx)]
     set data($robot,my) \
-        [expr ($s_tab($data($robot,mhdg))*\
-                   $data($robot,mdist))+\
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
              $data($robot,morgy)]
     if {$gui} {
         after 1 "show_explode $robot"
@@ -552,11 +587,10 @@ proc assign_missile_damage {robot target} {
     # used by update_robots
     global data parms
 
-    set d [expr hypot($data($robot,mx)-$data($target,x),\
-                          $data($robot,my)-\
-                          $data($target,y))]
-    if {$d<$parms(dia3)} {
-        if {$d<$parms(dia0)} {
+    set d [hypot [- $data($robot,mx) $data($target,x)] \
+               [- $data($robot,my) $data($target,y)]]
+    if {$d < $parms(dia3)} {
+        if {$d < $parms(dia0)} {
             incr data($target,health) $parms(hit0)
         } elseif {$d<$parms(dia1)} {
             incr data($target,health) $parms(hit1)
@@ -588,8 +622,8 @@ proc check_speed {robot} {
 
     if {$data($robot,speed) > $parms(heatsp)} {
         incr data($robot,heat) \
-            [expr round(($data($robot,speed)-\
-                             $parms(heatsp))/$parms(hrate))+1]
+            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
+                           $parms(hrate)]] 1]
         if {$data($robot,heat) >= $parms(heatmax)} {
             set data($robot,heat) $parms(heatmax)
             set data($robot,hflag) 1
@@ -635,16 +669,20 @@ proc update_heading {robot} {
     global data parms
 
     if {$data($robot,hdg) != $data($robot,dhdg)} {
-        set mrate $parms(rate,[expr int($data($robot,speed)/25)])
-        set d1 [expr ($data($robot,dhdg)-$data($robot,hdg)+360)%360]
-        set d2 [expr ($data($robot,hdg)-$data($robot,dhdg)+360)%360]
-        set d  [expr $d1<$d2?$d1:$d2]
-        if {$d<=$mrate} {
+        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
+        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
+        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
+
+        if {$d1 < $d2} {
+            set d $d1
+        } else {
+            set d $d2
+        }
+        if {$d <= $mrate} {
             set data($robot,hdg) $data($robot,dhdg)
         } else {
             set data($robot,hdg) \
-                [expr ($data($robot,hdg)$data($robot,dir)$mrate+\
-                           360)%360]
+                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
         }
         set data($robot,orgx)  $data($robot,x)
         set data($robot,orgy)  $data($robot,y)
@@ -674,13 +712,12 @@ proc update_distance {robot} {
                                          $randfactor]]
 
         set data($robot,x) \
-            [expr round(($c_tab($data($robot,hdg))*\
-                             $data($robot,range))+\
-                            $data($robot,orgx))]
+            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
+                         $data($robot,orgx)]]
+
         set data($robot,y) \
-            [expr round(($s_tab($data($robot,hdg))*\
-                             $data($robot,range))+\
-                            $data($robot,orgy))]
+            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
+                        $data($robot,orgy)]]
     }
 }
 
@@ -690,23 +727,30 @@ proc check_wall {robot} {
     global data parms
 
     if {$data($robot,speed) > 0} {
-        if {$data($robot,x)<0 || $data($robot,x)>999} {
-            set data($robot,x) [expr $data($robot,x)<0? 0 : 999]
-            set data($robot,orgx)   $data($robot,x)
-            set data($robot,orgy)   $data($robot,y)
-            set data($robot,range)  0
-            set data($robot,speed)  0
-            set data($robot,dspeed) 0
+        if {($data($robot,x) < 0) || ($data($robot,x) > 999)} {
+            if {$data($robot,x) < 0} {
+                set data($robot,x) 0
+            } else {
+                set data($robot,x) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
             incr data($robot,health) $parms(coll)
-            puts "WALL $robot: $data($robot,health)"
         }
-        if {$data($robot,y)<0 || $data($robot,y)>999} {
-            set data($robot,y) [expr $data($robot,y)<0? 0 : 999]
-            set data($robot,orgx)   $data($robot,x)
-            set data($robot,orgy)   $data($robot,y)
-            set data($robot,range)  0
-            set data($robot,speed)  0
-            set data($robot,dspeed) 0
+        if {($data($robot,y) < 0) || ($data($robot,y) > 999)} {
+            if {$data($robot,y) < 0} {
+                set data($robot,y) 0
+            } else {
+                set data($robot,y) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
             incr data($robot,health) $parms(coll)
         }
     }
@@ -911,6 +955,17 @@ proc main {} {
     puts "activerobots: $::activeRobots"
     find_winner
     puts "seed: $::seed"
+}
+
+# Prints debug message. The proc name makes it easy to search for.
+# Precede other debug changes with the word debug in a comment.
+proc debug {args} {
+    if {[lindex $args 0] ne "exit"} {
+        puts [join $args]
+    } else {
+        puts [join [lrange $args 1 end]]
+        exit
+    }
 }
 
 #############################################################################
