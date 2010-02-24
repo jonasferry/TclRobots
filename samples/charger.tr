@@ -13,49 +13,43 @@ set dir [rand 360]
 set nothing 0
 set closest 0
 
-proc I_was_scanned {who} {
-#  dputs "$who scanned me"
-}
-
-alert I_was_scanned
-
 # start of main code
 
 while {1} {
-  # look for an opponet
-  set rng [scanner $dir 10]
 
-  # if found and inrange
-  if {$rng > 0 && $rng < 700} {
+    # look for an opponet
+    set rng [scanner $dir 10]
 
-    # begin narrow scan
-    set start [expr ($dir+20)%360]
-    for {set limit 1} {$limit <= 40} {incr limit} {
-      set dir [expr ($start-($limit)+360)%360]
-      set rng [scanner $dir 1]
-      if {$rng > 0 && $rng < 700} {
-        # fire a shell, and backup scan so not to miss a moving target
-        set nothing 0
-        # charge!
-        cannon $dir $rng
-        drive $dir 70
-        incr limit -4
-      }
+    # if found and inrange
+    if {$rng > 0 && $rng < 700} {
+
+        # begin narrow scan
+        set start [expr ($dir+20)%360]
+        for {set limit 1} {$limit <= 40} {incr limit} {
+            set dir [expr ($start-($limit)+360)%360]
+            set rng [scanner $dir 1]
+            if {$rng > 0 && $rng < 700} {
+                # fire a shell, and backup scan so not to miss a moving target
+                set nothing 0
+                # charge!
+                cannon $dir $rng
+                drive $dir 70
+                incr limit -4
+            }
+        }
+    } else {
+        incr nothing
+        if {$rng > 700} {set closest $dir}
     }
-  } else {
-    incr nothing
-    if {$rng > 700} {set closest $dir}
-  }
 
-  drive 0 0
-  # check for nothing found in reasonable time
-  if {$nothing >= 30} {
-    set nothing 0
-    drive $closest 100
-    after 10000 drive 0 0
-  }
+    drive 0 0
+    # check for nothing found in reasonable time
+    if {$nothing >= 30} {
+        set nothing 0
+        drive $closest 100
+        # NOT SUPPORTED in coroutine based TclRobots
+        #after 10000 drive 0 0
+    }
 
-  set dir [expr ($dir-20+360)%360]
+    set dir [expr ($dir-20+360)%360]
 }
-
-
