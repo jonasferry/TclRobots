@@ -144,18 +144,18 @@ proc sysScanner {robot} {
         set near   9999
         foreach target $activeRobots {
             if {"$target" == "$robot"} { continue }
-            set x [expr $data($target,x)-$data($robot,x)]
-            set y [expr $data($target,y)-$data($robot,y)]
-            set d [expr round(57.2958*atan2($y,$x))]
+            set x [- $data($target,x) $data($robot,x)]
+            set y [- $data($target,y) $data($robot,y)]
+            set d [round [* 57.2958 [atan2 $y $x]]]
             if {$d<0} {incr d 360}
-            set d1  [expr ($d-$deg+360)%360]
-            set d2  [expr ($deg-$d+360)%360]
+            set d1  [% [+ [- $d $deg] 360] 360]
+            set d2  [% [+ [- $deg $d] 360] 360]
             set f   [expr $d1<$d2?$d1:$d2]
             if {$f<=$res} {
                 set data($target,ping) $data($robot,num)
-                set dist [expr round(hypot($x,$y))]
+                set dist [round [hypot $x $y]]
                 if {$dist<$near} {
-                    set derr [expr $parms(errdist)*$res]
+                    set derr [* $parms(errdist) $res]
                     set terr [expr ($res>0 ? 5 : 0) + [rand $derr]]
                     set fud1  [expr [rand 2] ? \"-\" : \"+\"]
                     set fud2  [expr [rand 2] ? \"-\" : \"+\"]
