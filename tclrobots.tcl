@@ -407,6 +407,8 @@ proc init_robots {} {
         set data($robot,range) 0
         # robot current health
         set data($robot,health) $::parms(health)
+        # robot inflicted damage
+        set data($robot,inflicted) 0
         # robot current speed
         set data($robot,speed) 0
         # robot desired   "
@@ -589,16 +591,20 @@ proc assign_missile_damage {robot target} {
     global data parms
 
     set d [hypot [- $data($robot,mx) $data($target,x)] \
-               [- $data($robot,my) $data($target,y)]]
+            [- $data($robot,my) $data($target,y)]]
     if {$d < $parms(dia3)} {
         if {$d < $parms(dia0)} {
             incr data($target,health) $parms(hit0)
+            incr data($robot,inflicted) [- $parms(hit0)]
         } elseif {$d<$parms(dia1)} {
             incr data($target,health) $parms(hit1)
+            incr data($robot,inflicted) [- $parms(hit1)]
         } elseif {$d<$parms(dia2)} {
             incr data($target,health) $parms(hit2)
+            incr data($robot,inflicted) [- $parms(hit2)]
         } else {
             incr data($target,health) $parms(hit3)
+            incr data($robot,inflicted) [- $parms(hit3)]
         }
     }
 }

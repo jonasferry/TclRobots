@@ -349,9 +349,6 @@ proc show_scan {} {
     $::arena_c itemconfigure scan -outline ""
 
     foreach robot $::activeRobots {
-        # Hide the scan arc by default
-        $::arena_c itemconfigure $::data($robot,scanid) -outline ""
-
         if {$::data($robot,status)} {
             lassign $::data($robot,syscall,$::tick) cmd deg res
             if {($cmd eq "scanner") && \
@@ -458,7 +455,7 @@ proc show_health {} {
     set ::robotHealth {}
     set index 0
     foreach robot $::allRobots {
-        lappend ::robotHealth "$::data($robot,name) $::data($robot,health)"
+        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
         $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
         if {$::data($robot,brightness) > 0.5} {
             $::robotHealth_lb itemconfigure $index -background black
