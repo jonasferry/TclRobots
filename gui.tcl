@@ -410,6 +410,48 @@ proc show_explode {robot} {
     after 300 "$::arena_c delete e$::data($robot,num)"
 }
 
+###############################################################################
+#
+# show effect when robot dies
+#
+#
+
+proc show_die {robot} {
+    set x [* $::data($robot,x) $::scale]
+    set y [* [- 1000 $::data($robot,y)] $::scale]
+
+    set val [* 20 $::scale]
+    set id [$::arena_c create oval \
+            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+            -outline red    -fill ""     -width 1  \
+            -tags die$::data($robot,num)]
+    set val [* 30 $::scale]
+    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    set val [* 40 $::scale]
+    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    set val [* 50 $::scale]
+    set coords4 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    set val [* 60 $::scale]
+    set coords5 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+
+    update
+    after 100 [string map [list %id% $id %coords% $coords2] {
+        $::arena_c coords %id% %coords%
+        
+    }]
+    after 200 [string map [list %id% $id %coords% $coords3] {
+        $::arena_c coords %id% %coords%
+    }]
+    after 300 [string map [list %id% $id %coords% $coords4] {
+        $::arena_c coords %id% %coords%
+        
+    }] 
+    after 400 [string map [list %id% $id %coords% $coords5] {
+        $::arena_c coords %id% %coords%
+    }]
+    after 500 "$::arena_c delete die$::data($robot,num)"
+}
+
 proc show_health {} {
     set ::robotHealth {}
     set index 0
