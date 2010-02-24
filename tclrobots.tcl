@@ -43,8 +43,7 @@ set ::parms(rate,3) 30
 #  "   "   "   "    "   "   "    "   > 75
 set ::parms(rate,4) 20
 # robot start health
-#set ::parms(health) 100
-set ::parms(health) 100; #for debugging
+set ::parms(health) 100
 # diameter of direct missile damage
 set ::parms(dia0) 6
 #     "    "  maximum   "      "
@@ -143,7 +142,7 @@ proc sysScanner {robot} {
         set health 0
         set near   9999
         foreach target $activeRobots {
-            if {"$target" == "$robot"} { continue }
+            if {"$target" == "$robot"} {continue}
             set x [- $data($target,x) $data($robot,x)]
             set y [- $data($target,y) $data($robot,y)]
             set d [round [* 57.2958 [atan2 $y $x]]]
@@ -255,18 +254,18 @@ proc sysDrive {robot} {
     set index [expr int($d/25)]
     if {$index>3} {set index 3}
     if {$data($robot,speed)>$parms(turn,$index)} {
-	set data($robot,dspeed) 0
-	set data($robot,dhdg) $data($robot,hdg)
+        set data($robot,dspeed) 0
+        set data($robot,dhdg) $data($robot,hdg)
     } else {
-	set data($robot,orgx)  $data($robot,x)
-	set data($robot,orgy)  $data($robot,y)
-	set data($robot,range) 0
+        set data($robot,orgx)  $data($robot,x)
+        set data($robot,orgy)  $data($robot,y)
+        set data($robot,range) 0
     }
     # find direction of turn
     if {($data($robot,hdg)+$d+360)%360==$deg} {
-	set data($robot,dir) +
+        set data($robot,dir) +
     } else {
-	set data($robot,dir) -
+        set data($robot,dir) -
     }
 
     set data($robot,sysreturn,$tick) $data($robot,dspeed)
@@ -290,13 +289,14 @@ proc sysTick {robot} {
 }
 
 proc init_robots {} {
+    global data allRobots
+
     set file_index 0
-    foreach robot $::allRobots {
-        set ::data($robot,interp) [interp create -safe]
+    foreach robot $allRobots {
+        set data($robot,interp) [interp create -safe]
 
         set name [file tail [lindex $::robotFiles $file_index]]
         incr file_index
-        #set name $robot
 
         set x [rand 1000]
         set y [rand 1000]
@@ -308,83 +308,83 @@ proc init_robots {} {
         # set robot parms
         #########
         # window name = source.file_randnumber
-        set ::data($robot,name) ${name}
+        set data($robot,name) ${name}
         # the rand number as digital signature
-        set ::data($robot,num) $newsig
+        set data($robot,num) $newsig
         # robot status: 0=not used or dead, 1=running
-        set ::data($robot,status)	1
+        set data($robot,status)	1
         # robot current x
-        set ::data($robot,x) $x
+        set data($robot,x) $x
         # robot current y
-        set ::data($robot,y) $y
+        set data($robot,y) $y
         # robot origin  x since last heading
-        set ::data($robot,orgx) $x
+        set data($robot,orgx) $x
         # robot origin  y   "    "     "
-        set ::data($robot,orgy) $y
+        set data($robot,orgy) $y
         # robot current range on this heading
-        set ::data($robot,range) 0
+        set data($robot,range) 0
         # robot current health
-        set ::data($robot,health) $::parms(health)
+        set data($robot,health) $::parms(health)
         # robot current speed
-        set ::data($robot,speed) 0
+        set data($robot,speed) 0
         # robot desired   "
-        set ::data($robot,dspeed)	0
+        set data($robot,dspeed)	0
         # robot current heading
-        set ::data($robot,hdg) [rand 360]
+        set data($robot,hdg) [rand 360]
         # robot desired   "
-        set ::data($robot,dhdg) $::data($robot,hdg)
+        set data($robot,dhdg) $data($robot,hdg)
         # robot direction of turn (+/-)
-        set ::data($robot,dir) +
+        set data($robot,dir) +
         # robot last scan dsp signature
-        set ::data($robot,sig) "0 0"
+        set data($robot,sig) "0 0"
         # missile state: 0=avail, 1=flying
-        set ::data($robot,mstate) 0
+        set data($robot,mstate) 0
         # missile reload time: 0=ok, >0 = reloading
-        set ::data($robot,reload) 0
+        set data($robot,reload) 0
         # number of missiles used per clip
-        set ::data($robot,mused) 0
+        set data($robot,mused) 0
         # missile current x
-        set ::data($robot,mx) 0
+        set data($robot,mx) 0
         # missile current y
-        set ::data($robot,my) 0
+        set data($robot,my) 0
         # missile origin  x
-        set ::data($robot,morgx) 0
+        set data($robot,morgx) 0
         # missile origin  y
-        set ::data($robot,morgy) 0
+        set data($robot,morgy) 0
         # missile heading
-        set ::data($robot,mhdg) 0
+        set data($robot,mhdg) 0
         # missile current range
-        set ::data($robot,mrange)	0
+        set data($robot,mrange)	0
         # missile target distance
-        set ::data($robot,mdist) 0
+        set data($robot,mdist) 0
         # motor heat index
-        set ::data($robot,heat) 0
+        set data($robot,heat) 0
         # overheated flag
-        set ::data($robot,hflag) 0
+        set data($robot,hflag) 0
         # alert procedure to call when scanned
-        set ::data($robot,alert) {}
+        set data($robot,alert) {}
         # signature of last robot to scan us
-        set ::data($robot,ping) {}
+        set data($robot,ping) {}
         # declared team
-        set ::data($robot,team) ""
+        set data($robot,team) ""
         # last team message sent
-        set ::data($robot,data) ""
+        set data($robot,data) ""
         # barrel temp, affected by cannon fire
-        set ::data($robot,btemp) 0
+        set data($robot,btemp) 0
         # request from robot slave interp to master
         # tick -1 is set to {} to handle scanner charging in tick 0
-        set ::data($robot,syscall,-1) {}
+        set data($robot,syscall,-1) {}
         # return value from master to slave interp
-        set ::data($robot,sysreturn,0) {}
+        set data($robot,sysreturn,0) {}
 
-        interp alias $::data($robot,interp) syscall {} syscall $robot
+        interp alias $data($robot,interp) syscall {} syscall $robot
 
-        $::data($robot,interp) invokehidden source $::thisDir/syscalls.tcl
+        $data($robot,interp) invokehidden source $::thisDir/syscalls.tcl
 
-        $::data($robot,interp) eval coroutine \
-                ${robot}Run [list uplevel \#0 $::data($robot,code)]
+        $data($robot,interp) eval coroutine \
+                ${robot}Run [list uplevel \#0 $data($robot,code)]
 
-        interp alias {} ${robot}Run $::data($robot,interp) ${robot}Run
+        interp alias {} ${robot}Run $data($robot,interp) ${robot}Run
     }
 }
 
@@ -392,24 +392,12 @@ proc init_robots {} {
 # Disable robot
 #########
 proc disable_robot {robot} {
-    interp delete $::data($robot,interp)
-    set index [lsearch -exact $::activeRobots $robot]
-    set ::activeRobots [lreplace $::activeRobots $index $index]
-    set ::data($robot,syscall,$::tick) {}
-}
+    global data activeRobots tick
 
-
-###############################################################################
-#
-# update damage label of robot
-#
-#
-
-proc up_damage {robot} {
-#    if {$::data($robot,damage) >= 100} {
-#        set ::data($robot,damage) dead
-#        
-#}
+    interp delete $data($robot,interp)
+    set index [lsearch -exact $activeRobots $robot]
+    set activeRobots [lreplace $activeRobots $index $index]
+    set data($robot,syscall,$tick) {}
 }
 
 #########
@@ -535,7 +523,6 @@ proc assign_missile_damage {robot target} {
         } else {
             incr data($target,health) $parms(hit3)
         }
-        up_damage $target
     }
 }
 
@@ -669,7 +656,6 @@ proc check_wall {robot} {
             set data($robot,speed)  0
             set data($robot,dspeed) 0
             incr data($robot,health) $parms(coll)
-            up_damage $robot
             puts "WALL $robot: $data($robot,health)"
         }
         if {$data($robot,y)<0 || $data($robot,y)>999} {
@@ -680,7 +666,6 @@ proc check_wall {robot} {
             set data($robot,speed)  0
             set data($robot,dspeed) 0
             incr data($robot,health) $parms(coll)
-            up_damage $robot
         }
     }
 }
@@ -697,7 +682,6 @@ proc check_health {} {
             if {$data($robot,health) <= 0 } {
                 set data($robot,status) 0
                 set data($robot,health) 0
-                up_damage     $robot
                 disable_robot $robot
                 append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
             } else {
@@ -718,9 +702,11 @@ proc check_health {} {
 }
 
 proc act {} {
-    foreach robot $::activeRobots {
-        if {$::data($robot,status)} {
-            set currentSyscall $::data($robot,syscall,$::tick)
+    global data activeRobots tick
+
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            set currentSyscall $data($robot,syscall,$tick)
             switch [lindex $currentSyscall 0] {
                 scanner {sysScanner $robot}
                 dsp     {sysDsp     $robot}
@@ -747,57 +733,61 @@ proc tick {} {
 }
 
 proc runRobots {} {
-    while {$::running == 1} {
-        foreach robot $::activeRobots {
-            if {($::data($robot,alert) ne {}) && \
-                    ($::data($robot,ping) ne {})} {
+    global data activeRobots tick running gui parms
+
+    while {$running == 1} {
+        foreach robot $activeRobots {
+            if {($data($robot,alert) ne {}) && \
+                    ($data($robot,ping) ne {})} {
                 # Prepend alert data to sysreturn no notify robot it's
                 # been scanned.
-                set ::data($robot,sysreturn,[- $::tick 1]) \
-                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
+                set data($robot,sysreturn,[- $tick 1]) \
+                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
 
                 # Robot is notified; reset alert request
-                set ::data($robot,ping) {}
+                set data($robot,ping) {}
             }
-            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
+            ${robot}Run $data($robot,sysreturn,[- $tick 1])
         }
         act
 
         update_robots
 
-        if {$::gui} {
+        if {$gui} {
             update_gui
         }
 
         tick
 
-        after $::parms(tick) [info coroutine]
+        after $parms(tick) [info coroutine]
         yield
     }
 }
 
 proc find_winner {} {
+    global data activeRobots
+
     set ::finish ""
     set alive 0
     set winner ""
     set num_team 0
     set diffteam ""
     set win_color black
-    foreach robot $::activeRobots {
+    foreach robot $activeRobots {
         disable_robot $robot
         incr alive
-        lappend winner $::data($robot,name)
-#        set win_color $::data($robot,color)
-        if {$::data($robot,team) != ""} {
-            if {[lsearch -exact $diffteam $::data($robot,team)] == -1} {
-                lappend diffteam $::data($robot,team)
+        lappend winner $data($robot,name)
+
+        if {$data($robot,team) != ""} {
+            if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+                lappend diffteam $data($robot,team)
                 incr num_team
             }
         } else {
             incr num_team
         }
     }
-    
+
     switch $alive {
         0 {
             set ::win_msg "No robots left alive"
@@ -842,27 +832,29 @@ proc find_winner {} {
 }
 
 proc init {} {
-    set ::tick 0
+    global data allRobots activeRobots robotFiles tick
 
-    set ::allRobots {}
+    set tick 0
+
+    set allRobots {}
 
     # Pick a random element from a list; use this for reading code!
     # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
 
-    for {set i 0} {$i < [llength $::robotFiles]} {incr i} {
+    for {set i 0} {$i < [llength $robotFiles]} {incr i} {
         # Give the robots names like r0, r1, etc.
         set robot r$i
         # Update list of robots
-        lappend ::allRobots $robot
+        lappend allRobots $robot
 
         # Read
-        set f [open [lindex $::robotFiles $i]]
-        set ::data($robot,code) [read $f]
+        set f [open [lindex $robotFiles $i]]
+        set data($robot,code) [read $f]
         close $f
     }
 
     # At the start of the game all robots are active
-    set ::activeRobots $::allRobots
+    set activeRobots $allRobots
 
     init_robots
     act
