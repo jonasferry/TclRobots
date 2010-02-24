@@ -7,7 +7,7 @@ package require Tk
 #
 
 proc about {} {
-    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas@tclrobots.org\n\nVersion 3.0\nFebruary, 2010\n" "-image iconfn" 0 dismiss
+    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
 
 }
 
