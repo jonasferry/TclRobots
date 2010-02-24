@@ -92,8 +92,7 @@ for {set i 0} {$i<360} {incr i} {
 }
 
 # Set random seed
-#set ::seed [* [pid] [file atime /dev/tty]]
-set ::seed 5
+set ::seed [* [pid] [file atime /dev/tty]]
 srand $::seed
 
 # Return random integer 1-max
@@ -103,7 +102,7 @@ proc rand {max} {
 
 # Handle syscalls from robots
 proc syscall {args} {
-    global data gui tick
+    global data tick
 
     set robot [lindex $args 0]
     set result 0
@@ -112,17 +111,13 @@ proc syscall {args} {
 
     if {[lindex $syscall 0] eq "dputs"} {
         set msg [lrange $args 2 end]
-        if {$gui} {
-            # Output to robot message box
-            show_msg $robot $msg
-            # Output to terminal for debugging
-            puts "$robot: $msg ($::tick)"
-        } else {
-            # Output to terminal
-            puts "$robot: $msg"
-        }
+        sysDputs $robot $msg
     } elseif {[lindex $syscall 0] eq "rand"} {
         set result [rand [lindex $syscall 1]]
+    } elseif {[lindex $syscall 0] eq "team_send"} {
+        sysTeamSend $robot [lindex $syscall 1]
+    } elseif {[lindex $syscall 0] eq "team_get"} {
+        set result [sysTeamGet $robot]
     } else {
         set data($robot,syscall,$tick) $syscall
     }
@@ -251,9 +246,9 @@ proc sysDrive {robot} {
 	     $spd>$parms(heatsp) ? $parms(heatsp) : $spd]
 
     # shutdown drive if turning too fast at current speed
-    set index [expr int($d/25)]
+    set index [int [/ $d 25]]
     if {$index>3} {set index 3}
-    if {$data($robot,speed)>$parms(turn,$index)} {
+    if {$data($robot,speed) > $parms(turn,$index)} {
         set data($robot,dspeed) 0
         set data($robot,dhdg) $data($robot,hdg)
     } else {
@@ -272,20 +267,67 @@ proc sysDrive {robot} {
 }
 
 proc sysData {robot} {
+    global data tick
     set val 0
 
-    switch $::data($robot,syscall,$::tick) {
-        health {set val $::data($robot,health)}
-        speed  {set val $::data($robot,speed)}
-        heat   {set val $::data($robot,heat)}
-        loc_x  {set val $::data($robot,x)}
-        loc_y  {set val $::data($robot,y)}
+    switch $data($robot,syscall,$tick) {
+        health {set val $data($robot,health)}
+        speed  {set val $data($robot,speed)}
+        heat   {set val $data($robot,heat)}
+        loc_x  {set val $data($robot,x)}
+        loc_y  {set val $data($robot,y)}
     }
-    set ::data($robot,sysreturn,$::tick) $val
+    set data($robot,sysreturn,$tick) $val
 }
 
 proc sysTick {robot} {
-    set ::data($robot,sysreturn,$::tick) $::tick
+    global data tick
+    set data($robot,sysreturn,$tick) $tick
+}
+
+proc sysTeamDeclare {robot} {
+    global data tick
+    set team [lindex $data($robot,syscall,$tick) 1]
+    set data($robot,team) $team
+    set data($robot,sysreturn,$tick) $team
+}
+
+proc sysTeamSend {robot msg} {
+    global data
+    puts "sysTeamSend $robot $msg"
+    set data($robot,data) $msg
+}
+
+proc sysTeamGet {robot} {
+    global data activeRobots tick
+    set val ""
+
+    if {$data($robot,team) ne {}} {
+        foreach target $activeRobots {
+            if {"$robot" eq "$target"} {continue}
+            if {"$data($robot,team)" eq "$data($target,team)"} {
+                lappend val [list $data($target,num) $data($target,data)]
+            }
+        }
+    }
+    if {$val ne {}} {
+        puts "sysTeamGet $robot $val"
+    }
+    return $val
+}
+
+proc sysDputs {robot msg} {
+    global gui
+
+    if {$gui} {
+        # Output to robot message box
+        show_msg $robot $msg
+        # Output to terminal for debugging
+        puts "$robot: $msg ($::tick)"
+    } else {
+        # Output to terminal
+        puts "$robot: $msg"
+    }
 }
 
 proc init_robots {} {
@@ -708,17 +750,18 @@ proc act {} {
         if {$data($robot,status)} {
             set currentSyscall $data($robot,syscall,$tick)
             switch [lindex $currentSyscall 0] {
-                scanner {sysScanner $robot}
-                dsp     {sysDsp     $robot}
-                alert   {sysAlert   $robot}
-                cannon  {sysCannon  $robot}
-                drive   {sysDrive   $robot}
-                health  -
-                speed   -
-                heat    -
-                loc_x   -
-                loc_y   {sysData    $robot}
-                tick    {sysTick    $robot}
+                scanner      {sysScanner     $robot}
+                dsp          {sysDsp         $robot}
+                alert        {sysAlert       $robot}
+                cannon       {sysCannon      $robot}
+                drive        {sysDrive       $robot}
+                health       -
+                speed        -
+                heat         -
+                loc_x        -
+                loc_y        {sysData        $robot}
+                tick         {sysTick        $robot}
+                team_declare {sysTeamDeclare $robot}
             }
         }
     }
