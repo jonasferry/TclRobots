@@ -719,6 +719,7 @@ proc reset {} {
     set ::execCmd init_arena
     $::run_b configure -text "Run Battle"
     grid forget $::game_f
+    destroy $::game_f.sim
     grid $::sel_f -column 0 -row 2 -sticky nsew
     $::info_l configure -text "Select robot files for battle"
     $::run_b   configure -state normal
@@ -803,12 +804,12 @@ proc init_gui {} {
     grid columnconfigure $::buttons_f all -weight 1
 
     # make a toplevel icon window, iconwindow doesn't have transparent bg
-    catch {destroy .iconm}
-    toplevel .iconm
-    grid [label .iconm.i -image iconfn]
+    #catch {destroy .iconm}
+    #toplevel .iconm
+    #grid [label .iconm.i -image iconfn]
 
     wm title . "TclRobots"
-    wm iconwindow . .iconm
+    #wm iconwindow . .iconm
     wm iconname . TclRobots
     wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
 
