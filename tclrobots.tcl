@@ -3,7 +3,6 @@ namespace import ::tcl::mathfunc::*
 set ::thisScript [file join [pwd] [info script]]
 set ::thisDir [file dirname $::thisScript]
 
-
 proc init_parms {} {
     # set general tclrobots environment parameters
 
