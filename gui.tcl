@@ -645,6 +645,10 @@ proc tk_dialog2 {w title text bitmap default args} {
 
     catch {destroy $w}
     toplevel $w -class Dialog
+    if {[tk windowingsystem] eq "aqua"} {
+        # Trick to try to get rid of the odd-looking resize grip on Mac
+        wm resizable $w 0 0
+    }
     ttk::frame $w.background
     place $w.background -x 0 -y 0 -relwidth 1.0 -relheight 1.0
     wm title $w $title
