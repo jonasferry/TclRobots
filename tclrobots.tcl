@@ -3,97 +3,98 @@ namespace import ::tcl::mathfunc::*
 set ::thisScript [file join [pwd] [info script]]
 set ::thisDir [file dirname $::thisScript]
 
-#########
-# set general tclrobots environment parameters
-#########
-# milliseconds per tick
-set ::parms(tick) 100
-# meters of possible error on scan resolution
-set ::parms(errdist) 10
-# distance traveled at 100% per tick
-set ::parms(sp) 10
-# accel/deaccel speed per tick as % speed
-set ::parms(accel) 10
-# maximum range for a missile
-set ::parms(mismax) 700
-# distance missiles travel per tick
-set ::parms(msp) 100
-# missile reload time in ticks
-set ::parms(mreload) [round [+ [/ $parms(mismax) $parms(msp)] 0.5]]
-# missile long reload time after clip
-set ::parms(lreload) [* $parms(mreload) 3]
-# number of missiles per clip
-set ::parms(clip)	4
-# max turn speed < 25 deg. delta
-set ::parms(turn,0) 100
-#  "   "     "   " 50  "     "
-set ::parms(turn,1) 50
-#  "   "     "   " 75  "     "
-set ::parms(turn,2) 30
-#  "   "     "   > 75  "     "
-set ::parms(turn,3) 20
-# max rate of turn per tick at speed < 25
-set ::parms(rate,0) 90
-#  "   "   "   "    "   "   "    "   " 50
-set ::parms(rate,1) 60
-#  "   "   "   "    "   "   "    "   " 75
-set ::parms(rate,2) 40
-#  "   "   "   "    "   "   "    "   > 75
-set ::parms(rate,3) 30
-#  "   "   "   "    "   "   "    "   > 75
-set ::parms(rate,4) 20
-# robot start health
-set ::parms(health) 100
-# diameter of direct missile damage
-set ::parms(dia0) 6
-#     "    "  maximum   "      "
-set ::parms(dia1) 10
-#     "    "  medium    "      "
-set ::parms(dia2) 20
-#     "    "  minimum   "      "
-set ::parms(dia3) 40
-# damage within range 0
-set ::parms(hit0) -25
-#    "       "     "   1
-set ::parms(hit1) -12
-#    "       "     "   2
-set ::parms(hit2) -7
-#    "       "     "   3
-set ::parms(hit3) -3
-#    "    from collision into wall
-set ::parms(coll) -5
-# speed when heat builds
-set ::parms(heatsp) 35
-# max heat index, sets speed to heatsp
-set ::parms(heatmax) 200
-# inverse heating rate (greater hrate=slower)
-set ::parms(hrate) 10
-# cooling rate per tick, after overheat
-set ::parms(cooling) -25
-# cannon heating rate per shell
-set ::parms(canheat) 20
-# cannon cooling rate per tick
-set ::parms(cancool) -1
-# cannon heat index where scanner is inop
-set ::parms(scanbad) 35
 
-set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
-set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+proc init_parms {} {
+    # set general tclrobots environment parameters
 
-set outfile ""
-
-# init sin & cos tables
-set pi  [* 4 [atan 1]]
-set d2r [/ 180 $pi]
-
-for {set i 0} {$i<360} {incr i} {
-    set ::s_tab($i) [sin [/ $i $d2r]]
-    set ::c_tab($i) [cos [/ $i $d2r]]
+    # milliseconds per tick
+    set ::parms(tick) 100
+    # meters of possible error on scan resolution
+    set ::parms(errdist) 10
+    # distance traveled at 100% per tick
+    set ::parms(sp) 10
+    # accel/deaccel speed per tick as % speed
+    set ::parms(accel) 10
+    # maximum range for a missile
+    set ::parms(mismax) 700
+    # distance missiles travel per tick
+    set ::parms(msp) 100
+    # missile reload time in ticks
+    set ::parms(mreload) [round [+ [/ $::parms(mismax) $::parms(msp)] 0.5]]
+    # missile long reload time after clip
+    set ::parms(lreload) [* $::parms(mreload) 3]
+    # number of missiles per clip
+    set ::parms(clip)	4
+    # max turn speed < 25 deg. delta
+    set ::parms(turn,0) 100
+    #  "   "     "   " 50  "     "
+    set ::parms(turn,1) 50
+    #  "   "     "   " 75  "     "
+    set ::parms(turn,2) 30
+    #  "   "     "   > 75  "     "
+    set ::parms(turn,3) 20
+    # max rate of turn per tick at speed < 25
+    set ::parms(rate,0) 90
+    #  "   "   "   "    "   "   "    "   " 50
+    set ::parms(rate,1) 60
+    #  "   "   "   "    "   "   "    "   " 75
+    set ::parms(rate,2) 40
+    #  "   "   "   "    "   "   "    "   > 75
+    set ::parms(rate,3) 30
+    #  "   "   "   "    "   "   "    "   > 75
+    set ::parms(rate,4) 20
+    # robot start health
+    set ::parms(health) 100
+    # diameter of direct missile damage
+    set ::parms(dia0) 6
+    #     "    "  maximum   "      "
+    set ::parms(dia1) 10
+    #     "    "  medium    "      "
+    set ::parms(dia2) 20
+    #     "    "  minimum   "      "
+    set ::parms(dia3) 40
+    # damage within range 0
+    set ::parms(hit0) -25
+    #    "       "     "   1
+    set ::parms(hit1) -12
+    #    "       "     "   2
+    set ::parms(hit2) -7
+    #    "       "     "   3
+    set ::parms(hit3) -3
+    #    "    from collision into wall
+    set ::parms(coll) -5
+    # speed when heat builds
+    set ::parms(heatsp) 35
+    # max heat index, sets speed to heatsp
+    set ::parms(heatmax) 200
+    # inverse heating rate (greater hrate=slower)
+    set ::parms(hrate) 10
+    # cooling rate per tick, after overheat
+    set ::parms(cooling) -25
+    # cannon heating rate per shell
+    set ::parms(canheat) 20
+    # cannon cooling rate per tick
+    set ::parms(cancool) -1
+    # cannon heat index where scanner is inop
+    set ::parms(scanbad) 35
 }
 
-# Set random seed
-set ::seed [* [pid] [file atime /dev/tty]]
-srand $::seed
+proc init_trig_tables {} {
+    # init sin & cos tables
+    set pi  [* 4 [atan 1]]
+    set d2r [/ 180 $pi]
+
+    for {set i 0} {$i<360} {incr i} {
+        set ::s_tab($i) [sin [/ $i $d2r]]
+        set ::c_tab($i) [cos [/ $i $d2r]]
+    }
+}
+
+proc init_rand {} {
+    # Set random seed
+    set ::seed [* [pid] [file atime /dev/tty]]
+    srand $::seed
+}
 
 # Return random integer 1-max
 proc rand {max} {
@@ -931,6 +932,10 @@ proc find_winner {} {
 proc init {} {
     global data allRobots activeRobots robotFiles tick
 
+    init_parms
+    init_trig_tables
+    init_rand
+
     set tick 0
 
     set allRobots {}
@@ -991,6 +996,7 @@ set arg_outfile  "results.out"
 set ::robotFiles {}
 set tourn_type   0
 set ::numlist    0
+set outfile      ""
 
 foreach arg $::argv {
     switch -glob -- $arg  {

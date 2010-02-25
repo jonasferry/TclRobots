@@ -549,6 +549,9 @@ proc hls2rgb {h l s} {
 #
 
 proc init_arena {} {
+    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+
     set finish ""
     set players "battle: "
     set ::running 0
@@ -636,18 +639,20 @@ proc tk_dialog2 {w title text bitmap default args} {
 
     catch {destroy $w}
     toplevel $w -class Dialog
+    ttk::frame $w.background
+    place $w.background -x 0 -y 0 -relwidth 1.0 -relheight 1.0
     wm title $w $title
     wm iconname $w Dialog
     wm protocol $w WM_DELETE_WINDOW { }
     wm transient $w [winfo toplevel [winfo parent $w]]
-    frame $w.top -relief raised -bd 1
+    ttk::frame $w.top
     pack $w.top -side top -fill both
-    frame $w.bot -relief raised -bd 1
+    ttk::frame $w.bot
     pack $w.bot -side bottom -fill both
 
     # 2. Fill the top part with bitmap and message.
 
-    label $w.msg -wraplength 3i -justify left -text $text
+    ttk::label $w.msg -wraplength 3i -justify left -text $text
     pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 3m -pady 3m
     if {$bitmap != ""} {
         if {[llength $bitmap] > 1} {
@@ -659,7 +664,7 @@ proc tk_dialog2 {w title text bitmap default args} {
         } else {
             set type -bitmap
         }
-        label $w.bitmap $type $bitmap
+        ttk::label $w.bitmap $type $bitmap
         pack $w.bitmap -in $w.top -side left -padx 3m -pady 3m
     }
 
@@ -667,12 +672,13 @@ proc tk_dialog2 {w title text bitmap default args} {
 
     set i 0
     foreach but $args {
-        button $w.button$i -text $but -command "set ::tkPriv(button) $i"
+        ttk::button $w.button$i -text $but -command "set ::tkPriv(button) $i"
         if {$i == $default} {
-            frame $w.default -relief sunken -bd 1
-            raise $w.button$i $w.default
-            pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
-            pack $w.button$i -in $w.default -padx 2m -pady 2m
+            $w.button$i configure -default active
+            #frame $w.default -relief sunken -bd 1
+            #raise $w.button$i $w.default
+            #pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
+            pack $w.button$i -padx 2m -pady 2m
             bind $w <Return> "$w.button$i flash; set tkPriv(button) $i"
         } else {
             pack $w.button$i -in $w.bot -side left -expand 1  -padx 3m -pady 2m
