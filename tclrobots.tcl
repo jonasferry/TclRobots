@@ -7,7 +7,11 @@ proc init_parms {} {
     # set general tclrobots environment parameters
 
     # milliseconds per tick
-    set ::parms(tick) 100
+    if {$::gui} {
+        set ::parms(tick) 100
+    } else {
+        set ::parms(tick) 0
+    }
     # meters of possible error on scan resolution
     set ::parms(errdist) 10
     # distance traveled at 100% per tick
@@ -1040,7 +1044,6 @@ foreach arg $::argv {
 
 if {[llength $::robotFiles] >= 2} {
     # Run batch
-    set ::parms(tick) 0
     puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {
     # Run GUI
