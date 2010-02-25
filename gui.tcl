@@ -1,3 +1,9 @@
+# Trying this to get better toplevel on Mac
+namespace eval ::tk {
+    namespace eval ::mac {
+        set useThemedToplevel 1
+    }
+}
 package require Tk
 
 ###############################################################################
