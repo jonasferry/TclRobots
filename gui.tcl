@@ -867,17 +867,17 @@ proc init_gui {} {
     wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
 
     # The info label
-    set ::info_l [ttk::label .l -relief solid \
+    set ::info_l [ttk::label .l  \
                       -text "Select robot files for battle"]
 
     # The contents frame contains two frames
     set ::sel_f [ttk::frame .f2]
 
     # Contents left frame
-    set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 3]
+    set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 1]
 
     # Contents right frame
-    set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 3]
+    set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 1]
 
     # The file selection box
     set files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
