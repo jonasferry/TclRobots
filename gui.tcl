@@ -549,6 +549,9 @@ proc hls2rgb {h l s} {
 #
 
 proc init_arena {} {
+    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+
     set finish ""
     set players "battle: "
     set ::running 0
