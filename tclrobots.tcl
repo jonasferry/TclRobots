@@ -123,6 +123,24 @@ proc syscall {args} {
         team_get {
             set result [sysTeamGet $robot]
         }
+        callback {
+            set ticks  [lindex $syscall 1]
+            set script [lindex $syscall 2]
+            set when [+ $tick $ticks]
+            lappend data($robot,callbacks) [list $when $script]
+            set data($robot,callbacks) \
+                    [lsort -integer -index 0 $data($robot,callbacks)]
+        }
+        callbackcheck {
+            set when [lindex $data($robot,callbacks) 0 0]
+            if {$when ne "" && $when <= $tick} {
+                set result [lindex $data($robot,callbacks) 0 1]
+                set data($robot,callbacks) \
+                        [lrange $data($robot,callbacks) 1 end]
+            } else {
+                set result ""
+            }
+        }
         default {
             # All postponed syscalls ends up here
             set data($robot,syscall,$tick) $syscall
@@ -457,6 +475,8 @@ proc init_robots {} {
         set data($robot,alert) {}
         # signature of last robot to scan us
         set data($robot,ping) {}
+        # list of requested timed callbacks
+        set data($robot,callbacks) {}
         # declared team
         set data($robot,team) ""
         # last team message sent

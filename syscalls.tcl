@@ -1,4 +1,5 @@
-proc ping_check {val} {
+# Check the answer from a yield for a ping alert
+proc _ping_check {val} {
     if {[lindex $val 0] eq "alert"} {
         #  ping_proc:        dsp:
         [lindex $val 1] [lindex $val 2]
@@ -7,73 +8,71 @@ proc ping_check {val} {
     return $val
 }
 
+# Combine the common syscall+yield call
+proc _syscall_yield {args} {
+    set result [syscall callbackcheck]
+    if {$result ne ""} {
+        uplevel \#0 $result
+    }
+    syscall {*}$args
+    return [_ping_check [yield]]
+}
+
+
 ### Basic commands
 ## 2 ticks
 #scanner degree resolution
 proc scanner {degree resolution} {
-    syscall scanner $degree $resolution
-    ping_check [yield]
-    syscall scanner $degree $resolution
-    return [ping_check [yield]]
+    _syscall_yield scanner $degree $resolution
+    _syscall_yield scanner $degree $resolution
 }
 ## 1 tick
 #dsp
 proc dsp {} {
-    syscall dsp
-    return [ping_check [yield]]
+    _syscall_yield dsp
 }
 #alert proc-name
 proc alert {procname} {
-    syscall alert $procname
-    return [ping_check [yield]]
+    _syscall_yield alert $procname
 }
 #cannon degree range
 proc cannon {degree range} {
-    syscall cannon $degree $range
-    return [ping_check [yield]]
+    _syscall_yield cannon $degree $range
 }
 #health
 proc health {} {
-    syscall health
-    return [ping_check [yield]]
+    _syscall_yield health
 }
 #drive degree speed
 proc drive {degree speed} {
-    syscall drive $degree $speed
-    return [ping_check [yield]]
+    _syscall_yield drive $degree $speed
 }
 #speed
 proc speed {} {
-    syscall speed
-    return [ping_check [yield]]
+    _syscall_yield speed
 }
 #heat
 proc heat {} {
-    syscall heat
-    return [ping_check [yield]]
+    _syscall_yield heat
 }
 #loc_x
 proc loc_x {} {
-    syscall loc_x
-    return [ping_check [yield]]
+    _syscall_yield loc_x
 }
 #loc_y
 proc loc_y {} {
-    syscall loc_y
-    return [ping_check [yield]]
+    _syscall_yield loc_y
 }
 #tick
 proc tick {} {
-    syscall tick
-    return [ping_check [yield]]
+    _syscall_yield tick
 }
 
 ## Team commands
 # 1 tick
 #team_declare teamname
 proc team_declare {teamname} {
-    syscall team_declare $teamname
-    return [ping_check [yield]]
+    _syscall_yield team_declare $teamname
 }
 # 0 ticks
 #team_send data
@@ -94,4 +93,25 @@ proc dputs {args} {
 #rand max
 proc rand {max} {
     syscall rand $max
+}
+
+proc callback {time script} {
+    syscall callback $time $script
+}
+
+# After does not work, emulate it using callbacks
+proc after {ms args} {
+    set ticks [expr {$ms / 100}]
+    if {[llength $args] == 0} {
+        # Emulate a wait using some syscalls
+        for {set t 0} {$t < $ticks} {incr t} {
+            syscall speed
+            return [_ping_check [yield]]
+        }
+        
+    } else {
+        set script [join $args]
+        syscall callback $ticks $script
+    }
+    return
 }
