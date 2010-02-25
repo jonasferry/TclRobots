@@ -109,16 +109,24 @@ proc syscall {args} {
 
     set syscall [lrange $args 1 end]
 
-    if {[lindex $syscall 0] eq "dputs"} {
-        sysDputs $robot [lrange $args 2 end]
-    } elseif {[lindex $syscall 0] eq "rand"} {
-        set result [rand [lindex $syscall 1]]
-    } elseif {[lindex $syscall 0] eq "team_send"} {
-        sysTeamSend $robot [lindex $syscall 1]
-    } elseif {[lindex $syscall 0] eq "team_get"} {
-        set result [sysTeamGet $robot]
-    } else {
-        set data($robot,syscall,$tick) $syscall
+    # Handle all immediate syscalls
+    switch [lindex $syscall 0] {
+        dputs {
+            sysDputs $robot [lrange $args 2 end]
+        }
+        rand {
+            set result [rand [lindex $syscall 1]]
+        }
+        team_send {
+            sysTeamSend $robot [lindex $syscall 1]
+        }
+        team_get {
+            set result [sysTeamGet $robot]
+        }
+        default {
+            # All postponed syscalls ends up here
+            set data($robot,syscall,$tick) $syscall
+        }
     }
     return $result
 }
