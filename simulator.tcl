@@ -159,6 +159,7 @@ proc init_sim {} {
              -fill $::data(r0,color) \
              -arrow last -arrowshape $::data(r0,shape) \
              -tags "r$::data(r0,num) robot"]
+    set ::data(r0,highlight) 0
     # Precreate scan mark on canvas
     set ::data(r0,scanid) \
         [$::arena_c create arc -100 -100 -100 -100 \
@@ -172,6 +173,7 @@ proc init_sim {} {
     set ::data(target,x)     500
     set ::data(target,y)     500
     set ::data(target,shape) [lindex $::parms(shapes) 1]
+    set ::data(target,highlight) 0
     set ::data(target,robotid) \
         [$::arena_c create line -100 -100 -100 -100 \
              -fill $::data(target,color) \

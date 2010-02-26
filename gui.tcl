@@ -320,6 +320,7 @@ proc border_check {coord} {
 #
 
 proc show_robots {} {
+    $::arena_c delete highlight
     foreach robot $::allRobots {
         # check robots
         if {$::data($robot,status)} {
@@ -329,6 +330,13 @@ proc show_robots {} {
             $::arena_c coords $::data($robot,robotid) $x $y \
                     [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
                     [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+            if {$::data($robot,highlight)} {
+                set r [* 50 $::scale]
+                $::arena_c create oval \
+                        [- $x $r] [- $y $r] [+ $x $r] [+ $y $r] \
+                        -outline $::data($robot,color) -tags highlight
+                $::arena_c lower highlight
+            }
         }
         # check missiles
         if {$::data($robot,mstate)} {
@@ -467,6 +475,19 @@ proc show_health {} {
             $::robotHealth_lb itemconfigure $index -background black
         }
         incr index
+    }
+}
+
+# Highlight a robot selected in health listbox
+proc highlightRobot {} {
+    foreach robot $::allRobots {
+        set ::data($robot,highlight) 0
+    }
+    set sel [$::robotHealth_lb curselection]
+
+    if {[string is integer -strict $sel]} {
+        set robot [lindex $::allRobots $sel]
+        set ::data($robot,highlight) 1
     }
 }
 
@@ -612,6 +633,7 @@ proc init_arena {} {
                 -fill $::data($robot,color) \
                 -arrow last -arrowshape $::data($robot,shape) \
                 -tags "r$::data($robot,num) robot"]
+        set ::data($robot,highlight) 0
         # Precreate scan mark on canvas
         set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
                 -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
@@ -948,6 +970,7 @@ proc init_gui {} {
     set ::robotHealth {}
     set ::robotHealth_lb [listbox $::game_f.h -background black \
                               -listvariable ::robotHealth]
+    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
 
     # The robot message box
     set ::robotMsg {}
