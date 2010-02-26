@@ -235,8 +235,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
     bind $win.sel <KeyPress-Return> "$win.ok     invoke"
     bind $win.l.lst <ButtonRelease-1> \
         "+selInsert $win \[%W get \[ %W nearest %y \] \] "
-    bind $win.l.lst <Double-1> \
-        "selInsert $win \[%W get \[%W curselection\]\];  $win.ok invoke"
+    bind $win.l.lst <Double-1> "$win.ok invoke"
 
 
     fillLst $win $filt $startdir
