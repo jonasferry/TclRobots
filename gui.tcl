@@ -578,87 +578,87 @@ proc init_arena {} {
     
     if {$::numlist < 2} {
     	tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
-    } else {
-
-	    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
-	    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
-	
-	    set finish ""
-	    set players "battle: "
-	    set ::running 0
-	    set halted  0
-	    set quads $::parms(quads)
-	
-	    $::info_l configure -text "Initializing..."
-	
-	    # get robot filenames from window
-	    set lst $::robotlist_lb
-	    set ::robotFiles {}
-	
-	    for {set i 0} {$i < $::numlist} {incr i} {
-	        lappend ::robotFiles [$lst get $i]
-	    }
-	
-	    grid forget $::sel_f
-	    grid $::game_f -column 0 -row 2 -sticky nsew
-	    show_arena
-	
-	    # Clear message boxes
-	    set ::robotHealth {}
-	    set ::robotMsg    {}
-	
-	    # start robots
-	    $::info_l configure -text "Running"
-	    set ::execCmd halt
-	    $::run_b   configure -state normal    -text "Halt"
-	    $::sim_b   configure -state disabled
-	    $::tourn_b configure -state disabled
-	    $::about_b configure -state disabled
-	    $::quit_b  configure -state disabled
-	
-	    # Init robots
-	    init
-	
-	    # Give the robots colors
-	    set ::colors [distinct_colors [llength $::robotFiles]]
-	
-	    # Remove old canvas items
-	    $::arena_c delete robot
-	    $::arena_c delete scan
-	
-	    set i 0
-	    foreach robot $::allRobots color $::colors {
-	        # Set colors as far away as possible from each other visually
-	        set ::data($robot,color) $color
-	        set ::data($robot,brightness) [brightness $color]
-	        # Precreate robot on canvas
-	        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-	        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
-	                -fill $::data($robot,color) \
-	                -arrow last -arrowshape $::data($robot,shape) \
-	                -tags "r$::data($robot,num) robot"]
-	        set ::data($robot,highlight) 0
-	        # Precreate scan mark on canvas
-	        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-	                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-	                -width 1 -tags "scan s$::data($robot,num)"]
-	
-	        incr i
-	    }
-	
-	    # Start game
-	    main
-	
-	    # find winnner
-	    if {$halted} {
-	        .l configure -text "Battle halted"
-	    } else {
-	        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
-	    }
-	
-	    #  set ::execCmd "kill_wishes \"$robots\""
-	    $::run_b configure -state normal -text "Reset"
+        return
     }
+
+    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+
+    set finish ""
+    set players "battle: "
+    set ::running 0
+    set halted  0
+    set quads $::parms(quads)
+	
+    $::info_l configure -text "Initializing..."
+	
+    # get robot filenames from window
+    set lst $::robotlist_lb
+    set ::robotFiles {}
+	
+    for {set i 0} {$i < $::numlist} {incr i} {
+        lappend ::robotFiles [$lst get $i]
+    }
+	
+    grid forget $::sel_f
+    grid $::game_f -column 0 -row 2 -sticky nsew
+    show_arena
+	
+    # Clear message boxes
+    set ::robotHealth {}
+    set ::robotMsg    {}
+	
+    # start robots
+    $::info_l configure -text "Running"
+    set ::execCmd halt
+    $::run_b   configure -state normal    -text "Halt"
+    $::sim_b   configure -state disabled
+    $::tourn_b configure -state disabled
+    $::about_b configure -state disabled
+    $::quit_b  configure -state disabled
+	
+    # Init robots
+    init
+	
+    # Give the robots colors
+    set ::colors [distinct_colors [llength $::robotFiles]]
+	
+    # Remove old canvas items
+    $::arena_c delete robot
+    $::arena_c delete scan
+	
+    set i 0
+    foreach robot $::allRobots color $::colors {
+        # Set colors as far away as possible from each other visually
+        set ::data($robot,color) $color
+        set ::data($robot,brightness) [brightness $color]
+        # Precreate robot on canvas
+        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
+        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
+                -fill $::data($robot,color) \
+                -arrow last -arrowshape $::data($robot,shape) \
+                -tags "r$::data($robot,num) robot"]
+        set ::data($robot,highlight) 0
+        # Precreate scan mark on canvas
+        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                -width 1 -tags "scan s$::data($robot,num)"]
+
+        incr i
+    }
+	
+    # Start game
+    main
+	
+    # find winnner
+    if {$halted} {
+        .l configure -text "Battle halted"
+    } else {
+        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
+    }
+	
+    #  set ::execCmd "kill_wishes \"$robots\""
+    $::run_b configure -state normal -text "Reset"
 }
 
 # standard tk_dialog modified to use -image on label
