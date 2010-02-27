@@ -715,7 +715,7 @@ proc tk_dialog2 {w title text bitmap default args} {
             #raise $w.button$i $w.default
             #pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
             pack $w.button$i -padx 2m -pady 2m
-            bind $w <Return> "$w.button$i flash; set tkPriv(button) $i"
+            bind $w <Return> "set tkPriv(button) $i"
         } else {
             pack $w.button$i -in $w.bot -side left -expand 1  -padx 3m -pady 2m
         }
