@@ -99,11 +99,11 @@ proc end_sim {} {
 #
 
 proc init_sim {} {
-    # Read from robot file name from window; only the first file is used
-    set lst [$::robotlist_lb get 0]
-    if {[llength $lst] == 0} {
+    # Read from robot file names; only the first file is used
+    if {[llength $::robotList] == 0} {
         return
     }
+    set ::robotFiles [lrange $::robotList 0 0]
 
     set halted  0
     set ticks   0
@@ -133,7 +133,7 @@ proc init_sim {} {
 
     set ::allRobots {r0 target}
 
-    set f [open [lindex $lst 0]]
+    set f [open [lindex $::robotList 0]]
     set ::data(r0,code) [read $f]
     close $f
 

@@ -22,14 +22,11 @@ proc about {} {
 # choose_file
 #
 proc choose_file {win filename} {
-    set listsize $::numlist
-    $::robotlist_lb insert end $filename
-    incr ::numlist
+    lappend ::robotList $filename
     set dir $filename
-    for {set i 0} {$i <= $listsize} {incr i} {
-        set d [$::robotlist_lb get $i]
+    foreach d $::robotList {
         if {[string length $d] > [string length $dir]} {
-            set dir  $d
+            set dir $d
         }
     }
     set index [+ [string length [file dirname [file dirname $dir]]] 1]
@@ -59,10 +56,9 @@ proc choose_all {} {
 #
 proc remove_file {} {
     set index -1
-    catch {set index [.f2.fr.f.lb curselection]}
+    catch {set index [$::robotlist_lb curselection]}
     if {$index >= 0} {
-        .f2.fr.f.lb delete $index
-        incr  ::numlist -1
+        $::robotlist_lb delete $index
     }
 }
 
@@ -72,11 +68,7 @@ proc remove_file {} {
 # remove_all
 #
 proc remove_all {} {
-    set index $::numlist
-    if {$index > 0} {
-        $::robotlist_lb delete 0 end
-        set ::numlist 0
-    }
+    set ::robotList {}
 }
 
 #######################################################################
@@ -616,7 +608,7 @@ proc gui_init_robots {{lastblack 0}} {
 
 proc init_battle {} {
     
-    if {$::numlist < 2} {
+    if {[llength $::robotList] < 2} {
     	tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
         return
     }
@@ -626,12 +618,7 @@ proc init_battle {} {
     set ::StatusBarMsg "Initializing..."
 	
     # get robot filenames from window
-    set lst $::robotlist_lb
-    set ::robotFiles {}
-	
-    for {set i 0} {$i < $::numlist} {incr i} {
-        lappend ::robotFiles [$lst get $i]
-    }
+    set ::robotFiles $::robotList
 	
     grid forget $::sel_f
     grid $::game_f -column 0 -row 2 -sticky nsew
@@ -921,9 +908,10 @@ proc init_gui {} {
     set robotlist_f  [ttk::frame $::sel_f.fr.f]
 
     # The robot list
+    set ::robotList {}
     set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
                             -yscrollcommand "$::sel_f.fr.f.s set" \
-                            -selectmode single]
+                            -selectmode single -listvariable ::robotList]
 
     # The scrollbar
     set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
