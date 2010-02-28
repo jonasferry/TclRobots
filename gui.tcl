@@ -255,7 +255,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
 #
 
 proc clean_up {} {
-    $::info_l configure -text "Standby, cleaning up any left overs...."
+    set ::StatusBarMsg "Standby, cleaning up any left overs...."
     update
 
     foreach robot $::activeRobots {
@@ -623,7 +623,7 @@ proc init_battle {} {
 
     set ::halted  0
 	
-    $::info_l configure -text "Initializing..."
+    set ::StatusBarMsg "Initializing..."
 	
     # get robot filenames from window
     set lst $::robotlist_lb
@@ -642,7 +642,7 @@ proc init_battle {} {
     set ::robotMsg    {}
 	
     # start robots
-    $::info_l configure -text "Running"
+    set ::StatusBarMsg "Running"
     set ::execCmd halt
     $::run_b   configure -state normal    -text "Halt"
     $::sim_b   configure -state disabled
@@ -661,7 +661,7 @@ proc init_battle {} {
 	
     # find winnner
     if {$::halted} {
-        $::info_l configure -text "Battle halted"
+        set ::StatusBarMsg "Battle halted"
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
@@ -787,7 +787,7 @@ proc tk_dialog2 {w title text bitmap default args} {
 proc halt {} {
     #    global execCmd halted running
     set ::running 0
-    $::info_l configure -text "Stopping battle, standby"
+    set ::StatusBarMsg "Stopping battle, standby"
     update
     foreach robot $::allRobots {
         if {$::data($robot,status)} {
@@ -819,7 +819,7 @@ proc reset {} {
     grid forget $::game_f
     destroy $::game_f.sim
     grid $::sel_f -column 0 -row 2 -sticky nsew
-    $::info_l configure -text "Select robot files for battle"
+    set ::StatusBarMsg "Select robot files for battle"
     $::run_b   configure -state normal
     $::sim_b   configure -state normal
     $::tourn_b configure -state normal
@@ -907,8 +907,12 @@ proc init_gui {} {
     wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
 
     # The info label
-    set ::info_l [ttk::label .l  \
-                      -text "Select robot files for battle"]
+    set ::StatusBarMsg "Select robot files for battle"
+    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w]
+
+    # Add a size grip over the status bar
+    ttk::sizegrip .sg
+    place .sg -anchor se -relx 1.0 -rely 1.0
 
     # The contents frame contains two frames
     set ::sel_f [ttk::frame .f2]
@@ -948,7 +952,7 @@ proc init_gui {} {
     set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
                           -command remove_all]
 
-    grid $::info_l       -column 0 -row 1 -sticky nsew
+    grid $info_l         -column 0 -row 3 -sticky nsew
     grid $::sel_f        -column 0 -row 2 -sticky nsew
     grid $sel0_f         -column 0 -row 0 -sticky nsew
     grid $sel1_f         -column 1 -row 0 -sticky nsew

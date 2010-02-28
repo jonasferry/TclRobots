@@ -107,7 +107,7 @@ proc init_sim {} {
 
     set halted  0
     set ticks   0
-    $::info_l configure -text "Simulator"
+    set ::StatusBarMsg "Simulator"
 
     grid forget $::sel_f
 #    grid forget $::robotHealth_lb
@@ -119,7 +119,7 @@ proc init_sim {} {
     puts check
 
     # start robots
-    $::info_l configure -text "Running Simulator"
+    set ::StatusBarMsg "Running Simulator"
     set ::execCmd reset
 
     $::run_b   configure -state disabled
