@@ -80,6 +80,8 @@ proc init_parms {} {
     set ::parms(cancool) -1
     # cannon heat index where scanner is inop
     set ::parms(scanbad) 35
+    # quadrants, can be used to spread out robots at start
+    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
 }
 
 proc init_trig_tables {} {
@@ -413,7 +415,7 @@ proc init_robots {} {
         set x [rand 1000]
         set y [rand 1000]
 
-        # generate a new signature
+        # generate a new signature  FIXA: avoid duplicates?
         set newsig [rand 65535]
 
         #########
@@ -896,7 +898,6 @@ proc runRobots {} {
 proc find_winner {} {
     global data activeRobots
 
-    set ::finish ""
     set alive 0
     set winner ""
     set num_team 0
@@ -956,8 +957,12 @@ proc find_winner {} {
         if {$l > 0} {incr l -1; set n [string range $n 0 $l]}
         append score "$n = $points  "
     }
+    set players "battle: "
+    foreach robot $::allRobots {
+        append players "$data($robot,name) "
+    }
     catch {write_file $outfile \
-               "$players\n$finish\n$::win_msg2\n\n$score\n\n\n"}
+               "$players\n$::finish\n$::win_msg2\n\n$score\n\n\n"}
 }
 
 proc init {} {
@@ -966,6 +971,7 @@ proc init {} {
     init_parms
     init_trig_tables
     init_rand
+    set ::finish ""
 
     set tick 0
 

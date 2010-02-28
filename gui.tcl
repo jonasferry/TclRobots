@@ -255,7 +255,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
 #
 
 proc clean_up {} {
-    .l configure -text "Standby, cleaning up any left overs...."
+    $::info_l configure -text "Standby, cleaning up any left overs...."
     update
 
     foreach robot $::activeRobots {
@@ -568,27 +568,26 @@ proc hls2rgb {h l s} {
     return [list $r $g $b]
 }
 
+proc create_arena {} {
+    # The battle field canvas
+    set ::arena_c [canvas $::game_f.c -background white]
+    bind $::arena_c <Configure> {show_arena}
+}
+
 ###############################################################################
 #
 # start a match
 #
 #
 
-proc init_arena {} {
+proc init_battle {} {
     
     if {$::numlist < 2} {
     	tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
         return
     }
 
-    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
-    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
-
-    set finish ""
-    set players "battle: "
-    set ::running 0
-    set halted  0
-    set quads $::parms(quads)
+    set ::halted  0
 	
     $::info_l configure -text "Initializing..."
 	
@@ -621,14 +620,14 @@ proc init_arena {} {
     init
 	
     # Give the robots colors
-    set ::colors [distinct_colors [llength $::robotFiles]]
+    set colors [distinct_colors [llength $::robotFiles]]
 	
     # Remove old canvas items
     $::arena_c delete robot
     $::arena_c delete scan
 	
     set i 0
-    foreach robot $::allRobots color $::colors {
+    foreach robot $::allRobots color $colors {
         # Set colors as far away as possible from each other visually
         set ::data($robot,color) $color
         set ::data($robot,brightness) [brightness $color]
@@ -651,8 +650,8 @@ proc init_arena {} {
     main
 	
     # find winnner
-    if {$halted} {
-        .l configure -text "Battle halted"
+    if {$::halted} {
+        $::info_l configure -text "Battle halted"
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
@@ -805,7 +804,7 @@ proc reset {} {
     clean_up
 
     $::arena_c delete all
-    set ::execCmd init_arena
+    set ::execCmd init_battle
     $::run_b configure -text "Run Battle"
     grid forget $::game_f
     destroy $::game_f.sim
@@ -861,6 +860,7 @@ proc gui_settings {} {
 
 proc init_gui {} {
     gui_settings
+    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
 
     # Create and grid the outer content frame
     # The button row
@@ -868,7 +868,7 @@ proc init_gui {} {
     # The content frames sel and game
     grid rowconfigure    . 2 -weight 1
 
-    set ::execCmd init_arena
+    set ::execCmd init_battle
 
     # Create button frame and buttons
     set ::buttons_f [ttk::frame .f1]
@@ -892,13 +892,7 @@ proc init_gui {} {
 
     grid columnconfigure $::buttons_f all -weight 1
 
-    # make a toplevel icon window, iconwindow doesn't have transparent bg
-    #catch {destroy .iconm}
-    #toplevel .iconm
-    #grid [label .iconm.i -image iconfn]
-
     wm title . "TclRobots"
-    #wm iconwindow . .iconm
     wm iconname . TclRobots
     wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
 
@@ -966,9 +960,7 @@ proc init_gui {} {
     #set ::game_f [ttk::frame .f3 -width 520 -height 520]
     set ::game_f [ttk::frame .f3]
 
-    # The battle field canvas
-    set ::arena_c [canvas $::game_f.c -background white]
-    bind $::arena_c <Configure> {show_arena}
+    create_arena
 
     # The robot health list
     set ::robotHealth {}
