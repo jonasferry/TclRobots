@@ -643,8 +643,7 @@ proc init_battle {} {
 	
     # start robots
     set ::StatusBarMsg "Running"
-    set ::execCmd halt
-    $::run_b   configure -state normal    -text "Halt"
+    $::run_b   configure -state normal   -text "Halt" -command halt
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
     $::about_b configure -state disabled
@@ -666,8 +665,7 @@ proc init_battle {} {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
 	
-    #  set ::execCmd "kill_wishes \"$robots\""
-    $::run_b configure -state normal -text "Reset"
+    $::run_b configure -state normal -text "Reset" -command reset
 }
 
 # standard tk_dialog modified to use -image on label
@@ -785,18 +783,11 @@ proc tk_dialog2 {w title text bitmap default args} {
 #
 
 proc halt {} {
-    #    global execCmd halted running
     set ::running 0
     set ::StatusBarMsg "Stopping battle, standby"
-    update
-    foreach robot $::allRobots {
-        if {$::data($robot,status)} {
-            #disable_robot $robot 0
-        }
-    }
     set ::halted 1
-    set ::execCmd reset
-    $::run_b   configure -state normal -text "Reset"
+
+    $::run_b   configure -state normal -text "Reset" -command reset
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
     $::about_b configure -state disabled
@@ -814,13 +805,13 @@ proc reset {} {
     clean_up
 
     $::arena_c delete all
-    set ::execCmd init_battle
-    $::run_b configure -text "Run Battle"
+
     grid forget $::game_f
     destroy $::game_f.sim
     grid $::sel_f -column 0 -row 2 -sticky nsew
+
     set ::StatusBarMsg "Select robot files for battle"
-    $::run_b   configure -state normal
+    $::run_b   configure -state normal -text "Run Battle" -command init_battle
     $::sim_b   configure -state normal
     $::tourn_b configure -state normal
     $::about_b configure -state normal
@@ -878,12 +869,9 @@ proc init_gui {} {
     # The content frames sel and game
     grid rowconfigure    . 2 -weight 1
 
-    set ::execCmd init_battle
-
     # Create button frame and buttons
     set ::buttons_f [ttk::frame .f1]
-    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
-                         -command {eval $::execCmd}]
+    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" -command init_battle]
     set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
                          -command {source $::thisDir/simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \

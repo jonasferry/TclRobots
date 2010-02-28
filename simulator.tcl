@@ -120,9 +120,8 @@ proc init_sim {} {
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
-    set ::execCmd reset
 
-    $::run_b   configure -state disabled
+    $::run_b   configure -state disabled -command reset
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
     $::about_b configure -state disabled
