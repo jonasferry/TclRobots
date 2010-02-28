@@ -574,6 +574,40 @@ proc create_arena {} {
     bind $::arena_c <Configure> {show_arena}
 }
 
+proc gui_init_robots {{lastblack 0}} {
+    # Give the robots colors
+    set colors [distinct_colors [llength $::allRobots]]
+
+    # For the simulator, force the last robot to be black
+    if {$lastblack} {
+        lset colors end black
+    }
+
+    # Remove old canvas items
+    $::arena_c delete robot
+    $::arena_c delete scan
+	
+    set i 0
+    foreach robot $::allRobots color $colors {
+        # Set colors as far away as possible from each other visually
+        set ::data($robot,color) $color
+        set ::data($robot,brightness) [brightness $color]
+        # Precreate robot on canvas
+        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
+        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
+                -fill $::data($robot,color) \
+                -arrow last -arrowshape $::data($robot,shape) \
+                -tags "r$::data($robot,num) robot"]
+        set ::data($robot,highlight) 0
+        # Precreate scan mark on canvas
+        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                -width 1 -tags "scan s$::data($robot,num)"]
+
+        incr i
+    }
+}
+
 ###############################################################################
 #
 # start a match
@@ -618,34 +652,10 @@ proc init_battle {} {
 	
     # Init robots
     init
-	
-    # Give the robots colors
-    set colors [distinct_colors [llength $::robotFiles]]
-	
-    # Remove old canvas items
-    $::arena_c delete robot
-    $::arena_c delete scan
-	
-    set i 0
-    foreach robot $::allRobots color $colors {
-        # Set colors as far away as possible from each other visually
-        set ::data($robot,color) $color
-        set ::data($robot,brightness) [brightness $color]
-        # Precreate robot on canvas
-        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
-                -fill $::data($robot,color) \
-                -arrow last -arrowshape $::data($robot,shape) \
-                -tags "r$::data($robot,num) robot"]
-        set ::data($robot,highlight) 0
-        # Precreate scan mark on canvas
-        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-                -width 1 -tags "scan s$::data($robot,num)"]
 
-        incr i
-    }
-	
+    # Init robots on GUI
+    gui_init_robots
+
     # Start game
     main
 	

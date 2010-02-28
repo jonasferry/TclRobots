@@ -107,7 +107,7 @@ proc init_sim {} {
 
     set halted  0
     set ticks   0
-    .l configure -text "Simulator"
+    $::info_l configure -text "Simulator"
 
     grid forget $::sel_f
 #    grid forget $::robotHealth_lb
@@ -119,7 +119,7 @@ proc init_sim {} {
     puts check
 
     # start robots
-    .l configure -text "Running Simulator"
+    $::info_l configure -text "Running Simulator"
     set ::execCmd reset
 
     $::run_b   configure -state disabled
@@ -139,79 +139,21 @@ proc init_sim {} {
     close $f
 
     set ::data(target,code) {while {1} {set x [loc_x]}}
-    #set ::data(target,code) $::data(r0,code)
 
     set ::activeRobots $::allRobots
 
     init_robots
 
-    # Give the robot color
-    set color [lindex [distinct_colors 1] 0]
-    set ::data(r0,color) $color
-
-    # Set colors as far away as possible from each other visually
-    set ::data(r0,color) $color
-    set ::data(r0,brightness) [brightness $color]
-    # Precreate robot on canvas
-    set ::data(r0,shape) [lindex $::parms(shapes) 0]
-    set ::data(r0,robotid) \
-        [$::arena_c create line -100 -100 -100 -100 \
-             -fill $::data(r0,color) \
-             -arrow last -arrowshape $::data(r0,shape) \
-             -tags "r$::data(r0,num) robot"]
-    set ::data(r0,highlight) 0
-    # Precreate scan mark on canvas
-    set ::data(r0,scanid) \
-        [$::arena_c create arc -100 -100 -100 -100 \
-             -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-             -width 1 -tags "scan s$::data(r0,num)"]
-
     # Set target signature, make it black and place it in center of the arena
     set ::data(target,num)   1
-    set ::data(target,color) black
-    set ::data(target,brightness) [brightness black]
     set ::data(target,x)     500
     set ::data(target,y)     500
-    set ::data(target,shape) [lindex $::parms(shapes) 1]
-    set ::data(target,highlight) 0
-    set ::data(target,robotid) \
-        [$::arena_c create line -100 -100 -100 -100 \
-             -fill $::data(target,color) \
-             -arrow last -arrowshape $::data(target,shape) \
-             -tags "r$::data(r0,num) robot"]
-    set ::data(target,scanid) \
-        [$::arena_c create arc -100 -100 -100 -100 \
-             -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-             -width 1 -tags "scan s$::data(target,num)"]
+
+    gui_init_robots 1
 
     act
     tick
 
-    if 0 {
-    # setup target
-    set robot target
-    lappend ::allRobots target
-    lappend ::activeRobots target
-
-    set ::data($robot,name)    target_0
-    set ::data($robot,status)  1
-    set ::data($robot,num)     1
-    set ::data($robot,color)   black
-    set ::data($robot,x)       500
-    set ::data($robot,y)       500
-    set ::data($robot,health)  100
-    set ::data($robot,speed)   0
-    set ::data($robot,dspeed)  0
-    set ::data($robot,hdg)     0
-    set ::data($robot,dhdg)    0
-    set ::data($robot,mstate)  0
-    set ::data($robot,reload)  0
-    set ::data($robot,hflag)   0
-    set ::data($robot,heat)    0
-    set ::data($robot,team)    "target"
-    set ::data($robot,btemp)   0
-
-}
     # Make room for simulation controls
     grid configure $::arena_c -rowspan 3
 
