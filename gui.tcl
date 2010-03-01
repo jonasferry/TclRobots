@@ -5,6 +5,11 @@ namespace eval ::tk {
     }
 }
 package require Tk
+catch {
+    load ./libtkpath0.3.1.so
+    source tkpath.tcl
+    package require tkpath
+}
 
 ###############################################################################
 #
@@ -332,7 +337,11 @@ proc show_robots {} {
 
 proc show_scan {} {
     # Hide the scan arcs by default
-    $::arena_c itemconfigure scan -outline ""
+    if {$::data(tkp)} {
+        $::arena_c itemconfigure scan -fill ""
+    } else {
+        $::arena_c itemconfigure scan -outline ""
+    }
 
     foreach robot $::activeRobots {
         if {$::data($robot,status)} {
@@ -347,13 +356,23 @@ proc show_scan {} {
                 set y [* [- 1000 $::data($robot,y)] $::scale]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
-                $::arena_c coords $::data($robot,scanid) \
-                        [- $x $val] [- $y $val] \
-                        [+ $x $val] [+ $y $val]
-                $::arena_c itemconfigure $::data($robot,scanid) \
-                        -start [expr {$deg-$res}] \
-                        -extent [expr {2*$res + 1}] \
-                        -outline $::data($robot,color)
+                if {$::data(tkp)} {
+                    set path [arc_path $x $y $val [expr {$deg-$res}] [expr {2*$res + 1}]]
+                    $::arena_c coords $::data($robot,scanid) $path
+                    $::arena_c itemconfigure $::data($robot,scanid) \
+                            -fill $::data($robot,color)
+                    #set ::data($robot,scanid) [$::arena_c create path $path \
+                    #        -fill "" -fillopacity 0.5 -stroke "" \
+                    #        -strokewidth 1 -tags "scan s$::data($robot,num)"]
+                } else {
+                    $::arena_c coords $::data($robot,scanid) \
+                            [- $x $val] [- $y $val] \
+                            [+ $x $val] [+ $y $val]
+                    $::arena_c itemconfigure $::data($robot,scanid) \
+                            -start [expr {$deg-$res}] \
+                            -extent [expr {2*$res + 1}] \
+                            -outline $::data($robot,color)
+                }
             }
         }
     }
@@ -543,7 +562,13 @@ proc hls2rgb {h l s} {
 
 proc create_arena {} {
     # The battle field canvas
-    set ::arena_c [canvas $::game_f.c -background white]
+    if {[info commands ::tkp::canvas] ne ""} {
+        set ::arena_c [tkp::canvas $::game_f.c -background white]
+        set ::data(tkp) 1
+    } else {
+        set ::arena_c [canvas $::game_f.c -background white]
+        set ::data(tkp) 0
+    }
     bind $::arena_c <Configure> {show_arena}
 }
 
@@ -573,12 +598,37 @@ proc gui_init_robots {{lastblack 0}} {
                 -tags "r$::data($robot,num) robot"]
         set ::data($robot,highlight) 0
         # Precreate scan mark on canvas
-        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-                -width 1 -tags "scan s$::data($robot,num)"]
+        if {$::data(tkp)} {
+            set path [arc_path 0 0 10 0 1]
+            set ::data($robot,scanid) [$::arena_c create path $path \
+                    -fill "" -fillopacity 0.2 -stroke "" \
+                    -strokewidth 1 -tags "scan s$::data($robot,num)"]
+        } else {
+            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                    -width 1 -tags "scan s$::data($robot,num)"]
+        }
 
         incr i
     }
+}
+    
+proc arc_path {x y r phi extend} {
+    set path [list M $x $y]
+
+    set phiRad    [expr {$phi/180.0*3.1415926}]
+    set extendRad [expr {$extend/180.0*3.1415926}]
+
+    set x1 [expr {$x+$r*cos($phiRad)}]
+    set y1 [expr {$y-$r*sin($phiRad)}]
+    lappend path L $x1 $y1
+
+    set x2 [expr {$x+$r*cos($phiRad+$extendRad)}]
+    set y2 [expr {$y-$r*sin($phiRad+$extendRad)}]
+    lappend path A $r $r 0 [expr {$extend > 180}] 0 $x2 $y2
+
+    lappend path Z
+    return $path
 }
 
 ###############################################################################
@@ -772,7 +822,11 @@ proc halt {} {
 proc reset {} {
     clean_up
 
-    $::arena_c delete all
+    if {$::data(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
 
     grid forget $::game_f
     destroy $::game_f.sim
