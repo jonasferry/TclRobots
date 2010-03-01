@@ -39,7 +39,7 @@ proc choose_file {win filename} {
 # choose_all
 #
 proc choose_all {} {
-    set win .f2.fl
+    set win $::files_fb
     set lsize [$win.l.lst size]
     for {set i 0} {$i < $lsize} {incr i} {
         set f [string trim [$win.l.lst get $i]]
@@ -233,7 +233,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
     fillLst $win $filt $startdir
     selection own $win
     focus $win.sel
-
+    return $win
 }
 
 #
@@ -273,13 +273,7 @@ proc show_arena {} {
     }
 
     set ::scale  [/ $val 1000.0]
-    #set ::border 0
-    #set ::side   [- [int [* 1000 $::scale]] [* 2 $::border]]
     set ::side   [int [* 1000 $::scale]]
-
-    #set b  $::border
-    #set sb [+ $::side $::border]
-    #$::arena_c configure -scrollregion "$b $b $sb $sb"
 
     $::arena_c delete wall
 
@@ -289,19 +283,6 @@ proc show_arena {} {
     $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
 
     $::arena_c configure -scrollregion [$::arena_c bbox wall]
-}
-
-proc border_check {coord} {
-    # Debug fix:
-    return $coord
-
-    if {$coord < $::border} {
-        return $::border
-    } elseif {$coord > $::side} {
-        return $::side
-    } else {
-        return $coord
-    }
 }
 
 ###############################################################################
@@ -315,8 +296,8 @@ proc show_robots {} {
     foreach robot $::allRobots {
         # check robots
         if {$::data($robot,status)} {
-            set x [border_check [* $::data($robot,x) $::scale]]
-            set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
+            set x [* $::data($robot,x) $::scale]
+            set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
             $::arena_c coords $::data($robot,robotid) $x $y \
                     [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
@@ -332,8 +313,8 @@ proc show_robots {} {
         # check missiles
         if {$::data($robot,mstate)} {
             $::arena_c delete m$::data($robot,num)
-            set x [border_check [* $::data($robot,mx) $::scale]]
-            set y [border_check [* [- 1000 $::data($robot,my)] $::scale]]
+            set x [* $::data($robot,mx) $::scale]
+            set y [* [- 1000 $::data($robot,my)] $::scale]
             $::arena_c create oval \
                     [- $x 2] [- $y 2] [+ $x 2] [+ $y 2] \
                     -fill black -tags m$::data($robot,num)
@@ -362,8 +343,8 @@ proc show_scan {} {
 
                 #puts "deg: $deg, res: $res"
 
-                set x [border_check [* $::data($robot,x) $::scale]]
-                set y [border_check [* [- 1000 $::data($robot,y)] $::scale]]
+                set x [* $::data($robot,x) $::scale]
+                set y [* [- 1000 $::data($robot,y)] $::scale]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
                 $::arena_c coords $::data($robot,scanid) \
@@ -899,7 +880,7 @@ proc init_gui {} {
     set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 1]
 
     # The file selection box
-    set files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
+    set ::files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
 
     # The robot list info label
     set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
