@@ -324,9 +324,16 @@ proc show_robots {} {
             $::arena_c delete m$::data($robot,num)
             set x [* $::data($robot,mx) $::scale]
             set y [* [- 1000 $::data($robot,my)] $::scale]
-            $::arena_c create oval \
-                    [- $x 2] [- $y 2] [+ $x 2] [+ $y 2] \
-                    -fill black -tags m$::data($robot,num)
+            set val [* 6 $::scale]
+            if {$::data(tkp)} {
+                $::arena_c create circle $x $y -r $val \
+                        -fill $::data(gradient,miss) \
+                        -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
+            } else {
+                $::arena_c create oval \
+                        [- $x $val] [- $y $val] [+ $x $val] [+ $y val] \
+                        -fill black -tags m$::data($robot,num)
+            }
         }
     }
 }
@@ -398,7 +405,8 @@ proc show_explode {robot} {
     set val4 [* 40 $::scale]
 
     if {$::data(tkp)} {
-        set id [$::arena_c create circle $x $y -r $val -fill $::data(gradient) \
+        set id [$::arena_c create circle $x $y -r $val \
+                -fill $::data(gradient,expl) \
                 -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
         after 100 [string map [list %id% $id %val% $val2] {
             $::arena_c itemconfigure %id% -r %val%
@@ -588,8 +596,12 @@ proc create_arena {} {
         set ::data(tkp) 1
 
         # A gradient for a ball. Used for explosion
-        set ::data(gradient) [$::arena_c gradient create radial \
+        set ::data(gradient,expl) [$::arena_c gradient create radial \
                 -stops "{0 yellow} {1 red}" \
+                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+        # A gradient for a ball. Used for missile
+        set ::data(gradient,miss) [$::arena_c gradient create radial \
+                -stops "{0 darkgray} {1 black}" \
                 -radialtransition {0.6 0.4 0.8 0.7 0.3}]
     } else {
         set ::arena_c [canvas $::game_f.c -background white]
