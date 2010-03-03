@@ -393,26 +393,46 @@ proc show_explode {robot} {
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
     set val [* 6 $::scale]
-    set id [$::arena_c create oval \
-            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-            -outline red    -fill red     -width 1  \
-            -tags e$::data($robot,num)]
-    set val [* 10 $::scale]
-    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
-    set val [* 20 $::scale]
-    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    set val2 [* 10 $::scale]
+    set val3 [* 20 $::scale]
+    set val4 [* 40 $::scale]
 
-    update
-    after 100 [string map [list %id% $id %coords% $coords2] {
-        $::arena_c itemconfigure %id% -outline orange -fill orange
-        $::arena_c coords %id% %coords%
-        
-    }]
-    after 200 [string map [list %id% $id %coords% $coords3] {
-        $::arena_c itemconfigure %id% -outline yellow -fill yellow
-        $::arena_c coords %id% %coords%
-    }]
-    after 300 "$::arena_c delete e$::data($robot,num)"
+    if {$::data(tkp)} {
+        set id [$::arena_c create circle $x $y -r $val -fill $::data(gradient) \
+                -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
+        after 100 [string map [list %id% $id %val% $val2] {
+            $::arena_c itemconfigure %id% -r %val%
+        }]
+        after 200 [string map [list %id% $id %val% $val3] {
+            $::arena_c itemconfigure %id% -r %val%
+        }]
+        after 300 [string map [list %id% $id %val% $val4] {
+            $::arena_c itemconfigure %id% -r %val%
+        }]
+    } else {
+        set id [$::arena_c create oval \
+                [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+                -outline red    -fill red     -width 1  \
+                -tags e$::data($robot,num)]
+        set coords2 [list [- $x $val2] [- $y $val2] [+ $x $val2] [+ $y $val2]]
+        set coords3 [list [- $x $val3] [- $y $val3] [+ $x $val3] [+ $y $val3]]
+        set coords4 [list [- $x $val4] [- $y $val4] [+ $x $val4] [+ $y $val4]]
+
+        update
+        after 100 [string map [list %id% $id %coords% $coords2] {
+            $::arena_c itemconfigure %id% -outline orange -fill red
+            $::arena_c coords %id% %coords%
+        }]
+        after 200 [string map [list %id% $id %coords% $coords3] {
+            $::arena_c itemconfigure %id% -outline yellow -fill orange
+            $::arena_c coords %id% %coords%
+        }]
+        after 300 [string map [list %id% $id %coords% $coords4] {
+            $::arena_c itemconfigure %id% -outline yellow -fill yellow
+            $::arena_c coords %id% %coords%
+        }]
+    }
+    after 400 "$::arena_c delete e$::data($robot,num)"
 }
 
 ###############################################################################
@@ -566,6 +586,11 @@ proc create_arena {} {
     if {[info commands ::tkp::canvas] ne ""} {
         set ::arena_c [tkp::canvas $::game_f.c -background white]
         set ::data(tkp) 1
+
+        # A gradient for a ball. Used for explosion
+        set ::data(gradient) [$::arena_c gradient create radial \
+                -stops "{0 yellow} {1 red}" \
+                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
     } else {
         set ::arena_c [canvas $::game_f.c -background white]
         set ::data(tkp) 0
