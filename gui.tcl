@@ -368,10 +368,12 @@ proc show_scan {} {
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
                 if {$::data(tkp)} {
-                    set path [arc_path $x $y $val [expr {$deg-$res}] [expr {2*$res + 1}]]
+                    set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
+                    # Scale to radius and move to location
+                    set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
                     $::arena_c coords $::data($robot,scanid) $path
                     $::arena_c itemconfigure $::data($robot,scanid) \
-                            -fill $::data($robot,color)
+                            -fill $::data($robot,color) -matrix $matrix
                 } else {
                     $::arena_c coords $::data($robot,scanid) \
                             [- $x $val] [- $y $val] \
@@ -637,7 +639,7 @@ proc gui_init_robots {{lastblack 0}} {
         set ::data($robot,highlight) 0
         # Precreate scan mark on canvas
         if {$::data(tkp)} {
-            set path [arc_path 0 0 10 0 1]
+            set path [arc_path 0 1]
             set ::data($robot,scanid) [$::arena_c create path $path \
                     -fill "" -fillopacity 0.2 -stroke "" \
                     -tags "scan s$::data($robot,num)"]
@@ -651,20 +653,20 @@ proc gui_init_robots {{lastblack 0}} {
     }
 }
     
-# Create a path for a pie-slice circular arc
-proc arc_path {x y r phi extend} {
-    set path [list M $x $y]
+# Create a path for a pie-slice circular arc, center in origo, radius 1
+proc arc_path {phi extend} {
+    set path [list M 0 0]
 
     set phiRad    [expr {$phi/180.0*3.1415926}]
     set extendRad [expr {$extend/180.0*3.1415926}]
 
-    set x1 [expr {$x+$r*cos($phiRad)}]
-    set y1 [expr {$y-$r*sin($phiRad)}]
+    set x1 [expr {cos($phiRad)}]
+    set y1 [expr {-sin($phiRad)}]
     lappend path L $x1 $y1
 
-    set x2 [expr {$x+$r*cos($phiRad+$extendRad)}]
-    set y2 [expr {$y-$r*sin($phiRad+$extendRad)}]
-    lappend path A $r $r 0 [expr {$extend > 180}] 0 $x2 $y2
+    set x2 [expr {cos($phiRad+$extendRad)}]
+    set y2 [expr {-sin($phiRad+$extendRad)}]
+    lappend path A 1 1 0 [expr {$extend > 180}] 0 $x2 $y2
 
     lappend path Z
     return $path
