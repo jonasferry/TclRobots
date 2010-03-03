@@ -5,10 +5,14 @@ namespace eval ::tk {
     }
 }
 package require Tk
-catch {
-    load ./libtkpath0.3.1.so
-    source tkpath.tcl
-    package require tkpath
+# Try to get tkpath
+if {[catch {package require tkpath}]} {
+    catch {
+        # Try for a local copy
+        load ./libtkpath0.3.1.so
+        source tkpath.tcl
+        package require tkpath
+    }
 }
 
 ###############################################################################
@@ -361,9 +365,6 @@ proc show_scan {} {
                     $::arena_c coords $::data($robot,scanid) $path
                     $::arena_c itemconfigure $::data($robot,scanid) \
                             -fill $::data($robot,color)
-                    #set ::data($robot,scanid) [$::arena_c create path $path \
-                    #        -fill "" -fillopacity 0.5 -stroke "" \
-                    #        -strokewidth 1 -tags "scan s$::data($robot,num)"]
                 } else {
                     $::arena_c coords $::data($robot,scanid) \
                             [- $x $val] [- $y $val] \
@@ -602,7 +603,7 @@ proc gui_init_robots {{lastblack 0}} {
             set path [arc_path 0 0 10 0 1]
             set ::data($robot,scanid) [$::arena_c create path $path \
                     -fill "" -fillopacity 0.2 -stroke "" \
-                    -strokewidth 1 -tags "scan s$::data($robot,num)"]
+                    -tags "scan s$::data($robot,num)"]
         } else {
             set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
                     -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
@@ -613,6 +614,7 @@ proc gui_init_robots {{lastblack 0}} {
     }
 }
     
+# Create a path for a pie-slice circular arc
 proc arc_path {x y r phi extend} {
     set path [list M $x $y]
 
