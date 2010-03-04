@@ -1,17 +1,21 @@
-# Trying this to get better toplevel on Mac
-namespace eval ::tk {
-    namespace eval ::mac {
-        set useThemedToplevel 1
-    }
-}
 package require Tk
 # Try to get tkpath
 if {[catch {package require tkpath}]} {
-    catch {
-        # Try for a local copy
-        load ./libtkpath0.3.1.so
-        source tkpath.tcl
-        package require tkpath
+    if {[file exists libtkpath0.3.1.dylib]} {
+        catch {
+            # Try for a local copy
+            load ./libtkpath0.3.1.dylib
+            source tkpath.tcl
+            package require tkpath
+        }
+    } elseif {[file exists libtkpath0.3.1.so]} {
+        catch {
+            # Try for a local copy
+            load ./libtkpath0.3.1.so
+            source tkpath.tcl
+            package require tkpath
+        }
+    	
     }
 }
 
@@ -413,25 +417,22 @@ proc show_explode {robot} {
     set x [* $::data($robot,mx) $::scale]
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    set val [* 6 $::scale]
-    set val2 [* 10 $::scale]
-    set val3 [* 20 $::scale]
-    set val4 [* 40 $::scale]
-
     if {$::data(tkp)} {
-        set id [$::arena_c create circle $x $y -r $val \
+        set id [$::arena_c create circle $x $y -r 0 \
                 -fill $::data(gradient,expl) \
                 -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
-        after 100 [string map [list %id% $id %val% $val2] {
-            $::arena_c itemconfigure %id% -r %val%
-        }]
-        after 200 [string map [list %id% $id %val% $val3] {
-            $::arena_c itemconfigure %id% -r %val%
-        }]
-        after 300 [string map [list %id% $id %val% $val4] {
-            $::arena_c itemconfigure %id% -r %val%
-        }]
+                
+        #Loop over all animation frames       
+        for {set i 0} {$i < $::parms(explosion,numbooms)} {incr i} {
+	    after [expr $::parms(explosion,duration)/$::parms(explosion,numbooms)*$i] [string map [list %id% $id %val% [expr 40*$i*$::scale/$::parms(explosion,numbooms)]] {
+                $::arena_c itemconfigure %id% -r %val%
+            }]
+        }
     } else {
+    	set val [* 6 $::scale] ; #It's easier that way
+        set val2 [* 10 $::scale]
+        set val3 [* 20 $::scale]
+        set val4 [* 40 $::scale]
         set id [$::arena_c create oval \
                 [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
                 -outline red    -fill red     -width 1  \
@@ -454,7 +455,7 @@ proc show_explode {robot} {
             $::arena_c coords %id% %coords%
         }]
     }
-    after 400 "$::arena_c delete e$::data($robot,num)"
+    after [expr $::parms(explosion,duration)+100] "$::arena_c delete e$::data($robot,num)"
 }
 
 ###############################################################################
@@ -463,7 +464,7 @@ proc show_explode {robot} {
 #
 #
 
-proc show_die {robot} {
+proc show_die {robot} {	
     set x [* $::data($robot,x) $::scale]
     set y [* [- 1000 $::data($robot,y)] $::scale]
 
@@ -611,8 +612,8 @@ proc create_arena {} {
 
         # A gradient for a ball. Used for explosion
         set ::data(gradient,expl) [$::arena_c gradient create radial \
-                -stops "{0 yellow} {1 red}" \
-                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+                -stops "{0 red 0.8} {1 yellow 0}" \
+                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
         # A gradient for a ball. Used for missile
         set ::data(gradient,miss) [$::arena_c gradient create radial \
                 -stops "{0 darkgray} {1 black}" \
@@ -955,6 +956,9 @@ proc gui_settings {} {
 
 proc init_gui {} {
     gui_settings
+    
+    set ::parms(explosion,numbooms) 20  ; #Number of frames in an explosion
+    set ::parms(explosion,duration) 300 ; #Duration of an explosion
     set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
     set ::parms(paths)  {}
     set path [list [list M 10 0 L -5 5 L -5 -5 Z] "M 6 0 L -1 0"]
