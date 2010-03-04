@@ -331,7 +331,7 @@ proc show_robots {} {
                         -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
             } else {
                 $::arena_c create oval \
-                        [- $x $val] [- $y $val] [+ $x $val] [+ $y val] \
+                        [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
                         -fill black -tags m$::data($robot,num)
             }
         }
