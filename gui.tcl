@@ -308,9 +308,21 @@ proc show_robots {} {
             set x [* $::data($robot,x) $::scale]
             set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-            $::arena_c coords $::data($robot,robotid) $x $y \
-                    [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
-                    [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+            if {$::data(tkp)} {
+                set val [* 4 $::scale]
+                set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
+                set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
+                set msinPhi [- $sinPhi]
+		set matrix \
+                        [list [list $cosPhi $msinPhi] [list $sinPhi $cosPhi] \
+                        [list $x $y]]
+                $::arena_c itemconfigure $::data($robot,robotid) \
+                        -matrix $matrix
+            } else {
+                $::arena_c coords $::data($robot,robotid) $x $y \
+                        [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
+                        [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+            }
             if {$::data($robot,highlight)} {
                 set r [* 50 $::scale]
                 $::arena_c create oval \
@@ -632,10 +644,21 @@ proc gui_init_robots {{lastblack 0}} {
         set ::data($robot,brightness) [brightness $color]
         # Precreate robot on canvas
         set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
-                -fill $::data($robot,color) \
-                -arrow last -arrowshape $::data($robot,shape) \
-                -tags "r$::data($robot,num) robot"]
+        set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
+        if {$::data(tkp)} {
+            foreach path $::data($robot,paths) {
+                $::arena_c create path $path \
+                        -fill "" -stroke $color \
+                        -tags "robot r$::data($robot,num)"
+            }
+            set ::data($robot,robotid) r$::data($robot,num)
+        } else {
+            set ::data($robot,robotid) [$::arena_c create line \
+                    -100 -100 -100 -100 \
+                    -fill $::data($robot,color) \
+                    -arrow last -arrowshape $::data($robot,shape) \
+                    -tags "r$::data($robot,num) robot"]
+        }
         set ::data($robot,highlight) 0
         # Precreate scan mark on canvas
         if {$::data(tkp)} {
@@ -914,6 +937,14 @@ set tr_icon {
 
 image create bitmap iconfn -data $::tr_icon -background ""
 
+proc ellipsepath {x y rx ry} {
+    list \
+            M $x [- $y $ry] \
+            a $rx $ry 0 1 1 0 [*  2 $ry] \
+            a $rx $ry 0 1 1 0 [* -2 $ry] \
+            Z
+}
+
 proc gui_settings {} {
     # Copy some settings from Ttk to Tk
     set bg [ttk::style configure . -background]
@@ -925,6 +956,13 @@ proc gui_settings {} {
 proc init_gui {} {
     gui_settings
     set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+    set ::parms(paths)  {}
+    set path [list [list M 10 0 L -5 5 L -5 -5 Z] "M 6 0 L -1 0"]
+    lappend ::parms(paths) $path
+    set path [list [list M 10 0 L -5 7 L 0 0 L -5 -7 Z]]
+    lappend ::parms(paths) $path
+    set path [list [ellipsepath 0 0 10 5] [ellipsepath 0 0 3 3]]
+    lappend ::parms(paths) $path
 
     # Create and grid the outer content frame
     # The button row
