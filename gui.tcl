@@ -295,6 +295,7 @@ proc show_arena {} {
     $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
 
     $::arena_c configure -scrollregion [$::arena_c bbox wall]
+    $::arena_c lower wall
 }
 
 ###############################################################################
@@ -312,7 +313,7 @@ proc show_robots {} {
             set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
             if {$::data(tkp)} {
-                set val [* 4 $::scale]
+                set val [* $::data($robot,scale) $::scale]
                 set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
                 set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
                 set msinPhi [- $sinPhi]
@@ -609,6 +610,7 @@ proc hls2rgb {h l s} {
 proc create_arena {} {
     # The battle field canvas
     if {[info commands ::tkp::canvas] ne ""} {
+        set ::tkp::depixelize 0
         set ::arena_c [tkp::canvas $::game_f.c -background white]
         set ::data(tkp) 1
 
@@ -649,12 +651,18 @@ proc gui_init_robots {{lastblack 0}} {
         set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
         set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
         if {$::data(tkp)} {
-            foreach path $::data($robot,paths) {
+            foreach {path opts} $::data($robot,paths) {
                 $::arena_c create path $path \
                         -fill "" -stroke $color \
+                        {*}$opts \
                         -tags "robot r$::data($robot,num)"
             }
             set ::data($robot,robotid) r$::data($robot,num)
+            # Auto-adapt scale to a robot size
+            set bbox [$::arena_c bbox r$::data($robot,num)]
+            lassign $bbox x1 y1 x2 y2
+            set size [max [- $x2 $x1] [- $y2 $y1]]
+            set ::data($robot,scale) [expr {80.0 / $size}]
         } else {
             set ::data($robot,robotid) [$::arena_c create line \
                     -100 -100 -100 -100 \
@@ -964,13 +972,27 @@ proc init_gui {} {
     set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
     # Some experimental path shapes for robots
     set ::parms(paths)  {}
-    set path [list [list M 10 0 L -5 5 L -5 -5 Z] "M 6 0 L -1 0"]
+    set path [list "M 10 0 L -5 5 L -5 -5 Z" {-fill black -stroke ""} "M 6 0 L -1 0" {}]
     lappend ::parms(paths) $path
-    set path [list [list M 10 0 L -5 7 L 0 0 L -5 -7 Z]]
+    set path [list "M 10 0 L -5 7 L 0 0 L -5 -7 Z" {}]
     lappend ::parms(paths) $path
-    set path [list [ellipsepath 0 0 10 5] [ellipsepath -2 0 3 3]]
+    set path [list [ellipsepath 0 0 10 5] {-fill gray} [ellipsepath -2 0 3 3] {-fill black -stroke ""}]
     lappend ::parms(paths) $path
-
+    if 0 {
+        # A little experiment to use tkpath's tiger demo as a robot
+        if {[file exists tiger.tcl]} {
+            set path {}
+            set ch [open tiger.tcl]
+            set data [read $ch]
+            close $ch
+            foreach line [split $data \n] {
+                if {![string match "*create path*" $line]} continue
+                lappend path [lindex $line 3]
+                lappend path [lrange $line 6 end]
+            }
+            lappend ::parms(paths) $path
+        }
+    }
     # Create and grid the outer content frame
     # The button row
     grid columnconfigure . 0 -weight 1
