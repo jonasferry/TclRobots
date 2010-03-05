@@ -1051,7 +1051,7 @@ proc init_gui {} {
     set robotlist_f  [ttk::frame $::sel_f.fr.f]
 
     # The robot list
-    set ::robotList {}
+    set ::robotList $::robotFiles
     set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
                             -yscrollcommand "$::sel_f.fr.f.s set" \
                             -selectmode single -listvariable ::robotList]

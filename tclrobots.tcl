@@ -97,7 +97,9 @@ proc init_trig_tables {} {
 
 proc init_rand {} {
     # Set random seed
-    set ::seed [* [pid] [file atime /dev/tty]]
+    if {![info exist ::seed]} {
+        set ::seed [* [pid] [file atime /dev/tty]]
+    }
     srand $::seed
 }
 
@@ -1055,9 +1057,17 @@ set tourn_type   0
 set ::numlist    0
 set outfile      ""
 
+set state none
 foreach arg $::argv {
+    if {$state eq "seed"} {
+        set ::seed $arg
+        set state none
+        continue
+    }
     switch -glob -- $arg  {
         -t*     {set ::tourn_type 1}
+        -gui    {set ::gui 1}
+        -seed   {set state seed}
         default {
             if {[file isfile [pwd]/$arg]} {
                 lappend ::robotFiles [pwd]/$arg
@@ -1068,7 +1078,7 @@ foreach arg $::argv {
     }
 }
 
-if {[llength $::robotFiles] >= 2} {
+if {[llength $::robotFiles] >= 2 && !$::gui} {
     # Run batch
     puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {
