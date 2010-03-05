@@ -968,7 +968,7 @@ proc init_gui {} {
     lappend ::parms(paths) $path
     set path [list [list M 10 0 L -5 7 L 0 0 L -5 -7 Z]]
     lappend ::parms(paths) $path
-    set path [list [ellipsepath 0 0 10 5] [ellipsepath 0 0 3 3]]
+    set path [list [ellipsepath 0 0 10 5] [ellipsepath -2 0 3 3]]
     lappend ::parms(paths) $path
 
     # Create and grid the outer content frame
@@ -1004,7 +1004,7 @@ proc init_gui {} {
 
     # The info label
     set ::StatusBarMsg "Select robot files for battle"
-    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w]
+    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w -width 1]
 
     # Add a size grip over the status bar
     ttk::sizegrip .sg

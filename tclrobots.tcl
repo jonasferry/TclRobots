@@ -890,7 +890,27 @@ proc runRobots {} {
 
         tick
 
-        after $parms(tick) [info coroutine]
+        if {$parms(tick) < 5} {
+            # Don't bother at high speed
+            after $parms(tick) [info coroutine]
+        } elseif {$tick <= 5} {
+            # Let the first few ticks pass before measuring
+            after $parms(tick) [info coroutine]
+            set timeAt5 [clock milliseconds]
+        } else {
+            # Try to measure time, to adjust the tick delay for load
+            set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
+            set delay [expr {$target - [clock milliseconds]}]
+            # Sanity check value
+            if {$delay > $parms(tick)} {
+                set delay $parms(tick)
+            } elseif {$delay < 5} {
+                set delay 5
+            }
+            after $delay [info coroutine]
+            # Keep the lag visible
+            set ::StatusBarMsg "Running $delay"
+        }
         yield
     }
 }
