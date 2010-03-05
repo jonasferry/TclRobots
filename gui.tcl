@@ -15,7 +15,6 @@ if {[catch {package require tkpath}]} {
             source tkpath.tcl
             package require tkpath
         }
-    	
     }
 }
 
@@ -422,14 +421,16 @@ proc show_explode {robot} {
                 -fill $::data(gradient,expl) \
                 -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
                 
-        #Loop over all animation frames       
+        # Loop over all animation frames       
         for {set i 0} {$i < $::parms(explosion,numbooms)} {incr i} {
-	    after [expr $::parms(explosion,duration)/$::parms(explosion,numbooms)*$i] [string map [list %id% $id %val% [expr 40*$i*$::scale/$::parms(explosion,numbooms)]] {
+            set delay [expr {$i * $::parms(explosion,duration) / $::parms(explosion,numbooms)}]
+            set radius [expr {40 * $i * $::scale / $::parms(explosion,numbooms)}]
+	    after $delay [string map [list %id% $id %val% $radius] {
                 $::arena_c itemconfigure %id% -r %val%
             }]
         }
     } else {
-    	set val [* 6 $::scale] ; #It's easier that way
+    	set val  [*  6 $::scale] ; #It's easier that way
         set val2 [* 10 $::scale]
         set val3 [* 20 $::scale]
         set val4 [* 40 $::scale]
@@ -455,7 +456,8 @@ proc show_explode {robot} {
             $::arena_c coords %id% %coords%
         }]
     }
-    after [expr $::parms(explosion,duration)+100] "$::arena_c delete e$::data($robot,num)"
+    set delay [expr {$::parms(explosion,duration) + 100}]
+    after $delay  "$::arena_c delete e$::data($robot,num)"
 }
 
 ###############################################################################
@@ -960,6 +962,7 @@ proc init_gui {} {
     set ::parms(explosion,numbooms) 20  ; #Number of frames in an explosion
     set ::parms(explosion,duration) 300 ; #Duration of an explosion
     set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+    # Some experimental path shapes for robots
     set ::parms(paths)  {}
     set path [list [list M 10 0 L -5 5 L -5 -5 Z] "M 6 0 L -1 0"]
     lappend ::parms(paths) $path
