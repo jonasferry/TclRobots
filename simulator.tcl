@@ -10,11 +10,6 @@ proc examine {} {
     puts $::data(r0,interp)
     set ::status_val [$::data(r0,interp) eval set $::status_var]
     puts $::status_val
-#    exit;
-
-    #set ::status_val [$::data(r0,interp) eval {set dir}]
-    #puts "status_val: $::status_val";exit
-#    interp alias {}  targetPath targetCmd
 }
 
 ###############################################################################
@@ -81,15 +76,18 @@ proc sim_robot {} {
 
 proc ver_range {var low high} {
     set val $::data(r0,$var)
-    if {$val < $low}  { set $var $low } 
-    if {$val > $high} { set $var $high } 
+    if {$val < $low} {
+        set $var $low
+    }
+    if {$val > $high} {
+        set $var $high
+    }
     set ::data(r0,$var) $val
 }
 
 proc end_sim {} {
-    # Restore canvas when simulation control no longer need space
-    grid configure $::arena_c -rowspan 2
-    exit
+    # See gui.tcl for the reset procedure
+    reset
 }
 
 ###############################################################################
@@ -115,8 +113,6 @@ proc init_sim {} {
 #    grid $::robotMsg_lb -column 1 -row 0
     grid $::game_f -column 0 -row 2 -sticky nsew
     show_arena
-
-    puts check
 
     # start robots
     set ::StatusBarMsg "Running Simulator"

@@ -96,7 +96,8 @@ proc init_trig_tables {} {
 }
 
 proc init_rand {} {
-    # Set random seed
+    # Set random seed. Note that this works on Linux and Mac, but needs
+    # to be done differently on Windows.
     set ::seed [* [pid] [file atime /dev/tty]]
     srand $::seed
 }
@@ -1015,6 +1016,8 @@ proc debug {args} {
     if {[lindex $args 0] ne "exit"} {
         puts [join $args]
     } else {
+        # Calling with 'debug exit "msg"' prints the message and then
+        # exits. This is useful for "checkpoint" style debugging.
         puts [join [lrange $args 1 end]]
         exit
     }

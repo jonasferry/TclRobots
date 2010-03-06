@@ -386,7 +386,7 @@ proc show_explode {robot} {
     after 100 [string map [list %id% $id %coords% $coords2] {
         $::arena_c itemconfigure %id% -outline orange -fill orange
         $::arena_c coords %id% %coords%
-        
+
     }]
     after 200 [string map [list %id% $id %coords% $coords3] {
         $::arena_c itemconfigure %id% -outline yellow -fill yellow
@@ -422,15 +422,15 @@ proc show_die {robot} {
     update
     after 100 [string map [list %id% $id %coords% $coords2] {
         $::arena_c coords %id% %coords%
-        
+
     }]
     after 200 [string map [list %id% $id %coords% $coords3] {
         $::arena_c coords %id% %coords%
     }]
     after 300 [string map [list %id% $id %coords% $coords4] {
         $::arena_c coords %id% %coords%
-        
-    }] 
+
+    }]
     after 400 [string map [list %id% $id %coords% $coords5] {
         $::arena_c coords %id% %coords%
     }]
@@ -559,7 +559,7 @@ proc gui_init_robots {{lastblack 0}} {
     # Remove old canvas items
     $::arena_c delete robot
     $::arena_c delete scan
-	
+
     set i 0
     foreach robot $::allRobots color $colors {
         # Set colors as far away as possible from each other visually
@@ -588,27 +588,27 @@ proc gui_init_robots {{lastblack 0}} {
 #
 
 proc init_battle {} {
-    
+
     if {[llength $::robotList] < 2} {
     	tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
         return
     }
 
     set ::halted  0
-	
+
     set ::StatusBarMsg "Initializing..."
-	
+
     # get robot filenames from window
     set ::robotFiles $::robotList
-	
+
     grid forget $::sel_f
     grid $::game_f -column 0 -row 2 -sticky nsew
     show_arena
-	
+
     # Clear message boxes
     set ::robotHealth {}
     set ::robotMsg    {}
-	
+
     # start robots
     set ::StatusBarMsg "Running"
     $::run_b   configure -state normal   -text "Halt" -command halt
@@ -616,7 +616,7 @@ proc init_battle {} {
     $::tourn_b configure -state disabled
     $::about_b configure -state disabled
     $::quit_b  configure -state disabled
-	
+
     # Init robots
     init
 
@@ -625,14 +625,14 @@ proc init_battle {} {
 
     # Start game
     main
-	
+
     # find winnner
     if {$::halted} {
         set ::StatusBarMsg "Battle halted"
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-	
+
     $::run_b configure -state normal -text "Reset" -command reset
 }
 
