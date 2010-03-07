@@ -98,7 +98,9 @@ proc init_trig_tables {} {
 proc init_rand {} {
     # Set random seed. Note that this works on Linux and Mac, but needs
     # to be done differently on Windows.
-    set ::seed [* [pid] [file atime /dev/tty]]
+    if {![info exist ::seed]} {
+        set ::seed [* [pid] [file atime /dev/tty]]
+    }
     srand $::seed
 }
 
@@ -891,7 +893,27 @@ proc runRobots {} {
 
         tick
 
-        after $parms(tick) [info coroutine]
+        if {$parms(tick) < 5} {
+            # Don't bother at high speed
+            after $parms(tick) [info coroutine]
+        } elseif {$tick <= 5} {
+            # Let the first few ticks pass before measuring
+            after $parms(tick) [info coroutine]
+            set timeAt5 [clock milliseconds]
+        } else {
+            # Try to measure time, to adjust the tick delay for load
+            set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
+            set delay [expr {$target - [clock milliseconds]}]
+            # Sanity check value
+            if {$delay > $parms(tick)} {
+                set delay $parms(tick)
+            } elseif {$delay < 5} {
+                set delay 5
+            }
+            after $delay [info coroutine]
+            # Keep the lag visible
+            set ::StatusBarMsg "Running $delay"
+        }
         yield
     }
 }
@@ -1027,7 +1049,7 @@ proc debug {args} {
 # do it!
 # main line code
 
-# check for command line args, run tournament if any 
+# check for command line args, run tournament if any
 
 set ::gui        0
 set ::max_ticks  6000
@@ -1038,9 +1060,17 @@ set tourn_type   0
 set ::numlist    0
 set outfile      ""
 
+set state none
 foreach arg $::argv {
+    if {$state eq "seed"} {
+        set ::seed $arg
+        set state none
+        continue
+    }
     switch -glob -- $arg  {
         -t*     {set ::tourn_type 1}
+        -gui    {set ::gui 1}
+        -seed   {set state seed}
         default {
             if {[file isfile [pwd]/$arg]} {
                 lappend ::robotFiles [pwd]/$arg
@@ -1051,7 +1081,7 @@ foreach arg $::argv {
     }
 }
 
-if {[llength $::robotFiles] >= 2} {
+if {[llength $::robotFiles] >= 2 && !$::gui} {
     # Run batch
     puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
 } else {

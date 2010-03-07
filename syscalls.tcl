@@ -108,7 +108,7 @@ proc after {ms args} {
             syscall speed
             return [_ping_check [yield]]
         }
-        
+
     } else {
         set script [join $args]
         syscall callback $ticks $script

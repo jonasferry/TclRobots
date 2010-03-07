@@ -1,10 +1,22 @@
-# Trying this to get better toplevel on Mac
-namespace eval ::tk {
-    namespace eval ::mac {
-        set useThemedToplevel 1
+package require Tk
+# Try to get tkpath
+if {[catch {package require tkpath}]} {
+    if {[file exists libtkpath0.3.1.dylib]} {
+        catch {
+            # Try for a local copy
+            load ./libtkpath0.3.1.dylib
+            source tkpath.tcl
+            package require tkpath
+        }
+    } elseif {[file exists libtkpath0.3.1.so]} {
+        catch {
+            # Try for a local copy
+            load ./libtkpath0.3.1.so
+            source tkpath.tcl
+            package require tkpath
+        }
     }
 }
-package require Tk
 
 ###############################################################################
 #
@@ -283,6 +295,7 @@ proc show_arena {} {
     $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
 
     $::arena_c configure -scrollregion [$::arena_c bbox wall]
+    $::arena_c lower wall
 }
 
 ###############################################################################
@@ -299,9 +312,21 @@ proc show_robots {} {
             set x [* $::data($robot,x) $::scale]
             set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-            $::arena_c coords $::data($robot,robotid) $x $y \
-                    [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
-                    [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+            if {$::data(tkp)} {
+                set val [* $::data($robot,scale) $::scale]
+                set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
+                set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
+                set msinPhi [- $sinPhi]
+		set matrix \
+                        [list [list $cosPhi $msinPhi] [list $sinPhi $cosPhi] \
+                        [list $x $y]]
+                $::arena_c itemconfigure $::data($robot,robotid) \
+                        -matrix $matrix
+            } else {
+                $::arena_c coords $::data($robot,robotid) $x $y \
+                        [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
+                        [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+            }
             if {$::data($robot,highlight)} {
                 set r [* 50 $::scale]
                 $::arena_c create oval \
@@ -315,9 +340,16 @@ proc show_robots {} {
             $::arena_c delete m$::data($robot,num)
             set x [* $::data($robot,mx) $::scale]
             set y [* [- 1000 $::data($robot,my)] $::scale]
-            $::arena_c create oval \
-                    [- $x 2] [- $y 2] [+ $x 2] [+ $y 2] \
-                    -fill black -tags m$::data($robot,num)
+            set val [* 6 $::scale]
+            if {$::data(tkp)} {
+                $::arena_c create circle $x $y -r $val \
+                        -fill $::data(gradient,miss) \
+                        -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
+            } else {
+                $::arena_c create oval \
+                        [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+                        -fill black -tags m$::data($robot,num)
+            }
         }
     }
 }
@@ -332,7 +364,11 @@ proc show_robots {} {
 
 proc show_scan {} {
     # Hide the scan arcs by default
-    $::arena_c itemconfigure scan -outline ""
+    if {$::data(tkp)} {
+        $::arena_c itemconfigure scan -fill ""
+    } else {
+        $::arena_c itemconfigure scan -outline ""
+    }
 
     foreach robot $::activeRobots {
         if {$::data($robot,status)} {
@@ -347,13 +383,22 @@ proc show_scan {} {
                 set y [* [- 1000 $::data($robot,y)] $::scale]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
-                $::arena_c coords $::data($robot,scanid) \
-                        [- $x $val] [- $y $val] \
-                        [+ $x $val] [+ $y $val]
-                $::arena_c itemconfigure $::data($robot,scanid) \
-                        -start [expr {$deg-$res}] \
-                        -extent [expr {2*$res + 1}] \
-                        -outline $::data($robot,color)
+                if {$::data(tkp)} {
+                    set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
+                    # Scale to radius and move to location
+                    set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
+                    $::arena_c coords $::data($robot,scanid) $path
+                    $::arena_c itemconfigure $::data($robot,scanid) \
+                            -fill $::data($robot,color) -matrix $matrix
+                } else {
+                    $::arena_c coords $::data($robot,scanid) \
+                            [- $x $val] [- $y $val] \
+                            [+ $x $val] [+ $y $val]
+                    $::arena_c itemconfigure $::data($robot,scanid) \
+                            -start [expr {$deg-$res}] \
+                            -extent [expr {2*$res + 1}] \
+                            -outline $::data($robot,color)
+                }
             }
         }
     }
@@ -372,27 +417,48 @@ proc show_explode {robot} {
     set x [* $::data($robot,mx) $::scale]
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    set val [* 6 $::scale]
-    set id [$::arena_c create oval \
-            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-            -outline red    -fill red     -width 1  \
-            -tags e$::data($robot,num)]
-    set val [* 10 $::scale]
-    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
-    set val [* 20 $::scale]
-    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+    if {$::data(tkp)} {
+        set id [$::arena_c create circle $x $y -r 0 \
+                -fill $::data(gradient,expl) \
+                -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
 
-    update
-    after 100 [string map [list %id% $id %coords% $coords2] {
-        $::arena_c itemconfigure %id% -outline orange -fill orange
-        $::arena_c coords %id% %coords%
+        # Loop over all animation frames
+        for {set i 0} {$i < $::parms(explosion,numbooms)} {incr i} {
+            set delay [expr {$i * $::parms(explosion,duration) / $::parms(explosion,numbooms)}]
+            set radius [expr {40 * $i * $::scale / $::parms(explosion,numbooms)}]
+	    after $delay [string map [list %id% $id %val% $radius] {
+                $::arena_c itemconfigure %id% -r %val%
+            }]
+        }
+    } else {
+    	set val  [*  6 $::scale] ; #It's easier that way
+        set val2 [* 10 $::scale]
+        set val3 [* 20 $::scale]
+        set val4 [* 40 $::scale]
+        set id [$::arena_c create oval \
+                [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+                -outline red    -fill red     -width 1  \
+                -tags e$::data($robot,num)]
+        set coords2 [list [- $x $val2] [- $y $val2] [+ $x $val2] [+ $y $val2]]
+        set coords3 [list [- $x $val3] [- $y $val3] [+ $x $val3] [+ $y $val3]]
+        set coords4 [list [- $x $val4] [- $y $val4] [+ $x $val4] [+ $y $val4]]
 
-    }]
-    after 200 [string map [list %id% $id %coords% $coords3] {
-        $::arena_c itemconfigure %id% -outline yellow -fill yellow
-        $::arena_c coords %id% %coords%
-    }]
-    after 300 "$::arena_c delete e$::data($robot,num)"
+        update
+        after 100 [string map [list %id% $id %coords% $coords2] {
+            $::arena_c itemconfigure %id% -outline orange -fill red
+            $::arena_c coords %id% %coords%
+        }]
+        after 200 [string map [list %id% $id %coords% $coords3] {
+            $::arena_c itemconfigure %id% -outline yellow -fill orange
+            $::arena_c coords %id% %coords%
+        }]
+        after 300 [string map [list %id% $id %coords% $coords4] {
+            $::arena_c itemconfigure %id% -outline yellow -fill yellow
+            $::arena_c coords %id% %coords%
+        }]
+    }
+    set delay [expr {$::parms(explosion,duration) + 100}]
+    after $delay  "$::arena_c delete e$::data($robot,num)"
 }
 
 ###############################################################################
@@ -543,7 +609,23 @@ proc hls2rgb {h l s} {
 
 proc create_arena {} {
     # The battle field canvas
-    set ::arena_c [canvas $::game_f.c -background white]
+    if {[info commands ::tkp::canvas] ne ""} {
+        set ::tkp::depixelize 0
+        set ::arena_c [tkp::canvas $::game_f.c -background white]
+        set ::data(tkp) 1
+
+        # A gradient for a ball. Used for explosion
+        set ::data(gradient,expl) [$::arena_c gradient create radial \
+                -stops "{0 red 0.8} {1 yellow 0}" \
+                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
+        # A gradient for a ball. Used for missile
+        set ::data(gradient,miss) [$::arena_c gradient create radial \
+                -stops "{0 darkgray} {1 black}" \
+                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+    } else {
+        set ::arena_c [canvas $::game_f.c -background white]
+        set ::data(tkp) 0
+    }
     bind $::arena_c <Configure> {show_arena}
 }
 
@@ -567,18 +649,61 @@ proc gui_init_robots {{lastblack 0}} {
         set ::data($robot,brightness) [brightness $color]
         # Precreate robot on canvas
         set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,robotid) [$::arena_c create line -100 -100 -100 -100 \
-                -fill $::data($robot,color) \
-                -arrow last -arrowshape $::data($robot,shape) \
-                -tags "r$::data($robot,num) robot"]
+        set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
+        if {$::data(tkp)} {
+            foreach {path opts} $::data($robot,paths) {
+                $::arena_c create path $path \
+                        -fill "" -stroke $color \
+                        {*}$opts \
+                        -tags "robot r$::data($robot,num)"
+            }
+            set ::data($robot,robotid) r$::data($robot,num)
+            # Auto-adapt scale to a robot size
+            set bbox [$::arena_c bbox r$::data($robot,num)]
+            lassign $bbox x1 y1 x2 y2
+            set size [max [- $x2 $x1] [- $y2 $y1]]
+            set ::data($robot,scale) [expr {80.0 / $size}]
+        } else {
+            set ::data($robot,robotid) [$::arena_c create line \
+                    -100 -100 -100 -100 \
+                    -fill $::data($robot,color) \
+                    -arrow last -arrowshape $::data($robot,shape) \
+                    -tags "r$::data($robot,num) robot"]
+        }
         set ::data($robot,highlight) 0
         # Precreate scan mark on canvas
-        set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-                -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-                -width 1 -tags "scan s$::data($robot,num)"]
+        if {$::data(tkp)} {
+            set path [arc_path 0 1]
+            set ::data($robot,scanid) [$::arena_c create path $path \
+                    -fill "" -fillopacity 0.2 -stroke "" \
+                    -tags "scan s$::data($robot,num)"]
+        } else {
+            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                    -width 1 -tags "scan s$::data($robot,num)"]
+        }
 
         incr i
     }
+}
+
+# Create a path for a pie-slice circular arc, center in origo, radius 1
+proc arc_path {phi extend} {
+    set path [list M 0 0]
+
+    set phiRad    [expr {$phi/180.0*3.1415926}]
+    set extendRad [expr {$extend/180.0*3.1415926}]
+
+    set x1 [expr {cos($phiRad)}]
+    set y1 [expr {-sin($phiRad)}]
+    lappend path L $x1 $y1
+
+    set x2 [expr {cos($phiRad+$extendRad)}]
+    set y2 [expr {-sin($phiRad+$extendRad)}]
+    lappend path A 1 1 0 [expr {$extend > 180}] 0 $x2 $y2
+
+    lappend path Z
+    return $path
 }
 
 ###############################################################################
@@ -772,7 +897,11 @@ proc halt {} {
 proc reset {} {
     clean_up
 
-    $::arena_c delete all
+    if {$::data(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
 
     grid forget $::game_f
     destroy $::game_f.sim
@@ -819,6 +948,14 @@ set tr_icon {
 
 image create bitmap iconfn -data $::tr_icon -background ""
 
+proc ellipsepath {x y rx ry} {
+    list \
+            M $x [- $y $ry] \
+            a $rx $ry 0 1 1 0 [*  2 $ry] \
+            a $rx $ry 0 1 1 0 [* -2 $ry] \
+            Z
+}
+
 proc gui_settings {} {
     # Copy some settings from Ttk to Tk
     set bg [ttk::style configure . -background]
@@ -829,8 +966,33 @@ proc gui_settings {} {
 
 proc init_gui {} {
     gui_settings
-    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
 
+    set ::parms(explosion,numbooms) 20  ; #Number of frames in an explosion
+    set ::parms(explosion,duration) 300 ; #Duration of an explosion
+    set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
+    # Some experimental path shapes for robots
+    set ::parms(paths)  {}
+    set path [list "M 10 0 L -5 5 L -5 -5 Z" {-fill black -stroke ""} "M 6 0 L -1 0" {}]
+    lappend ::parms(paths) $path
+    set path [list "M 10 0 L -5 7 L 0 0 L -5 -7 Z" {}]
+    lappend ::parms(paths) $path
+    set path [list [ellipsepath 0 0 10 5] {-fill gray} [ellipsepath -2 0 3 3] {-fill black -stroke ""}]
+    lappend ::parms(paths) $path
+    if 0 {
+        # A little experiment to use tkpath's tiger demo as a robot
+        if {[file exists tiger.tcl]} {
+            set path {}
+            set ch [open tiger.tcl]
+            set data [read $ch]
+            close $ch
+            foreach line [split $data \n] {
+                if {![string match "*create path*" $line]} continue
+                lappend path [lindex $line 3]
+                lappend path [lrange $line 6 end]
+            }
+            lappend ::parms(paths) $path
+        }
+    }
     # Create and grid the outer content frame
     # The button row
     grid columnconfigure . 0 -weight 1
@@ -864,7 +1026,7 @@ proc init_gui {} {
 
     # The info label
     set ::StatusBarMsg "Select robot files for battle"
-    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w]
+    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w -width 1]
 
     # Add a size grip over the status bar
     ttk::sizegrip .sg
@@ -889,7 +1051,7 @@ proc init_gui {} {
     set robotlist_f  [ttk::frame $::sel_f.fr.f]
 
     # The robot list
-    set ::robotList {}
+    set ::robotList $::robotFiles
     set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
                             -yscrollcommand "$::sel_f.fr.f.s set" \
                             -selectmode single -listvariable ::robotList]
