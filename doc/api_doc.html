@@ -1,0 +1,244 @@
+
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
+<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
+<title>api_doc</title>
+<!-- Source: ./ -->
+<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
+</head>
+<body>
+<div id='logo'>
+<a name='robo_top_of_doc'></a>
+</div> <!-- logo -->
+
+<div id="logo">
+<a name="robo_top_of_doc"></a>
+</div> <!-- logo -->
+<h3>TABLE OF CONTENTS</h3>
+<ul>
+<li>1. <a href="#robo0">syscalls/basic</a></li>
+<ul>
+<li>1.1. <a href="#robo1">basic/scanner</a></li>
+<li>1.2. <a href="#robo2">basic/dsp</a></li>
+<li>1.3. <a href="#robo3">basic/alert</a></li>
+<li>1.4. <a href="#robo4">basic/cannon</a></li>
+<li>1.5. <a href="#robo5">basic/health</a></li>
+<li>1.6. <a href="#robo6">basic/drive</a></li>
+<li>1.7. <a href="#robo7">basic/speed</a></li>
+<li>1.8. <a href="#robo8">basic/heat</a></li>
+<li>1.9. <a href="#robo9">basic/loc_x</a></li>
+<li>1.10. <a href="#robo10">basic/loc_y</a></li>
+<li>1.11. <a href="#robo11">basic/tick</a></li>
+</ul>
+<li>2. <a href="#robo12">syscalls/team</a></li>
+<ul>
+<li>2.1. <a href="#robo13">team/team_declare</a></li>
+<li>2.2. <a href="#robo14">team/team_send</a></li>
+<li>2.3. <a href="#robo15">team/team_get</a></li>
+</ul>
+<li>3. <a href="#robo16">syscalls/convenience</a></li>
+<ul>
+<li>3.1. <a href="#robo17">convenience/dputs</a></li>
+<li>3.2. <a href="#robo18">convenience/rand</a></li>
+<li>3.3. <a href="#robo19">convenience/callback</a></li>
+</ul>
+</ul>
+<a name="robo0"></a>
+<a name="syscalls2fbasic"></a>
+<h1>1.  syscalls/basic [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   basic
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Basic commands
+</pre>
+<a name="robo1"></a>
+<a name="basic2fscanner"></a>
+<h2>1.1.  basic/scanner [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   scanner
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 2 ticks.
+</pre>
+<a name="robo2"></a>
+<a name="basic2fdsp"></a>
+<h2>1.2.  basic/dsp [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   dsp
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo3"></a>
+<a name="basic2falert"></a>
+<h2>1.3.  basic/alert [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   alert
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo4"></a>
+<a name="basic2fcannon"></a>
+<h2>1.4.  basic/cannon [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   cannon
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo5"></a>
+<a name="basic2fhealth"></a>
+<h2>1.5.  basic/health [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   health
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo6"></a>
+<a name="basic2fdrive"></a>
+<h2>1.6.  basic/drive [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   drive
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo7"></a>
+<a name="basic2fspeed"></a>
+<h2>1.7.  basic/speed [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   speed
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo8"></a>
+<a name="basic2fheat"></a>
+<h2>1.8.  basic/heat [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   heat
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo9"></a>
+<a name="basic2floc5fx"></a>
+<h2>1.9.  basic/loc_x [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   loc_x
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo10"></a>
+<a name="basic2floc5fy"></a>
+<h2>1.10.  basic/loc_y [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   loc_y
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo11"></a>
+<a name="basic2ftick"></a>
+<h2>1.11.  basic/tick [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   tick
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo12"></a>
+<a name="syscalls2fteam"></a>
+<h1>2.  syscalls/team [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   team
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Team commands
+</pre>
+<a name="robo13"></a>
+<a name="team2fteam5fdeclare"></a>
+<h2>2.1.  team/team_declare [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_declare
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 1 tick.
+</pre>
+<a name="robo14"></a>
+<a name="team2fteam5fsend"></a>
+<h2>2.2.  team/team_send [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_send
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 0 ticks.
+</pre>
+<a name="robo15"></a>
+<a name="team2fteam5fget"></a>
+<h2>2.3.  team/team_get [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_get
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 0 ticks.
+</pre>
+<a name="robo16"></a>
+<a name="syscalls2fconvenience"></a>
+<h1>3.  syscalls/convenience [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   convenience
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Convenience commands
+</pre>
+<a name="robo17"></a>
+<a name="convenience2fdputs"></a>
+<h2>3.1.  convenience/dputs [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   dputs
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 0 ticks.
+</pre>
+<a name="robo18"></a>
+<a name="convenience2frand"></a>
+<h2>3.2.  convenience/rand [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   rand
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 0 ticks.
+</pre>
+<a name="robo19"></a>
+<a name="convenience2fcallback"></a>
+<h2>3.3.  convenience/callback [ Syscall ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   callback
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Cost: 0 ticks.
+</pre>
+<div id="footer">
+<p>Generated from ./ with ROBODoc V4.99.38 on Mon Mar 08 2010 21:52:13
+</p>
+</div> <!-- footer -->
+
+
+
+<div id='footer'>
+<p>Generated with ROBODoc V4.99.38
+</p>
+</div> <!-- footer -->
+</body>
+</html>
+

@@ -1,16 +1,22 @@
 #!/usr/bin/env tclsh
 
 set docpath "./doc"
-set srcfiles {tclrobots}
+set srcfiles {tclrobots syscalls api}
 
 source $docpath/web.tcl
 
 foreach file $srcfiles {
-    set srcfile "${file}.tcl"
-    set docfile "${file}_doc"
-
-    # Generate doc.html for sed to handle
+    if {$file eq "api"} {
+        set srcfile "syscalls.tcl"
+        set docfile "api_doc"
+        # Generate doc.html
+        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless --internalonly
+    } else {
+        set srcfile "${file}.tcl"
+        set docfile "${file}_doc"
+        # Generate doc.html
     exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless
+    }
 
     # MULTIDOC, if needed
     #exec robodoc --src . --doc $docpath --multidoc --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless --nodesc --no_subdirectories
@@ -23,7 +29,6 @@ foreach file $srcfiles {
 
     # Clean up file
     set f [open $docpath/${docfile}.html]
-    set navigation 0
     set toc 0
     set content 0
     set out {}
@@ -35,11 +40,22 @@ foreach file $srcfiles {
             set toc 1
         }
         if {$toc} {
+            if 0 {
             if {[regexp {\[ File \]} $line]} {
                 # Table of contents done
                 set toc     0
                 set content 1
             }
+            }
+
+            if {[regexp {<a name="robo0"></a>} $line]} {
+                # Table of contents done
+                set toc     0
+                set content 1
+            }
+
+
+
         }
         if {$content} {
             if {[regexp {<p>. <a href=.*>Top</a>.*} $line]} {
@@ -57,7 +73,7 @@ foreach file $srcfiles {
     close $f
 
     set f [open $docpath/${docfile}.html w]
-    puts $f [header $srcfile]
+    puts $f [header $docfile]
     puts $f $out
     puts $f [footer]
     close $f

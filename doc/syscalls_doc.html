@@ -1,0 +1,401 @@
+
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
+<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
+<title>syscalls_doc</title>
+<!-- Source: ./ -->
+<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
+</head>
+<body>
+<div id='logo'>
+<a name='robo_top_of_doc'></a>
+</div> <!-- logo -->
+
+<div id="logo">
+<a name="robo_top_of_doc"></a>
+</div> <!-- logo -->
+<h3>TABLE OF CONTENTS</h3>
+<ul>
+<li>1. <a href="#robo0">syscalls/file_header</a></li>
+<li>2. <a href="#robo1">syscalls/helper</a></li>
+<ul>
+<li>2.1. <a href="#robo2">helper/_ping_check</a></li>
+<li>2.2. <a href="#robo3">helper/_syscall_yield</a></li>
+</ul>
+<li>3. <a href="#robo4">syscalls/basic_cmds</a></li>
+<ul>
+<li>3.1. <a href="#robo5">basic_cmds/scanner</a></li>
+<li>3.2. <a href="#robo6">basic_cmds/dsp</a></li>
+<li>3.3. <a href="#robo7">basic_cmds/alert</a></li>
+<li>3.4. <a href="#robo8">basic_cmds/cannon</a></li>
+<li>3.5. <a href="#robo9">basic_cmds/health</a></li>
+<li>3.6. <a href="#robo10">basic_cmds/drive</a></li>
+<li>3.7. <a href="#robo11">basic_cmds/speed</a></li>
+<li>3.8. <a href="#robo12">basic_cmds/heat</a></li>
+<li>3.9. <a href="#robo13">basic_cmds/loc_x</a></li>
+<li>3.10. <a href="#robo14">basic_cmds/loc_y</a></li>
+<li>3.11. <a href="#robo15">basic_cmds/tick</a></li>
+</ul>
+<li>4. <a href="#robo16">syscalls/team_cmds</a></li>
+<ul>
+<li>4.1. <a href="#robo17">team_cmds/team_declare</a></li>
+<li>4.2. <a href="#robo18">team_cmds/team_send</a></li>
+<li>4.3. <a href="#robo19">team_cmds/team_get</a></li>
+</ul>
+<li>5. <a href="#robo20">syscalls/convenience_cmds</a></li>
+<ul>
+<li>5.1. <a href="#robo21">convenience_cmds/dputs</a></li>
+<li>5.2. <a href="#robo22">convenience_cmds/rand</a></li>
+<li>5.3. <a href="#robo23">convenience_cmds/callback</a></li>
+</ul>
+<li>6. <a href="#robo24">syscalls/deprecated_cmds</a></li>
+<ul>
+<li>6.1. <a href="#robo25">deprecated_cmds/after</a></li>
+</ul>
+</ul>
+<a name="robo0"></a>
+<a name="syscalls2ffile5fheader"></a>
+<h1>1.  syscalls/file_header [ File ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   syscalls.tcl
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   This file contains the syscalls robots can use.
+</pre>
+<p class="item_name">COPYRIGHT</p>
+<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
+   details.
+</pre>
+<a name="robo1"></a>
+<a name="syscalls2fhelper"></a>
+<h1>2.  syscalls/helper [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   helper
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Helper procedures
+</pre>
+<a name="robo2"></a>
+<a name="helper2f5fping5fcheck"></a>
+<h2>2.1.  helper/_ping_check [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   _ping_check
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Check the answer from a yield for a ping alert
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">42 </span>proc _ping_check {val} {
+<span class="line_number">43 </span>    if {[lindex $val 0] eq "alert"} {
+<span class="line_number">44 </span>        #  ping_proc:        dsp:
+<span class="line_number">45 </span>        [lindex $val 1] [lindex $val 2]
+<span class="line_number">46 </span>        set val [lrange $val 3 end]
+<span class="line_number">47 </span>    }
+<span class="line_number">48 </span>    return $val
+<span class="line_number">49 </span>}
+</pre>
+<a name="robo3"></a>
+<a name="helper2f5fsyscall5fyield"></a>
+<h2>2.2.  helper/_syscall_yield [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   _syscall_yield
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Combine the common syscall+yield call
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">64 </span>proc _syscall_yield {args} {
+<span class="line_number">65 </span>    set result [syscall callbackcheck]
+<span class="line_number">66 </span>    if {$result ne ""} {
+<span class="line_number">67 </span>        uplevel \#0 $result
+<span class="line_number">68 </span>    }
+<span class="line_number">69 </span>    syscall {*}$args
+<span class="line_number">70 </span>    return [_ping_check [yield]]
+<span class="line_number">71 </span>}
+</pre>
+<a name="robo4"></a>
+<a name="syscalls2fbasic5fcmds"></a>
+<h1>3.  syscalls/basic_cmds [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   basic_cmds
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Basic commands
+</pre>
+<a name="robo5"></a>
+<a name="basic5fcmds2fscanner"></a>
+<h2>3.1.  basic_cmds/scanner [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   scanner
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">122 </span>proc scanner {degree resolution} {
+<span class="line_number">123 </span>    _syscall_yield scanner $degree $resolution
+<span class="line_number">124 </span>    _syscall_yield scanner $degree $resolution
+<span class="line_number">125 </span>}
+</pre>
+<a name="robo6"></a>
+<a name="basic5fcmds2fdsp"></a>
+<h2>3.2.  basic_cmds/dsp [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   dsp
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">152 </span>proc dsp {} {
+<span class="line_number">153 </span>    _syscall_yield dsp
+<span class="line_number">154 </span>}
+</pre>
+<a name="robo7"></a>
+<a name="basic5fcmds2falert"></a>
+<h2>3.3.  basic_cmds/alert [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   alert
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">181 </span>proc alert {procname} {
+<span class="line_number">182 </span>    _syscall_yield alert $procname
+<span class="line_number">183 </span>}
+</pre>
+<a name="robo8"></a>
+<a name="basic5fcmds2fcannon"></a>
+<h2>3.4.  basic_cmds/cannon [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   cannon
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">210 </span>proc cannon {degree range} {
+<span class="line_number">211 </span>    _syscall_yield cannon $degree $range
+<span class="line_number">212 </span>}
+</pre>
+<a name="robo9"></a>
+<a name="basic5fcmds2fhealth"></a>
+<h2>3.5.  basic_cmds/health [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   health
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">239 </span>proc health {} {
+<span class="line_number">240 </span>    _syscall_yield health
+<span class="line_number">241 </span>}
+</pre>
+<a name="robo10"></a>
+<a name="basic5fcmds2fdrive"></a>
+<h2>3.6.  basic_cmds/drive [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   drive
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">268 </span>proc drive {degree speed} {
+<span class="line_number">269 </span>    _syscall_yield drive $degree $speed
+<span class="line_number">270 </span>}
+</pre>
+<a name="robo11"></a>
+<a name="basic5fcmds2fspeed"></a>
+<h2>3.7.  basic_cmds/speed [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   speed
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">297 </span>proc speed {} {
+<span class="line_number">298 </span>    _syscall_yield speed
+<span class="line_number">299 </span>}
+</pre>
+<a name="robo12"></a>
+<a name="basic5fcmds2fheat"></a>
+<h2>3.8.  basic_cmds/heat [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   heat
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">326 </span>proc heat {} {
+<span class="line_number">327 </span>    _syscall_yield heat
+<span class="line_number">328 </span>}
+</pre>
+<a name="robo13"></a>
+<a name="basic5fcmds2floc5fx"></a>
+<h2>3.9.  basic_cmds/loc_x [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   loc_x
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">355 </span>proc loc_x {} {
+<span class="line_number">356 </span>    _syscall_yield loc_x
+<span class="line_number">357 </span>}
+</pre>
+<a name="robo14"></a>
+<a name="basic5fcmds2floc5fy"></a>
+<h2>3.10.  basic_cmds/loc_y [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   loc_y
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">384 </span>proc loc_y {} {
+<span class="line_number">385 </span>    _syscall_yield loc_y
+<span class="line_number">386 </span>}
+</pre>
+<a name="robo15"></a>
+<a name="basic5fcmds2ftick"></a>
+<h2>3.11.  basic_cmds/tick [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   tick
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">413 </span>proc tick {} {
+<span class="line_number">414 </span>    _syscall_yield tick
+<span class="line_number">415 </span>}
+</pre>
+<a name="robo16"></a>
+<a name="syscalls2fteam5fcmds"></a>
+<h1>4.  syscalls/team_cmds [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   team_cmds
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Team commands
+</pre>
+<a name="robo17"></a>
+<a name="team5fcmds2fteam5fdeclare"></a>
+<h2>4.1.  team_cmds/team_declare [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_declare
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">466 </span>proc team_declare {teamname} {
+<span class="line_number">467 </span>    _syscall_yield team_declare $teamname
+<span class="line_number">468 </span>}
+</pre>
+<a name="robo18"></a>
+<a name="team5fcmds2fteam5fsend"></a>
+<h2>4.2.  team_cmds/team_send [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_send
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">495 </span>proc team_send {data} {
+<span class="line_number">496 </span>    syscall team_send $data
+<span class="line_number">497 </span>}
+</pre>
+<a name="robo19"></a>
+<a name="team5fcmds2fteam5fget"></a>
+<h2>4.3.  team_cmds/team_get [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   team_get
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">524 </span>proc team_get {} {
+<span class="line_number">525 </span>    syscall team_get
+<span class="line_number">526 </span>}
+</pre>
+<a name="robo20"></a>
+<a name="syscalls2fconvenience5fcmds"></a>
+<h1>5.  syscalls/convenience_cmds [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   convenience_cmds
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Convenience commands
+</pre>
+<a name="robo21"></a>
+<a name="convenience5fcmds2fdputs"></a>
+<h2>5.1.  convenience_cmds/dputs [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   dputs
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">577 </span>proc dputs {args} {
+<span class="line_number">578 </span>    syscall dputs $args
+<span class="line_number">579 </span>}
+</pre>
+<a name="robo22"></a>
+<a name="convenience5fcmds2frand"></a>
+<h2>5.2.  convenience_cmds/rand [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   rand
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">606 </span>proc rand {max} {
+<span class="line_number">607 </span>    syscall rand $max
+<span class="line_number">608 </span>}
+</pre>
+<a name="robo23"></a>
+<a name="convenience5fcmds2fcallback"></a>
+<h2>5.3.  convenience_cmds/callback [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   callback
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">635 </span>proc callback {time script} {
+<span class="line_number">636 </span>    syscall callback $time $script
+<span class="line_number">637 </span>}
+</pre>
+<a name="robo24"></a>
+<a name="syscalls2fdeprecated5fcmds"></a>
+<h1>6.  syscalls/deprecated_cmds [ Generics ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   deprecated_cmds
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Deprecated commands kept for backwards compatibility.
+</pre>
+<a name="robo25"></a>
+<a name="deprecated5fcmds2fafter"></a>
+<h2>6.1.  deprecated_cmds/after [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   after
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   After does not work, emulate it using callbacks
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">664 </span>proc after {ms args} {
+<span class="line_number">665 </span>    set ticks [expr {$ms / 100}]
+<span class="line_number">666 </span>    if {[llength $args] == 0} {
+<span class="line_number">667 </span>        # Emulate a wait using some syscalls
+<span class="line_number">668 </span>        for {set t 0} {$t &lt; $ticks} {incr t} {
+<span class="line_number">669 </span>            syscall speed
+<span class="line_number">670 </span>            return [_ping_check [yield]]
+<span class="line_number">671 </span>        }
+<span class="line_number">672 </span>
+<span class="line_number">673 </span>    } else {
+<span class="line_number">674 </span>        set script [join $args]
+<span class="line_number">675 </span>        syscall callback $ticks $script
+<span class="line_number">676 </span>    }
+<span class="line_number">677 </span>    return
+<span class="line_number">678 </span>}
+</pre>
+<div id="footer">
+<p>Generated from ./ with ROBODoc V4.99.38 on Mon Mar 08 2010 21:52:13
+</p>
+</div> <!-- footer -->
+
+
+
+<div id='footer'>
+<p>Generated with ROBODoc V4.99.38
+</p>
+</div> <!-- footer -->
+</body>
+</html>
+
