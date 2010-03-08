@@ -1,0 +1,64 @@
+#!/usr/bin/env tclsh
+
+set docpath "./doc"
+set srcfiles {tclrobots}
+
+source $docpath/web.tcl
+
+foreach file $srcfiles {
+    set srcfile "${file}.tcl"
+    set docfile "${file}_doc"
+
+    # Generate doc.html for sed to handle
+    exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless
+
+    # MULTIDOC, if needed
+    #exec robodoc --src . --doc $docpath --multidoc --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless --nodesc --no_subdirectories
+
+    # Add if needed:
+    # --nodesc --no_subdirectories --css $docpath/my.css 
+
+    # Remove extra css file
+    file delete $docpath/$docfile.css
+
+    # Clean up file
+    set f [open $docpath/${docfile}.html]
+    set navigation 0
+    set toc 0
+    set content 0
+    set out {}
+
+    foreach line [split [read $f] \n] {
+        if {[regexp {TABLE OF CONTENTS} $line]} {
+            # Start read table of contents. We don't want to remove
+            # these links, as will be done with the content.
+            set toc 1
+        }
+        if {$toc} {
+            if {[regexp {\[ File \]} $line]} {
+                # Table of contents done
+                set toc     0
+                set content 1
+            }
+        }
+        if {$content} {
+            if {[regexp {<p>. <a href=.*>Top</a>.*} $line]} {
+                #Remove navigation
+                continue
+            }
+            # Remove <strong> and </strong>
+            set line [regsub -all {</*strong>} $line {}]
+
+            # Remove links
+            set line [regsub -all {<a href=\"[^\"]+\">([^<]+)</a>} $line {\1}]
+        }
+        append out $line \n
+    }
+    close $f
+
+    set f [open $docpath/${docfile}.html w]
+    puts $f [header $srcfile]
+    puts $f $out
+    puts $f [footer]
+    close $f
+}

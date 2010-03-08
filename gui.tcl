@@ -749,7 +749,7 @@ proc init_battle {} {
     gui_init_robots
 
     # Start game
-    main
+    run_game
 
     # find winnner
     if {$::halted} {
@@ -916,7 +916,7 @@ proc reset {} {
 }
 
 # define our battle tank icon used in the About popup
-set tr_icon {
+set ::tr_icon {
     #define tr_width 48
     #define tr_height 48
     static char tr_bits[] = {

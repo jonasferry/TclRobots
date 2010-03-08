@@ -1,11 +1,145 @@
-namespace import ::tcl::mathop::*
-namespace import ::tcl::mathfunc::*
-set ::thisScript [file join [pwd] [info script]]
-set ::thisDir [file dirname $::thisScript]
+#****F* tclrobots/file_header
+#
+# NAME
+#
+#   tclrobots.tcl
+#
+# DESCRIPTION
+#
+#   This is the main file of TclRobots. It sources gui.tcl if GUI is
+#   requested, but can be used stand-alone.
+#
+#   See http://tclrobots.org for more information.
+#
+# COPYRIGHT
+#
+#   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
+#   details.
+#
+#******
 
+#****p* tclrobots/main
+#
+# NAME
+#
+#   main
+#
+# DESCRIPTION
+#
+#   The main proc is run at program startup.
+#
+# SOURCE
+#
+proc main {} {
+    namespace import ::tcl::mathop::*
+    namespace import ::tcl::mathfunc::*
+
+    set ::thisScript [file join [pwd] [info script]]
+    set ::thisDir [file dirname $::thisScript]
+
+    set ::gui         0
+    set ::max_ticks   6000
+    set ::arg_tlimit  10
+    set ::arg_outfile "results.out"
+    set ::robotFiles  {}
+    set ::tourn_type  0
+    set ::numlist     0
+    set ::outfile     ""
+
+    set state none
+    foreach arg $::argv {
+        if {$state eq "seed"} {
+            set ::seed $arg
+            set state none
+            continue
+        }
+        switch -glob -- $arg  {
+            -t*     {set ::tourn_type 1}
+            -gui    {set ::gui 1}
+            -seed   {set state seed}
+            default {
+                if {[file isfile [pwd]/$arg]} {
+                    lappend ::robotFiles [pwd]/$arg
+                } else {
+                    puts "'$arg' not found, skipping"
+                }
+            }
+        }
+    }
+
+    if {[llength $::robotFiles] >= 2 && !$::gui} {
+        # Run batch
+        puts "Running time [/ [lindex [time {init;run_game}] 0] 1000000.0] seconds"
+    } else {
+        # Run GUI
+        set ::gui 1
+        source $::thisDir/gui.tcl
+        init_gui
+    }
+}
+#******
+
+#****p* main/init
+#
+# NAME
+#
+#   init
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc init {} {
+    global data allRobots activeRobots robotFiles tick
+
+    init_parms
+    init_trig_tables
+    init_rand
+    set ::finish ""
+
+    set tick 0
+
+    set allRobots {}
+
+    # Pick a random element from a list; use this for reading code!
+    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
+
+    for {set i 0} {$i < [llength $robotFiles]} {incr i} {
+        # Give the robots names like r0, r1, etc.
+        set robot r$i
+        # Update list of robots
+        lappend allRobots $robot
+
+        # Read
+        set f [open [lindex $robotFiles $i]]
+        set data($robot,code) [read $f]
+        close $f
+    }
+
+    # At the start of the game all robots are active
+    set activeRobots $allRobots
+
+    init_robots
+    act
+    tick
+}
+#******
+
+#****p* init/init_parms
+#
+# NAME
+#
+#   init_parms
+#
+# DESCRIPTION
+#
+#   Set general TclRobots environment parameters.
+#
+# SOURCE
+#
 proc init_parms {} {
-    # set general tclrobots environment parameters
-
     # milliseconds per tick
     if {$::gui} {
         set ::parms(tick) 100
@@ -83,7 +217,20 @@ proc init_parms {} {
     # quadrants, can be used to spread out robots at start
     set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
 }
+#******
 
+#****p* init/init_trig_tables
+#
+# NAME
+#
+#   init_trig_tables
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
 proc init_trig_tables {} {
     # init sin & cos tables
     set pi  [* 4 [atan 1]]
@@ -94,7 +241,20 @@ proc init_trig_tables {} {
         set ::c_tab($i) [cos [/ $i $d2r]]
     }
 }
+#******
 
+#****p* init/init_rand
+#
+# NAME
+#
+#   init_rand
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
 proc init_rand {} {
     # Set random seed. Note that this works on Linux and Mac, but needs
     # to be done differently on Windows.
@@ -103,308 +263,20 @@ proc init_rand {} {
     }
     srand $::seed
 }
+#******
 
-# Return random integer 1-max
-proc rand {max} {
-    return [int [* [::tcl::mathfunc::rand] $max]]
-}
-
-# Handle syscalls from robots
-proc syscall {args} {
-    global data tick
-
-    set robot [lindex $args 0]
-    set result 0
-
-    set syscall [lrange $args 1 end]
-
-    # Handle all immediate syscalls
-    switch [lindex $syscall 0] {
-        dputs {
-            sysDputs $robot [lrange $args 2 end]
-        }
-        rand {
-            set result [rand [lindex $syscall 1]]
-        }
-        team_send {
-            sysTeamSend $robot [lindex $syscall 1]
-        }
-        team_get {
-            set result [sysTeamGet $robot]
-        }
-        callback {
-            set ticks  [lindex $syscall 1]
-            set script [lindex $syscall 2]
-            set when [+ $tick $ticks]
-            lappend data($robot,callbacks) [list $when $script]
-            set data($robot,callbacks) \
-                    [lsort -integer -index 0 $data($robot,callbacks)]
-        }
-        callbackcheck {
-            set when [lindex $data($robot,callbacks) 0 0]
-            if {$when ne "" && $when <= $tick} {
-                set result [lindex $data($robot,callbacks) 0 1]
-                set data($robot,callbacks) \
-                        [lrange $data($robot,callbacks) 1 end]
-            } else {
-                set result ""
-            }
-        }
-        default {
-            # All postponed syscalls ends up here
-            set data($robot,syscall,$tick) $syscall
-        }
-    }
-    return $result
-}
-
-proc sysScanner {robot} {
-    global data parms tick activeRobots
-
-    if {($data($robot,syscall,$tick) eq \
-             $data($robot,syscall,[- $tick 1]))} {
-
-        set deg [lindex $data($robot,syscall,$tick) 1]
-        set res [lindex $data($robot,syscall,$tick) 2]
-
-        set dsp    0
-        set health 0
-        set near   9999
-        foreach target $activeRobots {
-            if {"$target" == "$robot"} {
-                continue
-            }
-            set x [- $data($target,x) $data($robot,x)]
-            set y [- $data($target,y) $data($robot,y)]
-            set d [round [* 57.2958 [atan2 $y $x]]]
-
-            if {$d < 0} {
-                incr d 360
-            }
-            set d1  [% [+ [- $d $deg] 360] 360]
-            set d2  [% [+ [- $deg $d] 360] 360]
-
-            if {$d1 < $d2} {
-                set f $d1
-            } else {
-                set f $d2
-            }
-            if {$f<=$res} {
-                set data($target,ping) $data($robot,num)
-                set dist [round [hypot $x $y]]
-
-                if {$dist<$near} {
-                    set derr [* $parms(errdist) $res]
-
-                    if {$res > 0} {
-                        set terr [+ 5 [rand $derr]]
-                    } else {
-                        set terr [+ 0 [rand $derr]]
-                    }
-                    if {[rand 2]} {
-                        set fud1 -
-                    } else {
-                        set fud1 +
-                    }
-                    if {[rand 2]} {
-                        set fud2 -
-                    } else {
-                        set fud2 +
-                    }
-                    set near [$fud1 $dist [$fud2 $terr $data($robot,btemp)]]
-
-                    if {$near < 1} {
-                        set near 1
-                    }
-                    set dsp    $data($robot,num)
-                    set health $data($robot,health)
-                }
-            }
-        }
-        # if cannon has overheated scanner, report 0
-        if {$data($robot,btemp) >= $parms(scanbad)} {
-            set data($robot,sig) "0 0"
-            set val 0
-        } else {
-            set data($robot,sig) "$dsp $health"
-
-            if {$near == 9999} {
-                set val 0
-            } else {
-                set val $near
-            }
-        }
-        set data($robot,sysreturn,$tick) $val
-
-    } else {
-        set data($robot,sysreturn,$tick) 0
-    }
-}
-
-proc sysDsp {robot} {
-    global data tick
-    set data($robot,sysreturn,$tick) $data($robot,sig)
-}
-
-proc sysAlert {robot} {
-    global data tick
-    set data($robot,alert) [lindex $data($robot,syscall,$tick) 1]
-    set data($robot,sysreturn,$tick) 1
-}
-
-proc sysCannon {robot} {
-    global data parms tick
-
-    set deg [lindex $data($robot,syscall,$tick) 1]
-    set rng [lindex $data($robot,syscall,$tick) 2]
-
-    set val 0
-
-    if {$data($robot,mstate)} {
-        set val 0
-    } elseif {$data($robot,reload)} {
-        set val 0
-    } elseif [catch {set deg [round $deg]}] {
-        set val -1
-    } elseif [catch {set rng [round $rng]}] {
-        set val -1
-    } elseif {($deg < 0) || ($deg > 359)} {
-        set val -1
-    } elseif {($rng < 0) || ($rng > $parms(mismax))} {
-        set val -1
-    } else {
-        set data($robot,mhdg)   $deg
-        set data($robot,mdist)  $rng
-        set data($robot,mrange) 0
-        set data($robot,mstate) 1
-        set data($robot,morgx)  $data($robot,x)
-        set data($robot,morgy)  $data($robot,y)
-        set data($robot,mx)     $data($robot,x)
-        set data($robot,my)     $data($robot,y)
-        incr data($robot,btemp) $parms(canheat)
-        incr data($robot,mused)
-        # set longer reload time if used all missiles in clip
-        if {$data($robot,mused) == $parms(clip)} {
-            set data($robot,reload) $parms(lreload)
-            set data($robot,mused) 0
-        } else {
-            set data($robot,reload) $parms(mreload)
-        }
-        set val 1
-    }
-    set data($robot,sysreturn,$tick) $val
-}
-
-proc sysDrive {robot} {
-    global data parms tick
-
-    set deg [lindex $data($robot,syscall,$tick) 1]
-    set spd [lindex $data($robot,syscall,$tick) 2]
-
-    set d1  [% [+ [- $data($robot,hdg) $deg] 360] 360]
-    set d2  [% [+ [- $deg $data($robot,hdg)] 360] 360]
-
-    if {$d1 < $d2} {
-        set d $d1
-    } else {
-        set d $d2
-    }
-    set data($robot,dhdg) $deg
-
-    if {$data($robot,hflag) && ($spd > $parms(heatsp))} {
-        set data($robot,dspeed) $parms(heatsp)
-    } else {
-        set data($robot,dspeed) $spd
-    }
-    # shutdown drive if turning too fast at current speed
-    set index [int [/ $d 25]]
-    if {$index > 3} {
-        set index 3
-    }
-    if {$data($robot,speed) > $parms(turn,$index)} {
-        set data($robot,dspeed) 0
-        set data($robot,dhdg)   $data($robot,hdg)
-    } else {
-        set data($robot,orgx)  $data($robot,x)
-        set data($robot,orgy)  $data($robot,y)
-        set data($robot,range) 0
-    }
-    # find direction of turn
-    if {($data($robot,hdg)+$d+360)%360==$deg} {
-        set data($robot,dir) +
-    } else {
-        set data($robot,dir) -
-    }
-
-    set data($robot,sysreturn,$tick) $data($robot,dspeed)
-}
-
-proc sysData {robot} {
-    global data tick
-    set val 0
-
-    switch $data($robot,syscall,$tick) {
-        health {set val $data($robot,health)}
-        speed  {set val $data($robot,speed)}
-        heat   {set val $data($robot,heat)}
-        loc_x  {set val $data($robot,x)}
-        loc_y  {set val $data($robot,y)}
-    }
-    set data($robot,sysreturn,$tick) $val
-}
-
-proc sysTick {robot} {
-    global data tick
-    set data($robot,sysreturn,$tick) $tick
-}
-
-proc sysTeamDeclare {robot} {
-    global data tick
-    set team [lindex $data($robot,syscall,$tick) 1]
-    set data($robot,team) $team
-    set data($robot,sysreturn,$tick) $team
-}
-
-proc sysTeamSend {robot msg} {
-    global data
-    puts "sysTeamSend $robot $msg"
-    set data($robot,data) $msg
-}
-
-proc sysTeamGet {robot} {
-    global data activeRobots tick
-    set val ""
-
-    if {$data($robot,team) ne {}} {
-        foreach target $activeRobots {
-            if {"$robot" eq "$target"} {continue}
-            if {"$data($robot,team)" eq "$data($target,team)"} {
-                lappend val [list $data($target,num) $data($target,data)]
-            }
-        }
-    }
-    if {$val ne {}} {
-        puts "sysTeamGet $robot $val"
-    }
-    return $val
-}
-
-proc sysDputs {robot msg} {
-    global gui
-
-    set msg [join $msg]
-
-    if {$gui} {
-        # Output to robot message box
-        show_msg $robot $msg
-        # Output to terminal for debugging
-        debug $robot: $msg ($::tick)
-    } else {
-        # Output to terminal
-        puts "$robot: $msg"
-    }
-}
-
+#****p* init/init_robots
+#
+# NAME
+#
+#   init_robots
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
 proc init_robots {} {
     global data allRobots
 
@@ -415,11 +287,11 @@ proc init_robots {} {
         set name [file tail [lindex $::robotFiles $file_index]]
         incr file_index
 
-        set x [rand 1000]
-        set y [rand 1000]
+        set x [mrand 1000]
+        set y [mrand 1000]
 
         # generate a new signature  FIXA: avoid duplicates?
-        set newsig [rand 65535]
+        set newsig [mrand 65535]
 
         #########
         # set robot parms
@@ -449,7 +321,7 @@ proc init_robots {} {
         # robot desired   "
         set data($robot,dspeed)	0
         # robot current heading
-        set data($robot,hdg) [rand 360]
+        set data($robot,hdg) [mrand 360]
         # robot desired   "
         set data($robot,dhdg) $data($robot,hdg)
         # robot direction of turn (+/-)
@@ -508,365 +380,43 @@ proc init_robots {} {
         interp alias {} ${robot}Run $data($robot,interp) ${robot}Run
     }
 }
+#******
 
-#########
-# Disable robot
-#########
-proc disable_robot {robot} {
-    global data activeRobots tick
-
-    interp delete $data($robot,interp)
-    set index [lsearch -exact $activeRobots $robot]
-    set activeRobots [lreplace $activeRobots $index $index]
-    set data($robot,syscall,$tick) {}
+#****p* main/run_game
+#
+# NAME
+#
+#   run_game
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc run_game {} {
+    set ::running 1
+    coroutine run_robotsCo run_robots
+    vwait ::running
+    puts "activerobots: $::activeRobots"
+    find_winner
+    puts "seed: $::seed"
 }
+#******
 
-#########
-# update position of missiles and robots, assess damage
-#########
-proc update_robots {} {
-    global allRobots data
-
-    foreach robot $allRobots {
-        # check all flying missiles
-        set num_miss [check_missiles $robot]
-
-        # skip rest if robot dead
-        if {!$data($robot,status)} {continue}
-
-        # update missile reloader
-        if {$data($robot,reload)} {incr data($robot,reload) -1}
-
-        # check for barrel overheat, apply cooling
-        check_barrel $robot
-
-        # check for excessive speed, increment heat
-        check_speed $robot
-
-        # update robot speed, moderated by acceleration
-        update_speed $robot
-
-        # update robot heading, moderated by turn rates
-        update_heading $robot
-
-        # update distance traveled on this heading
-        update_distance $robot
-
-        # check for wall collision
-        check_wall $robot
-    }
-    # check for robot health
-    set health_status [check_health]
-
-    set num_rob       [lindex $health_status 0]
-    set diffteam      [lindex $health_status 1]
-    set num_team      [lindex $health_status 2]
-
-    if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
-        # Stop game
-        set ::running 0
-    }
-}
-
-proc check_missiles {robot} {
-    # check all flying missiles
-    # used by update_robots
-    global data activeRobots
-    set num_miss 0
-
-    if {$data($robot,mstate)} {
-        incr num_miss
-        update_missile_location $robot
-        # check if missile reached target
-        if {$data($robot,mrange) > $data($robot,mdist)} {
-            missile_reached_target $robot
-
-            # assign damage to all within explosion ranges
-            foreach target $activeRobots {
-                if {!$data($target,status)} {continue}
-                assign_missile_damage $robot $target
-            }
-        }
-    }
-    return $num_miss
-}
-
-proc update_missile_location {robot} {
-    # update location of missile
-    # used by update_robots
-    global data parms c_tab s_tab
-
-    set data($robot,mrange) \
-        [+ $data($robot,mrange) $parms(msp)]
-    set data($robot,mx) \
-        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
-             $data($robot,morgx)]
-    set data($robot,my) \
-        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
-             $data($robot,morgy)]
-}
-
-proc missile_reached_target {robot} {
-    # used by update_robots
-    global data gui c_tab s_tab
-
-    set data($robot,mstate) 0
-    set data($robot,mx) \
-        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
-             $data($robot,morgx)]
-    set data($robot,my) \
-        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
-             $data($robot,morgy)]
-    if {$gui} {
-        after 1 "show_explode $robot"
-    }
-}
-
-proc assign_missile_damage {robot target} {
-    # assign damage to all within explosion ranges
-    # used by update_robots
-    global data parms
-
-    set d [hypot [- $data($robot,mx) $data($target,x)] \
-            [- $data($robot,my) $data($target,y)]]
-    if {$d < $parms(dia3)} {
-        if {$d < $parms(dia0)} {
-            incr data($target,health) $parms(hit0)
-            incr data($robot,inflicted) [- $parms(hit0)]
-        } elseif {$d<$parms(dia1)} {
-            incr data($target,health) $parms(hit1)
-            incr data($robot,inflicted) [- $parms(hit1)]
-        } elseif {$d<$parms(dia2)} {
-            incr data($target,health) $parms(hit2)
-            incr data($robot,inflicted) [- $parms(hit2)]
-        } else {
-            incr data($target,health) $parms(hit3)
-            incr data($robot,inflicted) [- $parms(hit3)]
-        }
-    }
-}
-
-proc check_barrel {robot} {
-    # check for barrel overheat, apply cooling
-    # used by update_robots
-    global data parms
-
-    if {$data($robot,btemp)} {
-        incr data($robot,btemp) $parms(cancool)
-        if {$data($robot,btemp) < 0} {
-            set data($robot,btemp) 0
-        }
-    }
-}
-
-proc check_speed {robot} {
-    # check for excessive speed, increment heat
-    # used by update_robots
-    global data parms
-
-    if {$data($robot,speed) > $parms(heatsp)} {
-        incr data($robot,heat) \
-            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
-                           $parms(hrate)]] 1]
-        if {$data($robot,heat) >= $parms(heatmax)} {
-            set data($robot,heat) $parms(heatmax)
-            set data($robot,hflag) 1
-            if {$data($robot,dspeed) > $parms(heatsp)} {
-                set data($robot,dspeed) $parms(heatsp)
-            }
-        }
-    } else {
-        # if overheating, apply cooling rate
-        if {$data($robot,hflag) || $data($robot,heat) > 0} {
-            incr data($robot,heat) $parms(cooling)
-            if {$data($robot,heat) <= 0} {
-                set data($robot,hflag) 0
-                set data($robot,heat) 0
-            }
-        }
-    }
-}
-
-proc update_speed {robot} {
-    # update robot speed, moderated by acceleration
-    # used by update_robots
-    global data parms
-
-    if {$data($robot,speed) != $data($robot,dspeed)} {
-        if {$data($robot,speed) > $data($robot,dspeed)} {
-            incr data($robot,speed) -$parms(accel)
-            if {$data($robot,speed) < $data($robot,dspeed)} {
-                set data($robot,speed) $data($robot,dspeed)
-            }
-        } else {
-            incr data($robot,speed) $parms(accel)
-            if {$data($robot,speed) > $data($robot,dspeed)} {
-                set data($robot,speed) $data($robot,dspeed)
-            }
-        }
-    }
-}
-
-proc update_heading {robot} {
-    # update robot heading, moderated by turn rates
-    # used by update_robots
-    global data parms
-
-    if {$data($robot,hdg) != $data($robot,dhdg)} {
-        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
-        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
-        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
-
-        if {$d1 < $d2} {
-            set d $d1
-        } else {
-            set d $d2
-        }
-        if {$d <= $mrate} {
-            set data($robot,hdg) $data($robot,dhdg)
-        } else {
-            set data($robot,hdg) \
-                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
-        }
-        set data($robot,orgx)  $data($robot,x)
-        set data($robot,orgy)  $data($robot,y)
-        set data($robot,range) 0
-    }
-}
-
-proc update_distance {robot} {
-    # update distance traveled on this heading
-    # used by update_robots
-    global data parms c_tab s_tab
-
-    if {$data($robot,speed) > 0} {
-        set data($robot,range) \
-            [+ $data($robot,range) \
-                 [/ [* $data($robot,speed) $parms(sp)] 100]]
-
-        # Modify range with random factor to avoid totally
-        # deterministic movement. Range is currently +- 1%.
-        # Playtesting will tell if this should be lower or higher.
-        set randfactor [/ [+ [rand 100] 1.0] 10000]
-        if {[rand 2] == 0} {
-            set randfactor [- $randfactor]
-        }
-        set data($robot,range) [+ $data($robot,range) \
-                                    [* $data($robot,range) \
-                                         $randfactor]]
-
-        set data($robot,x) \
-            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
-                         $data($robot,orgx)]]
-
-        set data($robot,y) \
-            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
-                        $data($robot,orgy)]]
-    }
-}
-
-proc check_wall {robot} {
-    # check for wall collision
-    # used by update_robots
-    global data parms
-
-    if {$data($robot,speed) > 0} {
-        if {($data($robot,x) < 0) || ($data($robot,x) > 999)} {
-            if {$data($robot,x) < 0} {
-                set data($robot,x) 0
-            } else {
-                set data($robot,x) 999
-            }
-            set data($robot,orgx)    $data($robot,x)
-            set data($robot,orgy)    $data($robot,y)
-            set data($robot,range)   0
-            set data($robot,speed)   0
-            set data($robot,dspeed)  0
-            incr data($robot,health) $parms(coll)
-        }
-        if {($data($robot,y) < 0) || ($data($robot,y) > 999)} {
-            if {$data($robot,y) < 0} {
-                set data($robot,y) 0
-            } else {
-                set data($robot,y) 999
-            }
-            set data($robot,orgx)    $data($robot,x)
-            set data($robot,orgy)    $data($robot,y)
-            set data($robot,range)   0
-            set data($robot,speed)   0
-            set data($robot,dspeed)  0
-            incr data($robot,health) $parms(coll)
-        }
-    }
-}
-
-proc check_health {} {
-    # check for robot health
-    global activeRobots data tick
-
-    set num_rob  0
-    set diffteam ""
-    set num_team 0
-    foreach robot $activeRobots {
-        if {$data($robot,status)} {
-            if {$data($robot,health) <= 0 } {
-                set data($robot,status) 0
-                set data($robot,health) 0
-                disable_robot $robot
-                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
-                if {$::gui} {
-                    after 1 "show_die $robot"
-                }
-            } else {
-                incr num_rob
-                if {$data($robot,team) != ""} {
-                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
-                        lappend diffteam $data($robot,team)
-                        incr num_team
-                    }
-                } else {
-                    lappend diffteam $data($robot,name)
-                    incr num_team
-                }
-            }
-        }
-    }
-    return $num_rob $diffteam $num_team
-}
-
-proc act {} {
-    global data activeRobots tick
-
-    foreach robot $activeRobots {
-        if {$data($robot,status)} {
-            set currentSyscall $data($robot,syscall,$tick)
-            switch [lindex $currentSyscall 0] {
-                scanner      {sysScanner     $robot}
-                dsp          {sysDsp         $robot}
-                alert        {sysAlert       $robot}
-                cannon       {sysCannon      $robot}
-                drive        {sysDrive       $robot}
-                health       -
-                speed        -
-                heat         -
-                loc_x        -
-                loc_y        {sysData        $robot}
-                tick         {sysTick        $robot}
-                team_declare {sysTeamDeclare $robot}
-            }
-        }
-    }
-}
-
-proc tick {} {
-    if {$::tick < $::max_ticks} {
-        incr ::tick
-    } else {
-        set ::running 0
-    }
-}
-
-proc runRobots {} {
+#****p* run_game/run_robots
+#
+# NAME
+#
+#   run_robots
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc run_robots {} {
     global data activeRobots tick running gui parms
 
     while {$running == 1} {
@@ -917,7 +467,546 @@ proc runRobots {} {
         yield
     }
 }
+#******
 
+#****p* run_robots/act
+#
+# NAME
+#
+#   act
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc act {} {
+    global data activeRobots tick
+
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            set currentSyscall $data($robot,syscall,$tick)
+            switch [lindex $currentSyscall 0] {
+                scanner      {sysScanner     $robot}
+                dsp          {sysDsp         $robot}
+                alert        {sysAlert       $robot}
+                cannon       {sysCannon      $robot}
+                drive        {sysDrive       $robot}
+                health       -
+                speed        -
+                heat         -
+                loc_x        -
+                loc_y        {sysData        $robot}
+                tick         {sysTick        $robot}
+                team_declare {sysTeamDeclare $robot}
+            }
+        }
+    }
+}
+#******
+
+#****p* run_robots/update_robots
+#
+# NAME
+#
+#   update_robots
+#
+# DESCRIPTION
+#
+#   update position of missiles and robots, assess damage
+#
+# SOURCE
+#
+proc update_robots {} {
+    global allRobots data
+
+    foreach robot $allRobots {
+        # check all flying missiles
+        set num_miss [check_missiles $robot]
+
+        # skip rest if robot dead
+        if {!$data($robot,status)} {continue}
+
+        # update missile reloader
+        if {$data($robot,reload)} {incr data($robot,reload) -1}
+
+        # check for barrel overheat, apply cooling
+        check_barrel $robot
+
+        # check for excessive speed, increment heat
+        check_speed $robot
+
+        # update robot speed, moderated by acceleration
+        update_speed $robot
+
+        # update robot heading, moderated by turn rates
+        update_heading $robot
+
+        # update distance traveled on this heading
+        update_distance $robot
+
+        # check for wall collision
+        check_wall $robot
+    }
+    # check for robot health
+    set health_status [check_health]
+
+    set num_rob       [lindex $health_status 0]
+    set diffteam      [lindex $health_status 1]
+    set num_team      [lindex $health_status 2]
+
+    if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
+        # Stop game
+        set ::running 0
+    }
+}
+#******
+
+#****p* update_robots/check_missiles
+#
+# NAME
+#
+#   check_missiles
+#
+# DESCRIPTION
+#
+#   check all flying missiles
+#
+# SOURCE
+#
+proc check_missiles {robot} {
+    global data activeRobots
+    set num_miss 0
+
+    if {$data($robot,mstate)} {
+        incr num_miss
+        update_missile_location $robot
+        # check if missile reached target
+        if {$data($robot,mrange) > $data($robot,mdist)} {
+            missile_reached_target $robot
+
+            # assign damage to all within explosion ranges
+            foreach target $activeRobots {
+                if {!$data($target,status)} {continue}
+                assign_missile_damage $robot $target
+            }
+        }
+    }
+    return $num_miss
+}
+#******
+
+#****p* update_robots/update_missile_location
+#
+# NAME
+#
+#   update_missile_location
+#
+# DESCRIPTION
+#
+#   update location of missile
+#
+# SOURCE
+#
+proc update_missile_location {robot} {
+    global data parms c_tab s_tab
+
+    set data($robot,mrange) \
+        [+ $data($robot,mrange) $parms(msp)]
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgy)]
+}
+#******
+
+#****p* update_robots/missile_reached_target
+#
+# NAME
+#
+#   missile_reached_target
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc missile_reached_target {robot} {
+    global data gui c_tab s_tab
+
+    set data($robot,mstate) 0
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgy)]
+    if {$gui} {
+        after 1 "show_explode $robot"
+    }
+}
+#******
+
+#****p* update_robots/assign_missile_damage
+#
+# NAME
+#
+#   assign_missile_damage
+#
+# DESCRIPTION
+#
+#   assign damage to all within explosion ranges
+#
+# SOURCE
+#
+proc assign_missile_damage {robot target} {
+    global data parms
+
+    set d [hypot [- $data($robot,mx) $data($target,x)] \
+            [- $data($robot,my) $data($target,y)]]
+    if {$d < $parms(dia3)} {
+        if {$d < $parms(dia0)} {
+            incr data($target,health) $parms(hit0)
+            incr data($robot,inflicted) [- $parms(hit0)]
+        } elseif {$d<$parms(dia1)} {
+            incr data($target,health) $parms(hit1)
+            incr data($robot,inflicted) [- $parms(hit1)]
+        } elseif {$d<$parms(dia2)} {
+            incr data($target,health) $parms(hit2)
+            incr data($robot,inflicted) [- $parms(hit2)]
+        } else {
+            incr data($target,health) $parms(hit3)
+            incr data($robot,inflicted) [- $parms(hit3)]
+        }
+    }
+}
+#******
+
+#****p* update_robots/check_barrel
+#
+# NAME
+#
+#   check_barrel
+#
+# DESCRIPTION
+#
+#   check for barrel overheat, apply cooling
+#
+# SOURCE
+#
+proc check_barrel {robot} {
+    global data parms
+
+    if {$data($robot,btemp)} {
+        incr data($robot,btemp) $parms(cancool)
+        if {$data($robot,btemp) < 0} {
+            set data($robot,btemp) 0
+        }
+    }
+}
+#******
+
+#****p* update_robots/check_speed
+#
+# NAME
+#
+#   check_speed
+#
+# DESCRIPTION
+#
+#   check for excessive speed, increment heat
+#
+# SOURCE
+#
+proc check_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) > $parms(heatsp)} {
+        incr data($robot,heat) \
+            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
+                           $parms(hrate)]] 1]
+        if {$data($robot,heat) >= $parms(heatmax)} {
+            set data($robot,heat) $parms(heatmax)
+            set data($robot,hflag) 1
+            if {$data($robot,dspeed) > $parms(heatsp)} {
+                set data($robot,dspeed) $parms(heatsp)
+            }
+        }
+    } else {
+        # if overheating, apply cooling rate
+        if {$data($robot,hflag) || $data($robot,heat) > 0} {
+            incr data($robot,heat) $parms(cooling)
+            if {$data($robot,heat) <= 0} {
+                set data($robot,hflag) 0
+                set data($robot,heat) 0
+            }
+        }
+    }
+}
+#******
+
+#****p* update_robots/update_speed
+#
+# NAME
+#
+#   update_speed
+#
+# DESCRIPTION
+#
+#   update robot speed, moderated by acceleration
+#
+# SOURCE
+#
+proc update_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) != $data($robot,dspeed)} {
+        if {$data($robot,speed) > $data($robot,dspeed)} {
+            incr data($robot,speed) -$parms(accel)
+            if {$data($robot,speed) < $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        } else {
+            incr data($robot,speed) $parms(accel)
+            if {$data($robot,speed) > $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        }
+    }
+}
+#******
+
+#****p* update_robots/update_heading
+#
+# NAME
+#
+#   update_heading
+#
+# DESCRIPTION
+#
+#   update robot heading, moderated by turn rates
+#
+# SOURCE
+#
+proc update_heading {robot} {
+    global data parms
+
+    if {$data($robot,hdg) != $data($robot,dhdg)} {
+        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
+        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
+        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
+
+        if {$d1 < $d2} {
+            set d $d1
+        } else {
+            set d $d2
+        }
+        if {$d <= $mrate} {
+            set data($robot,hdg) $data($robot,dhdg)
+        } else {
+            set data($robot,hdg) \
+                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
+        }
+        set data($robot,orgx)  $data($robot,x)
+        set data($robot,orgy)  $data($robot,y)
+        set data($robot,range) 0
+    }
+}
+#******
+
+#****p* update_robots/update_distance
+#
+# NAME
+#
+#   update_distance
+#
+# DESCRIPTION
+#
+#   update distance traveled on this heading
+#
+# SOURCE
+#
+proc update_distance {robot} {
+    global data parms c_tab s_tab
+
+    if {$data($robot,speed) > 0} {
+        set data($robot,range) \
+            [+ $data($robot,range) \
+                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+
+        # Modify range with random factor to avoid totally
+        # deterministic movement. Range is currently +- 1%.
+        # Playtesting will tell if this should be lower or higher.
+        set randfactor [/ [+ [mrand 100] 1.0] 10000]
+        if {[mrand 2] == 0} {
+            set randfactor [- $randfactor]
+        }
+        set data($robot,range) [+ $data($robot,range) \
+                                    [* $data($robot,range) \
+                                         $randfactor]]
+
+        set data($robot,x) \
+            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
+                         $data($robot,orgx)]]
+
+        set data($robot,y) \
+            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
+                        $data($robot,orgy)]]
+    }
+}
+#******
+
+#****p* update_robots/check_wall
+#
+# NAME
+#
+#   check_wall
+#
+# DESCRIPTION
+#
+#   check for wall collision
+#
+# SOURCE
+#
+proc check_wall {robot} {
+    global data parms
+
+    if {$data($robot,speed) > 0} {
+        if {($data($robot,x) < 0) || ($data($robot,x) > 999)} {
+            if {$data($robot,x) < 0} {
+                set data($robot,x) 0
+            } else {
+                set data($robot,x) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+        if {($data($robot,y) < 0) || ($data($robot,y) > 999)} {
+            if {$data($robot,y) < 0} {
+                set data($robot,y) 0
+            } else {
+                set data($robot,y) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+    }
+}
+#******
+
+#****p* update_robots/check_health
+#
+# NAME
+#
+#   check_health
+#
+# DESCRIPTION
+#
+#   check for robot health
+#
+# SOURCE
+#
+proc check_health {} {
+    global activeRobots data tick
+
+    set num_rob  0
+    set diffteam ""
+    set num_team 0
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            if {$data($robot,health) <= 0 } {
+                set data($robot,status) 0
+                set data($robot,health) 0
+                disable_robot $robot
+                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+                if {$::gui} {
+                    after 1 "show_die $robot"
+                }
+            } else {
+                incr num_rob
+                if {$data($robot,team) != ""} {
+                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+                        lappend diffteam $data($robot,team)
+                        incr num_team
+                    }
+                } else {
+                    lappend diffteam $data($robot,name)
+                    incr num_team
+                }
+            }
+        }
+    }
+    return $num_rob $diffteam $num_team
+}
+#******
+
+#****p* check_health/disable_robot
+#
+# NAME
+#
+#   disable_robot
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc disable_robot {robot} {
+    global data activeRobots tick
+
+    interp delete $data($robot,interp)
+    set index [lsearch -exact $activeRobots $robot]
+    set activeRobots [lreplace $activeRobots $index $index]
+    set data($robot,syscall,$tick) {}
+}
+#******
+
+#****p* run_robots/tick
+#
+# NAME
+#
+#   tick
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc tick {} {
+    if {$::tick < $::max_ticks} {
+        incr ::tick
+    } else {
+        set ::running 0
+    }
+}
+#******
+
+#****p* run_game/find_winner
+#
+# NAME
+#
+#   find_winner
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
 proc find_winner {} {
     global data activeRobots
 
@@ -987,53 +1076,489 @@ proc find_winner {} {
     catch {write_file $outfile \
                "$players\n$::finish\n$::win_msg2\n\n$score\n\n\n"}
 }
+#******
 
-proc init {} {
-    global data allRobots activeRobots robotFiles tick
+#****p* tclrobots/syscall
+#
+# NAME
+#
+#   syscall
+#
+# DESCRIPTION
+#
+#   Handle syscalls from robots
+#
+# SOURCE
+#
+proc syscall {args} {
+    global data tick
 
-    init_parms
-    init_trig_tables
-    init_rand
-    set ::finish ""
+    set robot [lindex $args 0]
+    set result 0
 
-    set tick 0
+    set syscall [lrange $args 1 end]
 
-    set allRobots {}
+    # Handle all immediate syscalls
+    switch [lindex $syscall 0] {
+        dputs {
+            sysDputs $robot [lrange $args 2 end]
+        }
+        rand {
+            set result [mrand [lindex $syscall 1]]
+        }
+        team_send {
+            sysTeamSend $robot [lindex $syscall 1]
+        }
+        team_get {
+            set result [sysTeamGet $robot]
+        }
+        callback {
+            set ticks  [lindex $syscall 1]
+            set script [lindex $syscall 2]
+            set when [+ $tick $ticks]
+            lappend data($robot,callbacks) [list $when $script]
+            set data($robot,callbacks) \
+                    [lsort -integer -index 0 $data($robot,callbacks)]
+        }
+        callbackcheck {
+            set when [lindex $data($robot,callbacks) 0 0]
+            if {$when ne "" && $when <= $tick} {
+                set result [lindex $data($robot,callbacks) 0 1]
+                set data($robot,callbacks) \
+                        [lrange $data($robot,callbacks) 1 end]
+            } else {
+                set result ""
+            }
+        }
+        default {
+            # All postponed syscalls ends up here
+            set data($robot,syscall,$tick) $syscall
+        }
+    }
+    return $result
+}
+#******
 
-    # Pick a random element from a list; use this for reading code!
-    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
+#****p* syscall/sysScanner
+#
+# NAME
+#
+#   sysScanner
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysScanner {robot} {
+    global data parms tick activeRobots
 
-    for {set i 0} {$i < [llength $robotFiles]} {incr i} {
-        # Give the robots names like r0, r1, etc.
-        set robot r$i
-        # Update list of robots
-        lappend allRobots $robot
+    if {($data($robot,syscall,$tick) eq \
+             $data($robot,syscall,[- $tick 1]))} {
 
-        # Read
-        set f [open [lindex $robotFiles $i]]
-        set data($robot,code) [read $f]
-        close $f
+        set deg [lindex $data($robot,syscall,$tick) 1]
+        set res [lindex $data($robot,syscall,$tick) 2]
+
+        set dsp    0
+        set health 0
+        set near   9999
+        foreach target $activeRobots {
+            if {"$target" == "$robot"} {
+                continue
+            }
+            set x [- $data($target,x) $data($robot,x)]
+            set y [- $data($target,y) $data($robot,y)]
+            set d [round [* 57.2958 [atan2 $y $x]]]
+
+            if {$d < 0} {
+                incr d 360
+            }
+            set d1  [% [+ [- $d $deg] 360] 360]
+            set d2  [% [+ [- $deg $d] 360] 360]
+
+            if {$d1 < $d2} {
+                set f $d1
+            } else {
+                set f $d2
+            }
+            if {$f<=$res} {
+                set data($target,ping) $data($robot,num)
+                set dist [round [hypot $x $y]]
+
+                if {$dist<$near} {
+                    set derr [* $parms(errdist) $res]
+
+                    if {$res > 0} {
+                        set terr [+ 5 [mrand $derr]]
+                    } else {
+                        set terr [+ 0 [mrand $derr]]
+                    }
+                    if {[mrand 2]} {
+                        set fud1 -
+                    } else {
+                        set fud1 +
+                    }
+                    if {[mrand 2]} {
+                        set fud2 -
+                    } else {
+                        set fud2 +
+                    }
+                    set near [$fud1 $dist [$fud2 $terr $data($robot,btemp)]]
+
+                    if {$near < 1} {
+                        set near 1
+                    }
+                    set dsp    $data($robot,num)
+                    set health $data($robot,health)
+                }
+            }
+        }
+        # if cannon has overheated scanner, report 0
+        if {$data($robot,btemp) >= $parms(scanbad)} {
+            set data($robot,sig) "0 0"
+            set val 0
+        } else {
+            set data($robot,sig) "$dsp $health"
+
+            if {$near == 9999} {
+                set val 0
+            } else {
+                set val $near
+            }
+        }
+        set data($robot,sysreturn,$tick) $val
+
+    } else {
+        set data($robot,sysreturn,$tick) 0
+    }
+}
+#******
+
+#****p* syscall/sysDsp
+#
+# NAME
+#
+#   sysDsp
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysDsp {robot} {
+    global data tick
+    set data($robot,sysreturn,$tick) $data($robot,sig)
+}
+#******
+
+#****p* syscall/sysAlert
+#
+# NAME
+#
+#   sysAlert
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysAlert {robot} {
+    global data tick
+    set data($robot,alert) [lindex $data($robot,syscall,$tick) 1]
+    set data($robot,sysreturn,$tick) 1
+}
+#******
+
+#****p* syscall/sysCannon
+#
+# NAME
+#
+#   sysCannon
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysCannon {robot} {
+    global data parms tick
+
+    set deg [lindex $data($robot,syscall,$tick) 1]
+    set rng [lindex $data($robot,syscall,$tick) 2]
+
+    set val 0
+
+    if {$data($robot,mstate)} {
+        set val 0
+    } elseif {$data($robot,reload)} {
+        set val 0
+    } elseif [catch {set deg [round $deg]}] {
+        set val -1
+    } elseif [catch {set rng [round $rng]}] {
+        set val -1
+    } elseif {($deg < 0) || ($deg > 359)} {
+        set val -1
+    } elseif {($rng < 0) || ($rng > $parms(mismax))} {
+        set val -1
+    } else {
+        set data($robot,mhdg)   $deg
+        set data($robot,mdist)  $rng
+        set data($robot,mrange) 0
+        set data($robot,mstate) 1
+        set data($robot,morgx)  $data($robot,x)
+        set data($robot,morgy)  $data($robot,y)
+        set data($robot,mx)     $data($robot,x)
+        set data($robot,my)     $data($robot,y)
+        incr data($robot,btemp) $parms(canheat)
+        incr data($robot,mused)
+        # set longer reload time if used all missiles in clip
+        if {$data($robot,mused) == $parms(clip)} {
+            set data($robot,reload) $parms(lreload)
+            set data($robot,mused) 0
+        } else {
+            set data($robot,reload) $parms(mreload)
+        }
+        set val 1
+    }
+    set data($robot,sysreturn,$tick) $val
+}
+#******
+
+#****p* syscall/sysDrive
+#
+# NAME
+#
+#   sysDrive
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysDrive {robot} {
+    global data parms tick
+
+    set deg [lindex $data($robot,syscall,$tick) 1]
+    set spd [lindex $data($robot,syscall,$tick) 2]
+
+    set d1  [% [+ [- $data($robot,hdg) $deg] 360] 360]
+    set d2  [% [+ [- $deg $data($robot,hdg)] 360] 360]
+
+    if {$d1 < $d2} {
+        set d $d1
+    } else {
+        set d $d2
+    }
+    set data($robot,dhdg) $deg
+
+    if {$data($robot,hflag) && ($spd > $parms(heatsp))} {
+        set data($robot,dspeed) $parms(heatsp)
+    } else {
+        set data($robot,dspeed) $spd
+    }
+    # shutdown drive if turning too fast at current speed
+    set index [int [/ $d 25]]
+    if {$index > 3} {
+        set index 3
+    }
+    if {$data($robot,speed) > $parms(turn,$index)} {
+        set data($robot,dspeed) 0
+        set data($robot,dhdg)   $data($robot,hdg)
+    } else {
+        set data($robot,orgx)  $data($robot,x)
+        set data($robot,orgy)  $data($robot,y)
+        set data($robot,range) 0
+    }
+    # find direction of turn
+    if {($data($robot,hdg)+$d+360)%360==$deg} {
+        set data($robot,dir) +
+    } else {
+        set data($robot,dir) -
     }
 
-    # At the start of the game all robots are active
-    set activeRobots $allRobots
-
-    init_robots
-    act
-    tick
+    set data($robot,sysreturn,$tick) $data($robot,dspeed)
 }
+#******
 
-proc main {} {
-    set ::running 1
-    coroutine runRobotsCo runRobots
-    vwait ::running
-    puts "activerobots: $::activeRobots"
-    find_winner
-    puts "seed: $::seed"
+#****p* syscall/sysData
+#
+# NAME
+#
+#   sysData
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysData {robot} {
+    global data tick
+    set val 0
+
+    switch $data($robot,syscall,$tick) {
+        health {set val $data($robot,health)}
+        speed  {set val $data($robot,speed)}
+        heat   {set val $data($robot,heat)}
+        loc_x  {set val $data($robot,x)}
+        loc_y  {set val $data($robot,y)}
+    }
+    set data($robot,sysreturn,$tick) $val
 }
+#******
 
-# Prints debug message. The proc name makes it easy to search for.
-# Precede other debug changes with the word debug in a comment.
+#****p* syscall/sysTick
+#
+# NAME
+#
+#   sysTick
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysTick {robot} {
+    global data tick
+    set data($robot,sysreturn,$tick) $tick
+}
+#******
+
+#****p* syscall/sysTeamDeclare
+#
+# NAME
+#
+#   sysTeamDeclare
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysTeamDeclare {robot} {
+    global data tick
+    set team [lindex $data($robot,syscall,$tick) 1]
+    set data($robot,team) $team
+    set data($robot,sysreturn,$tick) $team
+}
+#******
+
+#****p* syscall/sysTeamSend
+#
+# NAME
+#
+#   sysTeamSend
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysTeamSend {robot msg} {
+    global data
+    puts "sysTeamSend $robot $msg"
+    set data($robot,data) $msg
+}
+#******
+
+#****p* syscall/sysTeamGet
+#
+# NAME
+#
+#   sysTeamGet
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysTeamGet {robot} {
+    global data activeRobots tick
+    set val ""
+
+    if {$data($robot,team) ne {}} {
+        foreach target $activeRobots {
+            if {"$robot" eq "$target"} {continue}
+            if {"$data($robot,team)" eq "$data($target,team)"} {
+                lappend val [list $data($target,num) $data($target,data)]
+            }
+        }
+    }
+    if {$val ne {}} {
+        puts "sysTeamGet $robot $val"
+    }
+    return $val
+}
+#******
+
+#****p* syscall/sysDputs
+#
+# NAME
+#
+#   sysDputs
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sysDputs {robot msg} {
+    global gui
+
+    set msg [join $msg]
+
+    if {$gui} {
+        # Output to robot message box
+        show_msg $robot $msg
+        # Output to terminal for debugging
+        debug $robot: $msg ($::tick)
+    } else {
+        # Output to terminal
+        puts "$robot: $msg"
+    }
+}
+#******
+
+#****p* tclrobots/rand
+#
+# NAME
+#
+#   mrand
+#
+# DESCRIPTION
+#
+#   Return random integer 1-max
+#
+# SOURCE
+#
+proc mrand {max} {
+    return [int [* [rand] $max]]
+}
+#******
+
+#****p* tclrobots/debug
+#
+# NAME
+#
+#   debug
+#
+# DESCRIPTION
+#
+#   Prints debug message. The proc name makes it easy to search for.
+#   Precede other debug changes with the word debug in a comment.
+#
+# SOURCE
+#
 proc debug {args} {
     if {[lindex $args 0] ne "exit"} {
         puts [join $args]
@@ -1044,114 +1569,7 @@ proc debug {args} {
         exit
     }
 }
+#******
 
-#############################################################################
-# do it!
-# main line code
-
-# check for command line args, run tournament if any
-
-set ::gui        0
-set ::max_ticks  6000
-set arg_tlimit   10
-set arg_outfile  "results.out"
-set ::robotFiles {}
-set tourn_type   0
-set ::numlist    0
-set outfile      ""
-
-set state none
-foreach arg $::argv {
-    if {$state eq "seed"} {
-        set ::seed $arg
-        set state none
-        continue
-    }
-    switch -glob -- $arg  {
-        -t*     {set ::tourn_type 1}
-        -gui    {set ::gui 1}
-        -seed   {set state seed}
-        default {
-            if {[file isfile [pwd]/$arg]} {
-                lappend ::robotFiles [pwd]/$arg
-            } else {
-                puts "'$arg' not found, skipping"
-            }
-        }
-    }
-}
-
-if {[llength $::robotFiles] >= 2 && !$::gui} {
-    # Run batch
-    puts "Running time [/ [lindex [time {init;main}] 0] 1000000.0] seconds"
-} else {
-    # Run GUI
-    set ::gui 1
-    source $::thisDir/gui.tcl
-    init_gui
-}
-
-
-
-if 0 {
-# check for tournament, two or more files on command line
-if {[llength $arg_files] >= 2} {
-  # if not a one-on-one and 2 or more files, set battle match
-  if {$tourn_type == 0} {
-    set tourn_type 4
-  }
-
-
-
-
-
-
-
-  wm geom . +20+20
-  if {$nowin} {
-    wm withdraw .
-    # if -nowin, then speed up game by factor of 5
-    set parms(tick)    [expr $parms(tick)/5]
-    set parms(do_wait) [expr $parms(do_wait)/5]
-    # and don't bother drawing on canvas or updating robot damage
-    proc show_scan {args} {}
-    proc show_robots {args} {}
-    proc show_explode {args} {}
-    proc show_die {args} {}
-    proc up_damage {args} {}
-  }
-  main_win
-  update
-  foreach f $arg_files {
-    .f2.fr.l1 insert end $f
-  }
-  set numList [llength $arg_files]
-  set tlimit $arg_tlimit
-  set outfile $arg_outfile
-  switch $tourn_type {
-    1 {
-      tournament
-      if {$nowin} {wm withdraw .tourn}
-      update
-      do_tourn
-    }
-    4 {
-      start
-    }
-    default {
-    }
-  }
-  clean_up
-  update
-  destroy .
-} else {
-  # no files for tourny, run interactive
-  set nowin      0
-  set tourn_type 0
-  main_win
-}
-
-# finis
-
-
-}
+# All procs are sourced; enter main proc; see top of file.
+main

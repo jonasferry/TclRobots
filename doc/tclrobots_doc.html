@@ -1,0 +1,1502 @@
+
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
+'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
+<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
+<head>
+<meta http-equiv='Content-Style-Type' content='text/css' />
+<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
+<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
+<title>tclrobots.tcl</title>
+<!-- Source: ./ -->
+<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
+</head>
+<body>
+<div id='logo'>
+<a name='robo_top_of_doc'></a>
+</div> <!-- logo -->
+
+<div id="logo">
+<a name="robo_top_of_doc"></a>
+</div> <!-- logo -->
+<h3>TABLE OF CONTENTS</h3>
+<ul>
+<li>1. <a href="#robo0">tclrobots/file_header</a></li>
+<li>2. <a href="#robo1">tclrobots/main</a></li>
+<ul>
+<li>2.1. <a href="#robo2">main/init</a></li>
+<ul>
+<li>2.1.1. <a href="#robo3">init/init_parms</a></li>
+<li>2.1.2. <a href="#robo4">init/init_trig_tables</a></li>
+<li>2.1.3. <a href="#robo5">init/init_rand</a></li>
+<li>2.1.4. <a href="#robo6">init/init_robots</a></li>
+</ul>
+<li>2.2. <a href="#robo7">main/run_game</a></li>
+<ul>
+<li>2.2.1. <a href="#robo8">run_game/run_robots</a></li>
+<ul>
+<li>2.2.1.1. <a href="#robo9">run_robots/act</a></li>
+<li>2.2.1.2. <a href="#robo10">run_robots/update_robots</a></li>
+<ul>
+<li>2.2.1.2.1. <a href="#robo11">update_robots/check_missiles</a></li>
+<li>2.2.1.2.2. <a href="#robo12">update_robots/update_missile_location</a></li>
+<li>2.2.1.2.3. <a href="#robo13">update_robots/missile_reached_target</a></li>
+<li>2.2.1.2.4. <a href="#robo14">update_robots/assign_missile_damage</a></li>
+<li>2.2.1.2.5. <a href="#robo15">update_robots/check_barrel</a></li>
+<li>2.2.1.2.6. <a href="#robo16">update_robots/check_speed</a></li>
+<li>2.2.1.2.7. <a href="#robo17">update_robots/update_speed</a></li>
+<li>2.2.1.2.8. <a href="#robo18">update_robots/update_heading</a></li>
+<li>2.2.1.2.9. <a href="#robo19">update_robots/update_distance</a></li>
+<li>2.2.1.2.10. <a href="#robo20">update_robots/check_wall</a></li>
+<li>2.2.1.2.11. <a href="#robo21">update_robots/check_health</a></li>
+<ul>
+<li>2.2.1.2.11.1. <a href="#robo22">check_health/disable_robot</a></li>
+</ul>
+</ul>
+<li>2.2.1.3. <a href="#robo23">run_robots/tick</a></li>
+</ul>
+<li>2.2.2. <a href="#robo24">run_game/find_winner</a></li>
+</ul>
+</ul>
+<li>3. <a href="#robo25">tclrobots/syscall</a></li>
+<ul>
+<li>3.1. <a href="#robo26">syscall/sysScanner</a></li>
+<li>3.2. <a href="#robo27">syscall/sysDsp</a></li>
+<li>3.3. <a href="#robo28">syscall/sysAlert</a></li>
+<li>3.4. <a href="#robo29">syscall/sysCannon</a></li>
+<li>3.5. <a href="#robo30">syscall/sysDrive</a></li>
+<li>3.6. <a href="#robo31">syscall/sysData</a></li>
+<li>3.7. <a href="#robo32">syscall/sysTick</a></li>
+<li>3.8. <a href="#robo33">syscall/sysTeamDeclare</a></li>
+<li>3.9. <a href="#robo34">syscall/sysTeamSend</a></li>
+<li>3.10. <a href="#robo35">syscall/sysTeamGet</a></li>
+<li>3.11. <a href="#robo36">syscall/sysDputs</a></li>
+</ul>
+<li>4. <a href="#robo37">tclrobots/rand</a></li>
+<li>5. <a href="#robo38">tclrobots/debug</a></li>
+</ul>
+<a name="robo0"></a>
+<a name="tclrobots2ffile5fheader"></a>
+<h1>1.  tclrobots/file_header [ File ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   tclrobots.tcl
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   This is the main file of TclRobots. It sources gui.tcl if GUI is
+   requested, but can be used stand-alone.
+
+   See http://tclrobots.org for more information.
+</pre>
+<p class="item_name">COPYRIGHT</p>
+<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
+   details.
+</pre>
+<a name="robo1"></a>
+<a name="tclrobots2fmain"></a>
+<h1>2.  tclrobots/main [ Procedure ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   main
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   The main proc is run at program startup.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">33 </span>proc main {} {
+<span class="line_number">34 </span>    namespace import ::tcl::mathop::*
+<span class="line_number">35 </span>    namespace import ::tcl::mathfunc::*
+<span class="line_number">36 </span>
+<span class="line_number">37 </span>    set ::thisScript [file join [pwd] [info script]]
+<span class="line_number">38 </span>    set ::thisDir [file dirname $::thisScript]
+<span class="line_number">39 </span>
+<span class="line_number">40 </span>    set ::gui         0
+<span class="line_number">41 </span>    set ::max_ticks   6000
+<span class="line_number">42 </span>    set ::arg_tlimit  10
+<span class="line_number">43 </span>    set ::arg_outfile "results.out"
+<span class="line_number">44 </span>    set ::robotFiles  {}
+<span class="line_number">45 </span>    set ::tourn_type  0
+<span class="line_number">46 </span>    set ::numlist     0
+<span class="line_number">47 </span>    set ::outfile     ""
+<span class="line_number">48 </span>
+<span class="line_number">49 </span>    set state none
+<span class="line_number">50 </span>    foreach arg $::argv {
+<span class="line_number">51 </span>        if {$state eq "seed"} {
+<span class="line_number">52 </span>            set ::seed $arg
+<span class="line_number">53 </span>            set state none
+<span class="line_number">54 </span>            continue
+<span class="line_number">55 </span>        }
+<span class="line_number">56 </span>        switch -glob -- $arg  {
+<span class="line_number">57 </span>            -t*     {set ::tourn_type 1}
+<span class="line_number">58 </span>            -gui    {set ::gui 1}
+<span class="line_number">59 </span>            -seed   {set state seed}
+<span class="line_number">60 </span>            default {
+<span class="line_number">61 </span>                if {[file isfile [pwd]/$arg]} {
+<span class="line_number">62 </span>                    lappend ::robotFiles [pwd]/$arg
+<span class="line_number">63 </span>                } else {
+<span class="line_number">64 </span>                    puts "'$arg' not found, skipping"
+<span class="line_number">65 </span>                }
+<span class="line_number">66 </span>            }
+<span class="line_number">67 </span>        }
+<span class="line_number">68 </span>    }
+<span class="line_number">69 </span>
+<span class="line_number">70 </span>    if {[llength $::robotFiles] &gt;= 2 &amp;&amp; !$::gui} {
+<span class="line_number">71 </span>        # Run batch
+<span class="line_number">72 </span>        puts "Running time [/ [lindex [time {init;run_game}] 0] 1000000.0] seconds"
+<span class="line_number">73 </span>    } else {
+<span class="line_number">74 </span>        # Run GUI
+<span class="line_number">75 </span>        set ::gui 1
+<span class="line_number">76 </span>        source $::thisDir/gui.tcl
+<span class="line_number">77 </span>        init_gui
+<span class="line_number">78 </span>    }
+<span class="line_number">79 </span>}
+</pre>
+<a name="robo2"></a>
+<a name="main2finit"></a>
+<h2>2.1.  main/init [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   init
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number"> 94 </span>proc init {} {
+<span class="line_number"> 95 </span>    global data allRobots activeRobots robotFiles tick
+<span class="line_number"> 96 </span>
+<span class="line_number"> 97 </span>    init_parms
+<span class="line_number"> 98 </span>    init_trig_tables
+<span class="line_number"> 99 </span>    init_rand
+<span class="line_number">100 </span>    set ::finish ""
+<span class="line_number">101 </span>
+<span class="line_number">102 </span>    set tick 0
+<span class="line_number">103 </span>
+<span class="line_number">104 </span>    set allRobots {}
+<span class="line_number">105 </span>
+<span class="line_number">106 </span>    # Pick a random element from a list; use this for reading code!
+<span class="line_number">107 </span>    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
+<span class="line_number">108 </span>
+<span class="line_number">109 </span>    for {set i 0} {$i &lt; [llength $robotFiles]} {incr i} {
+<span class="line_number">110 </span>        # Give the robots names like r0, r1, etc.
+<span class="line_number">111 </span>        set robot r$i
+<span class="line_number">112 </span>        # Update list of robots
+<span class="line_number">113 </span>        lappend allRobots $robot
+<span class="line_number">114 </span>
+<span class="line_number">115 </span>        # Read
+<span class="line_number">116 </span>        set f [open [lindex $robotFiles $i]]
+<span class="line_number">117 </span>        set data($robot,code) [read $f]
+<span class="line_number">118 </span>        close $f
+<span class="line_number">119 </span>    }
+<span class="line_number">120 </span>
+<span class="line_number">121 </span>    # At the start of the game all robots are active
+<span class="line_number">122 </span>    set activeRobots $allRobots
+<span class="line_number">123 </span>
+<span class="line_number">124 </span>    init_robots
+<span class="line_number">125 </span>    act
+<span class="line_number">126 </span>    tick
+<span class="line_number">127 </span>}
+</pre>
+<a name="robo3"></a>
+<a name="init2finit5fparms"></a>
+<h3>2.1.1.  init/init_parms [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   init_parms
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Set general TclRobots environment parameters.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">142 </span>proc init_parms {} {
+<span class="line_number">143 </span>    # milliseconds per tick
+<span class="line_number">144 </span>    if {$::gui} {
+<span class="line_number">145 </span>        set ::parms(tick) 100
+<span class="line_number">146 </span>    } else {
+<span class="line_number">147 </span>        set ::parms(tick) 0
+<span class="line_number">148 </span>    }
+<span class="line_number">149 </span>    # meters of possible error on scan resolution
+<span class="line_number">150 </span>    set ::parms(errdist) 10
+<span class="line_number">151 </span>    # distance traveled at 100% per tick
+<span class="line_number">152 </span>    set ::parms(sp) 10
+<span class="line_number">153 </span>    # accel/deaccel speed per tick as % speed
+<span class="line_number">154 </span>    set ::parms(accel) 10
+<span class="line_number">155 </span>    # maximum range for a missile
+<span class="line_number">156 </span>    set ::parms(mismax) 700
+<span class="line_number">157 </span>    # distance missiles travel per tick
+<span class="line_number">158 </span>    set ::parms(msp) 100
+<span class="line_number">159 </span>    # missile reload time in ticks
+<span class="line_number">160 </span>    set ::parms(mreload) [round [+ [/ $::parms(mismax) $::parms(msp)] 0.5]]
+<span class="line_number">161 </span>    # missile long reload time after clip
+<span class="line_number">162 </span>    set ::parms(lreload) [* $::parms(mreload) 3]
+<span class="line_number">163 </span>    # number of missiles per clip
+<span class="line_number">164 </span>    set ::parms(clip)   4
+<span class="line_number">165 </span>    # max turn speed &lt; 25 deg. delta
+<span class="line_number">166 </span>    set ::parms(turn,0) 100
+<span class="line_number">167 </span>    #  "   "     "   " 50  "     "
+<span class="line_number">168 </span>    set ::parms(turn,1) 50
+<span class="line_number">169 </span>    #  "   "     "   " 75  "     "
+<span class="line_number">170 </span>    set ::parms(turn,2) 30
+<span class="line_number">171 </span>    #  "   "     "   &gt; 75  "     "
+<span class="line_number">172 </span>    set ::parms(turn,3) 20
+<span class="line_number">173 </span>    # max rate of turn per tick at speed &lt; 25
+<span class="line_number">174 </span>    set ::parms(rate,0) 90
+<span class="line_number">175 </span>    #  "   "   "   "    "   "   "    "   " 50
+<span class="line_number">176 </span>    set ::parms(rate,1) 60
+<span class="line_number">177 </span>    #  "   "   "   "    "   "   "    "   " 75
+<span class="line_number">178 </span>    set ::parms(rate,2) 40
+<span class="line_number">179 </span>    #  "   "   "   "    "   "   "    "   &gt; 75
+<span class="line_number">180 </span>    set ::parms(rate,3) 30
+<span class="line_number">181 </span>    #  "   "   "   "    "   "   "    "   &gt; 75
+<span class="line_number">182 </span>    set ::parms(rate,4) 20
+<span class="line_number">183 </span>    # robot start health
+<span class="line_number">184 </span>    set ::parms(health) 100
+<span class="line_number">185 </span>    # diameter of direct missile damage
+<span class="line_number">186 </span>    set ::parms(dia0) 6
+<span class="line_number">187 </span>    #     "    "  maximum   "      "
+<span class="line_number">188 </span>    set ::parms(dia1) 10
+<span class="line_number">189 </span>    #     "    "  medium    "      "
+<span class="line_number">190 </span>    set ::parms(dia2) 20
+<span class="line_number">191 </span>    #     "    "  minimum   "      "
+<span class="line_number">192 </span>    set ::parms(dia3) 40
+<span class="line_number">193 </span>    # damage within range 0
+<span class="line_number">194 </span>    set ::parms(hit0) -25
+<span class="line_number">195 </span>    #    "       "     "   1
+<span class="line_number">196 </span>    set ::parms(hit1) -12
+<span class="line_number">197 </span>    #    "       "     "   2
+<span class="line_number">198 </span>    set ::parms(hit2) -7
+<span class="line_number">199 </span>    #    "       "     "   3
+<span class="line_number">200 </span>    set ::parms(hit3) -3
+<span class="line_number">201 </span>    #    "    from collision into wall
+<span class="line_number">202 </span>    set ::parms(coll) -5
+<span class="line_number">203 </span>    # speed when heat builds
+<span class="line_number">204 </span>    set ::parms(heatsp) 35
+<span class="line_number">205 </span>    # max heat index, sets speed to heatsp
+<span class="line_number">206 </span>    set ::parms(heatmax) 200
+<span class="line_number">207 </span>    # inverse heating rate (greater hrate=slower)
+<span class="line_number">208 </span>    set ::parms(hrate) 10
+<span class="line_number">209 </span>    # cooling rate per tick, after overheat
+<span class="line_number">210 </span>    set ::parms(cooling) -25
+<span class="line_number">211 </span>    # cannon heating rate per shell
+<span class="line_number">212 </span>    set ::parms(canheat) 20
+<span class="line_number">213 </span>    # cannon cooling rate per tick
+<span class="line_number">214 </span>    set ::parms(cancool) -1
+<span class="line_number">215 </span>    # cannon heat index where scanner is inop
+<span class="line_number">216 </span>    set ::parms(scanbad) 35
+<span class="line_number">217 </span>    # quadrants, can be used to spread out robots at start
+<span class="line_number">218 </span>    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+<span class="line_number">219 </span>}
+</pre>
+<a name="robo4"></a>
+<a name="init2finit5ftrig5ftables"></a>
+<h3>2.1.2.  init/init_trig_tables [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   init_trig_tables
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">234 </span>proc init_trig_tables {} {
+<span class="line_number">235 </span>    # init sin &amp; cos tables
+<span class="line_number">236 </span>    set pi  [* 4 [atan 1]]
+<span class="line_number">237 </span>    set d2r [/ 180 $pi]
+<span class="line_number">238 </span>
+<span class="line_number">239 </span>    for {set i 0} {$i&lt;360} {incr i} {
+<span class="line_number">240 </span>        set ::s_tab($i) [sin [/ $i $d2r]]
+<span class="line_number">241 </span>        set ::c_tab($i) [cos [/ $i $d2r]]
+<span class="line_number">242 </span>    }
+<span class="line_number">243 </span>}
+</pre>
+<a name="robo5"></a>
+<a name="init2finit5frand"></a>
+<h3>2.1.3.  init/init_rand [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   init_rand
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">258 </span>proc init_rand {} {
+<span class="line_number">259 </span>    # Set random seed. Note that this works on Linux and Mac, but needs
+<span class="line_number">260 </span>    # to be done differently on Windows.
+<span class="line_number">261 </span>    if {![info exist ::seed]} {
+<span class="line_number">262 </span>        set ::seed [* [pid] [file atime /dev/tty]]
+<span class="line_number">263 </span>    }
+<span class="line_number">264 </span>    srand $::seed
+<span class="line_number">265 </span>}
+</pre>
+<a name="robo6"></a>
+<a name="init2finit5frobots"></a>
+<h3>2.1.4.  init/init_robots [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   init_robots
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">280 </span>proc init_robots {} {
+<span class="line_number">281 </span>    global data allRobots
+<span class="line_number">282 </span>
+<span class="line_number">283 </span>    set file_index 0
+<span class="line_number">284 </span>    foreach robot $allRobots {
+<span class="line_number">285 </span>        set data($robot,interp) [interp create -safe]
+<span class="line_number">286 </span>
+<span class="line_number">287 </span>        set name [file tail [lindex $::robotFiles $file_index]]
+<span class="line_number">288 </span>        incr file_index
+<span class="line_number">289 </span>
+<span class="line_number">290 </span>        set x [mrand 1000]
+<span class="line_number">291 </span>        set y [mrand 1000]
+<span class="line_number">292 </span>
+<span class="line_number">293 </span>        # generate a new signature  FIXA: avoid duplicates?
+<span class="line_number">294 </span>        set newsig [mrand 65535]
+<span class="line_number">295 </span>
+<span class="line_number">296 </span>        #########
+<span class="line_number">297 </span>        # set robot parms
+<span class="line_number">298 </span>        #########
+<span class="line_number">299 </span>        # window name = source.file_randnumber
+<span class="line_number">300 </span>        set data($robot,name) ${name}
+<span class="line_number">301 </span>        # the rand number as digital signature
+<span class="line_number">302 </span>        set data($robot,num) $newsig
+<span class="line_number">303 </span>        # robot status: 0=not used or dead, 1=running
+<span class="line_number">304 </span>        set data($robot,status) 1
+<span class="line_number">305 </span>        # robot current x
+<span class="line_number">306 </span>        set data($robot,x) $x
+<span class="line_number">307 </span>        # robot current y
+<span class="line_number">308 </span>        set data($robot,y) $y
+<span class="line_number">309 </span>        # robot origin  x since last heading
+<span class="line_number">310 </span>        set data($robot,orgx) $x
+<span class="line_number">311 </span>        # robot origin  y   "    "     "
+<span class="line_number">312 </span>        set data($robot,orgy) $y
+<span class="line_number">313 </span>        # robot current range on this heading
+<span class="line_number">314 </span>        set data($robot,range) 0
+<span class="line_number">315 </span>        # robot current health
+<span class="line_number">316 </span>        set data($robot,health) $::parms(health)
+<span class="line_number">317 </span>        # robot inflicted damage
+<span class="line_number">318 </span>        set data($robot,inflicted) 0
+<span class="line_number">319 </span>        # robot current speed
+<span class="line_number">320 </span>        set data($robot,speed) 0
+<span class="line_number">321 </span>        # robot desired   "
+<span class="line_number">322 </span>        set data($robot,dspeed) 0
+<span class="line_number">323 </span>        # robot current heading
+<span class="line_number">324 </span>        set data($robot,hdg) [mrand 360]
+<span class="line_number">325 </span>        # robot desired   "
+<span class="line_number">326 </span>        set data($robot,dhdg) $data($robot,hdg)
+<span class="line_number">327 </span>        # robot direction of turn (+/-)
+<span class="line_number">328 </span>        set data($robot,dir) +
+<span class="line_number">329 </span>        # robot last scan dsp signature
+<span class="line_number">330 </span>        set data($robot,sig) "0 0"
+<span class="line_number">331 </span>        # missile state: 0=avail, 1=flying
+<span class="line_number">332 </span>        set data($robot,mstate) 0
+<span class="line_number">333 </span>        # missile reload time: 0=ok, &gt;0 = reloading
+<span class="line_number">334 </span>        set data($robot,reload) 0
+<span class="line_number">335 </span>        # number of missiles used per clip
+<span class="line_number">336 </span>        set data($robot,mused) 0
+<span class="line_number">337 </span>        # missile current x
+<span class="line_number">338 </span>        set data($robot,mx) 0
+<span class="line_number">339 </span>        # missile current y
+<span class="line_number">340 </span>        set data($robot,my) 0
+<span class="line_number">341 </span>        # missile origin  x
+<span class="line_number">342 </span>        set data($robot,morgx) 0
+<span class="line_number">343 </span>        # missile origin  y
+<span class="line_number">344 </span>        set data($robot,morgy) 0
+<span class="line_number">345 </span>        # missile heading
+<span class="line_number">346 </span>        set data($robot,mhdg) 0
+<span class="line_number">347 </span>        # missile current range
+<span class="line_number">348 </span>        set data($robot,mrange) 0
+<span class="line_number">349 </span>        # missile target distance
+<span class="line_number">350 </span>        set data($robot,mdist) 0
+<span class="line_number">351 </span>        # motor heat index
+<span class="line_number">352 </span>        set data($robot,heat) 0
+<span class="line_number">353 </span>        # overheated flag
+<span class="line_number">354 </span>        set data($robot,hflag) 0
+<span class="line_number">355 </span>        # alert procedure to call when scanned
+<span class="line_number">356 </span>        set data($robot,alert) {}
+<span class="line_number">357 </span>        # signature of last robot to scan us
+<span class="line_number">358 </span>        set data($robot,ping) {}
+<span class="line_number">359 </span>        # list of requested timed callbacks
+<span class="line_number">360 </span>        set data($robot,callbacks) {}
+<span class="line_number">361 </span>        # declared team
+<span class="line_number">362 </span>        set data($robot,team) ""
+<span class="line_number">363 </span>        # last team message sent
+<span class="line_number">364 </span>        set data($robot,data) ""
+<span class="line_number">365 </span>        # barrel temp, affected by cannon fire
+<span class="line_number">366 </span>        set data($robot,btemp) 0
+<span class="line_number">367 </span>        # request from robot slave interp to master
+<span class="line_number">368 </span>        # tick -1 is set to {} to handle scanner charging in tick 0
+<span class="line_number">369 </span>        set data($robot,syscall,-1) {}
+<span class="line_number">370 </span>        # return value from master to slave interp
+<span class="line_number">371 </span>        set data($robot,sysreturn,0) {}
+<span class="line_number">372 </span>
+<span class="line_number">373 </span>        interp alias $data($robot,interp) syscall {} syscall $robot
+<span class="line_number">374 </span>
+<span class="line_number">375 </span>        $data($robot,interp) invokehidden source $::thisDir/syscalls.tcl
+<span class="line_number">376 </span>
+<span class="line_number">377 </span>        $data($robot,interp) eval coroutine \
+<span class="line_number">378 </span>                ${robot}Run [list uplevel \#0 $data($robot,code)]
+<span class="line_number">379 </span>
+<span class="line_number">380 </span>        interp alias {} ${robot}Run $data($robot,interp) ${robot}Run
+<span class="line_number">381 </span>    }
+<span class="line_number">382 </span>}
+</pre>
+<a name="robo7"></a>
+<a name="main2frun5fgame"></a>
+<h2>2.2.  main/run_game [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   run_game
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">397 </span>proc run_game {} {
+<span class="line_number">398 </span>    set ::running 1
+<span class="line_number">399 </span>    coroutine run_robotsCo run_robots
+<span class="line_number">400 </span>    vwait ::running
+<span class="line_number">401 </span>    puts "activerobots: $::activeRobots"
+<span class="line_number">402 </span>    find_winner
+<span class="line_number">403 </span>    puts "seed: $::seed"
+<span class="line_number">404 </span>}
+</pre>
+<a name="robo8"></a>
+<a name="run5fgame2frun5frobots"></a>
+<h3>2.2.1.  run_game/run_robots [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   run_robots
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">419 </span>proc run_robots {} {
+<span class="line_number">420 </span>    global data activeRobots tick running gui parms
+<span class="line_number">421 </span>
+<span class="line_number">422 </span>    while {$running == 1} {
+<span class="line_number">423 </span>        foreach robot $activeRobots {
+<span class="line_number">424 </span>            if {($data($robot,alert) ne {}) &amp;&amp; \
+<span class="line_number">425 </span>                    ($data($robot,ping) ne {})} {
+<span class="line_number">426 </span>                # Prepend alert data to sysreturn no notify robot it's
+<span class="line_number">427 </span>                # been scanned.
+<span class="line_number">428 </span>                set data($robot,sysreturn,[- $tick 1]) \
+<span class="line_number">429 </span>                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
+<span class="line_number">430 </span>
+<span class="line_number">431 </span>                # Robot is notified; reset alert request
+<span class="line_number">432 </span>                set data($robot,ping) {}
+<span class="line_number">433 </span>            }
+<span class="line_number">434 </span>            ${robot}Run $data($robot,sysreturn,[- $tick 1])
+<span class="line_number">435 </span>        }
+<span class="line_number">436 </span>        act
+<span class="line_number">437 </span>
+<span class="line_number">438 </span>        update_robots
+<span class="line_number">439 </span>
+<span class="line_number">440 </span>        if {$gui} {
+<span class="line_number">441 </span>            update_gui
+<span class="line_number">442 </span>        }
+<span class="line_number">443 </span>
+<span class="line_number">444 </span>        tick
+<span class="line_number">445 </span>
+<span class="line_number">446 </span>        if {$parms(tick) &lt; 5} {
+<span class="line_number">447 </span>            # Don't bother at high speed
+<span class="line_number">448 </span>            after $parms(tick) [info coroutine]
+<span class="line_number">449 </span>        } elseif {$tick &lt;= 5} {
+<span class="line_number">450 </span>            # Let the first few ticks pass before measuring
+<span class="line_number">451 </span>            after $parms(tick) [info coroutine]
+<span class="line_number">452 </span>            set timeAt5 [clock milliseconds]
+<span class="line_number">453 </span>        } else {
+<span class="line_number">454 </span>            # Try to measure time, to adjust the tick delay for load
+<span class="line_number">455 </span>            set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
+<span class="line_number">456 </span>            set delay [expr {$target - [clock milliseconds]}]
+<span class="line_number">457 </span>            # Sanity check value
+<span class="line_number">458 </span>            if {$delay &gt; $parms(tick)} {
+<span class="line_number">459 </span>                set delay $parms(tick)
+<span class="line_number">460 </span>            } elseif {$delay &lt; 5} {
+<span class="line_number">461 </span>                set delay 5
+<span class="line_number">462 </span>            }
+<span class="line_number">463 </span>            after $delay [info coroutine]
+<span class="line_number">464 </span>            # Keep the lag visible
+<span class="line_number">465 </span>            set ::StatusBarMsg "Running $delay"
+<span class="line_number">466 </span>        }
+<span class="line_number">467 </span>        yield
+<span class="line_number">468 </span>    }
+<span class="line_number">469 </span>}
+</pre>
+<a name="robo9"></a>
+<a name="run5frobots2fact"></a>
+<h4>2.2.1.1.  run_robots/act [ Procedure ]  </h4>
+<p class="item_name">NAME</p>
+<pre>   act
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">484 </span>proc act {} {
+<span class="line_number">485 </span>    global data activeRobots tick
+<span class="line_number">486 </span>
+<span class="line_number">487 </span>    foreach robot $activeRobots {
+<span class="line_number">488 </span>        if {$data($robot,status)} {
+<span class="line_number">489 </span>            set currentSyscall $data($robot,syscall,$tick)
+<span class="line_number">490 </span>            switch [lindex $currentSyscall 0] {
+<span class="line_number">491 </span>                scanner      {sysScanner     $robot}
+<span class="line_number">492 </span>                dsp          {sysDsp         $robot}
+<span class="line_number">493 </span>                alert        {sysAlert       $robot}
+<span class="line_number">494 </span>                cannon       {sysCannon      $robot}
+<span class="line_number">495 </span>                drive        {sysDrive       $robot}
+<span class="line_number">496 </span>                health       -
+<span class="line_number">497 </span>                speed        -
+<span class="line_number">498 </span>                heat         -
+<span class="line_number">499 </span>                loc_x        -
+<span class="line_number">500 </span>                loc_y        {sysData        $robot}
+<span class="line_number">501 </span>                tick         {sysTick        $robot}
+<span class="line_number">502 </span>                team_declare {sysTeamDeclare $robot}
+<span class="line_number">503 </span>            }
+<span class="line_number">504 </span>        }
+<span class="line_number">505 </span>    }
+<span class="line_number">506 </span>}
+</pre>
+<a name="robo10"></a>
+<a name="run5frobots2fupdate5frobots"></a>
+<h4>2.2.1.2.  run_robots/update_robots [ Procedure ]  </h4>
+<p class="item_name">NAME</p>
+<pre>   update_robots
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   update position of missiles and robots, assess damage
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">521 </span>proc update_robots {} {
+<span class="line_number">522 </span>    global allRobots data
+<span class="line_number">523 </span>
+<span class="line_number">524 </span>    foreach robot $allRobots {
+<span class="line_number">525 </span>        # check all flying missiles
+<span class="line_number">526 </span>        set num_miss [check_missiles $robot]
+<span class="line_number">527 </span>
+<span class="line_number">528 </span>        # skip rest if robot dead
+<span class="line_number">529 </span>        if {!$data($robot,status)} {continue}
+<span class="line_number">530 </span>
+<span class="line_number">531 </span>        # update missile reloader
+<span class="line_number">532 </span>        if {$data($robot,reload)} {incr data($robot,reload) -1}
+<span class="line_number">533 </span>
+<span class="line_number">534 </span>        # check for barrel overheat, apply cooling
+<span class="line_number">535 </span>        check_barrel $robot
+<span class="line_number">536 </span>
+<span class="line_number">537 </span>        # check for excessive speed, increment heat
+<span class="line_number">538 </span>        check_speed $robot
+<span class="line_number">539 </span>
+<span class="line_number">540 </span>        # update robot speed, moderated by acceleration
+<span class="line_number">541 </span>        update_speed $robot
+<span class="line_number">542 </span>
+<span class="line_number">543 </span>        # update robot heading, moderated by turn rates
+<span class="line_number">544 </span>        update_heading $robot
+<span class="line_number">545 </span>
+<span class="line_number">546 </span>        # update distance traveled on this heading
+<span class="line_number">547 </span>        update_distance $robot
+<span class="line_number">548 </span>
+<span class="line_number">549 </span>        # check for wall collision
+<span class="line_number">550 </span>        check_wall $robot
+<span class="line_number">551 </span>    }
+<span class="line_number">552 </span>    # check for robot health
+<span class="line_number">553 </span>    set health_status [check_health]
+<span class="line_number">554 </span>
+<span class="line_number">555 </span>    set num_rob       [lindex $health_status 0]
+<span class="line_number">556 </span>    set diffteam      [lindex $health_status 1]
+<span class="line_number">557 </span>    set num_team      [lindex $health_status 2]
+<span class="line_number">558 </span>
+<span class="line_number">559 </span>    if {($num_rob&lt;=1 || $num_team==1) &amp;&amp; $num_miss==0} {
+<span class="line_number">560 </span>        # Stop game
+<span class="line_number">561 </span>        set ::running 0
+<span class="line_number">562 </span>    }
+<span class="line_number">563 </span>}
+</pre>
+<a name="robo11"></a>
+<a name="update5frobots2fcheck5fmissiles"></a>
+<h5>2.2.1.2.1.  update_robots/check_missiles [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   check_missiles
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   check all flying missiles
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">578 </span>proc check_missiles {robot} {
+<span class="line_number">579 </span>    global data activeRobots
+<span class="line_number">580 </span>    set num_miss 0
+<span class="line_number">581 </span>
+<span class="line_number">582 </span>    if {$data($robot,mstate)} {
+<span class="line_number">583 </span>        incr num_miss
+<span class="line_number">584 </span>        update_missile_location $robot
+<span class="line_number">585 </span>        # check if missile reached target
+<span class="line_number">586 </span>        if {$data($robot,mrange) &gt; $data($robot,mdist)} {
+<span class="line_number">587 </span>            missile_reached_target $robot
+<span class="line_number">588 </span>
+<span class="line_number">589 </span>            # assign damage to all within explosion ranges
+<span class="line_number">590 </span>            foreach target $activeRobots {
+<span class="line_number">591 </span>                if {!$data($target,status)} {continue}
+<span class="line_number">592 </span>                assign_missile_damage $robot $target
+<span class="line_number">593 </span>            }
+<span class="line_number">594 </span>        }
+<span class="line_number">595 </span>    }
+<span class="line_number">596 </span>    return $num_miss
+<span class="line_number">597 </span>}
+</pre>
+<a name="robo12"></a>
+<a name="update5frobots2fupdate5fmissile5flocation"></a>
+<h5>2.2.1.2.2.  update_robots/update_missile_location [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   update_missile_location
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   update location of missile
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">612 </span>proc update_missile_location {robot} {
+<span class="line_number">613 </span>    global data parms c_tab s_tab
+<span class="line_number">614 </span>
+<span class="line_number">615 </span>    set data($robot,mrange) \
+<span class="line_number">616 </span>        [+ $data($robot,mrange) $parms(msp)]
+<span class="line_number">617 </span>    set data($robot,mx) \
+<span class="line_number">618 </span>        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
+<span class="line_number">619 </span>             $data($robot,morgx)]
+<span class="line_number">620 </span>    set data($robot,my) \
+<span class="line_number">621 </span>        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
+<span class="line_number">622 </span>             $data($robot,morgy)]
+<span class="line_number">623 </span>}
+</pre>
+<a name="robo13"></a>
+<a name="update5frobots2fmissile5freached5ftarget"></a>
+<h5>2.2.1.2.3.  update_robots/missile_reached_target [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   missile_reached_target
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">638 </span>proc missile_reached_target {robot} {
+<span class="line_number">639 </span>    global data gui c_tab s_tab
+<span class="line_number">640 </span>
+<span class="line_number">641 </span>    set data($robot,mstate) 0
+<span class="line_number">642 </span>    set data($robot,mx) \
+<span class="line_number">643 </span>        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
+<span class="line_number">644 </span>             $data($robot,morgx)]
+<span class="line_number">645 </span>    set data($robot,my) \
+<span class="line_number">646 </span>        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
+<span class="line_number">647 </span>             $data($robot,morgy)]
+<span class="line_number">648 </span>    if {$gui} {
+<span class="line_number">649 </span>        after 1 "show_explode $robot"
+<span class="line_number">650 </span>    }
+<span class="line_number">651 </span>}
+</pre>
+<a name="robo14"></a>
+<a name="update5frobots2fassign5fmissile5fdamage"></a>
+<h5>2.2.1.2.4.  update_robots/assign_missile_damage [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   assign_missile_damage
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   assign damage to all within explosion ranges
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">666 </span>proc assign_missile_damage {robot target} {
+<span class="line_number">667 </span>    global data parms
+<span class="line_number">668 </span>
+<span class="line_number">669 </span>    set d [hypot [- $data($robot,mx) $data($target,x)] \
+<span class="line_number">670 </span>            [- $data($robot,my) $data($target,y)]]
+<span class="line_number">671 </span>    if {$d &lt; $parms(dia3)} {
+<span class="line_number">672 </span>        if {$d &lt; $parms(dia0)} {
+<span class="line_number">673 </span>            incr data($target,health) $parms(hit0)
+<span class="line_number">674 </span>            incr data($robot,inflicted) [- $parms(hit0)]
+<span class="line_number">675 </span>        } elseif {$d&lt;$parms(dia1)} {
+<span class="line_number">676 </span>            incr data($target,health) $parms(hit1)
+<span class="line_number">677 </span>            incr data($robot,inflicted) [- $parms(hit1)]
+<span class="line_number">678 </span>        } elseif {$d&lt;$parms(dia2)} {
+<span class="line_number">679 </span>            incr data($target,health) $parms(hit2)
+<span class="line_number">680 </span>            incr data($robot,inflicted) [- $parms(hit2)]
+<span class="line_number">681 </span>        } else {
+<span class="line_number">682 </span>            incr data($target,health) $parms(hit3)
+<span class="line_number">683 </span>            incr data($robot,inflicted) [- $parms(hit3)]
+<span class="line_number">684 </span>        }
+<span class="line_number">685 </span>    }
+<span class="line_number">686 </span>}
+</pre>
+<a name="robo15"></a>
+<a name="update5frobots2fcheck5fbarrel"></a>
+<h5>2.2.1.2.5.  update_robots/check_barrel [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   check_barrel
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   check for barrel overheat, apply cooling
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">701 </span>proc check_barrel {robot} {
+<span class="line_number">702 </span>    global data parms
+<span class="line_number">703 </span>
+<span class="line_number">704 </span>    if {$data($robot,btemp)} {
+<span class="line_number">705 </span>        incr data($robot,btemp) $parms(cancool)
+<span class="line_number">706 </span>        if {$data($robot,btemp) &lt; 0} {
+<span class="line_number">707 </span>            set data($robot,btemp) 0
+<span class="line_number">708 </span>        }
+<span class="line_number">709 </span>    }
+<span class="line_number">710 </span>}
+</pre>
+<a name="robo16"></a>
+<a name="update5frobots2fcheck5fspeed"></a>
+<h5>2.2.1.2.6.  update_robots/check_speed [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   check_speed
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   check for excessive speed, increment heat
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">725 </span>proc check_speed {robot} {
+<span class="line_number">726 </span>    global data parms
+<span class="line_number">727 </span>
+<span class="line_number">728 </span>    if {$data($robot,speed) &gt; $parms(heatsp)} {
+<span class="line_number">729 </span>        incr data($robot,heat) \
+<span class="line_number">730 </span>            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
+<span class="line_number">731 </span>                           $parms(hrate)]] 1]
+<span class="line_number">732 </span>        if {$data($robot,heat) &gt;= $parms(heatmax)} {
+<span class="line_number">733 </span>            set data($robot,heat) $parms(heatmax)
+<span class="line_number">734 </span>            set data($robot,hflag) 1
+<span class="line_number">735 </span>            if {$data($robot,dspeed) &gt; $parms(heatsp)} {
+<span class="line_number">736 </span>                set data($robot,dspeed) $parms(heatsp)
+<span class="line_number">737 </span>            }
+<span class="line_number">738 </span>        }
+<span class="line_number">739 </span>    } else {
+<span class="line_number">740 </span>        # if overheating, apply cooling rate
+<span class="line_number">741 </span>        if {$data($robot,hflag) || $data($robot,heat) &gt; 0} {
+<span class="line_number">742 </span>            incr data($robot,heat) $parms(cooling)
+<span class="line_number">743 </span>            if {$data($robot,heat) &lt;= 0} {
+<span class="line_number">744 </span>                set data($robot,hflag) 0
+<span class="line_number">745 </span>                set data($robot,heat) 0
+<span class="line_number">746 </span>            }
+<span class="line_number">747 </span>        }
+<span class="line_number">748 </span>    }
+<span class="line_number">749 </span>}
+</pre>
+<a name="robo17"></a>
+<a name="update5frobots2fupdate5fspeed"></a>
+<h5>2.2.1.2.7.  update_robots/update_speed [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   update_speed
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   update robot speed, moderated by acceleration
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">764 </span>proc update_speed {robot} {
+<span class="line_number">765 </span>    global data parms
+<span class="line_number">766 </span>
+<span class="line_number">767 </span>    if {$data($robot,speed) != $data($robot,dspeed)} {
+<span class="line_number">768 </span>        if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+<span class="line_number">769 </span>            incr data($robot,speed) -$parms(accel)
+<span class="line_number">770 </span>            if {$data($robot,speed) &lt; $data($robot,dspeed)} {
+<span class="line_number">771 </span>                set data($robot,speed) $data($robot,dspeed)
+<span class="line_number">772 </span>            }
+<span class="line_number">773 </span>        } else {
+<span class="line_number">774 </span>            incr data($robot,speed) $parms(accel)
+<span class="line_number">775 </span>            if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+<span class="line_number">776 </span>                set data($robot,speed) $data($robot,dspeed)
+<span class="line_number">777 </span>            }
+<span class="line_number">778 </span>        }
+<span class="line_number">779 </span>    }
+<span class="line_number">780 </span>}
+</pre>
+<a name="robo18"></a>
+<a name="update5frobots2fupdate5fheading"></a>
+<h5>2.2.1.2.8.  update_robots/update_heading [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   update_heading
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   update robot heading, moderated by turn rates
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">795 </span>proc update_heading {robot} {
+<span class="line_number">796 </span>    global data parms
+<span class="line_number">797 </span>
+<span class="line_number">798 </span>    if {$data($robot,hdg) != $data($robot,dhdg)} {
+<span class="line_number">799 </span>        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
+<span class="line_number">800 </span>        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
+<span class="line_number">801 </span>        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
+<span class="line_number">802 </span>
+<span class="line_number">803 </span>        if {$d1 &lt; $d2} {
+<span class="line_number">804 </span>            set d $d1
+<span class="line_number">805 </span>        } else {
+<span class="line_number">806 </span>            set d $d2
+<span class="line_number">807 </span>        }
+<span class="line_number">808 </span>        if {$d &lt;= $mrate} {
+<span class="line_number">809 </span>            set data($robot,hdg) $data($robot,dhdg)
+<span class="line_number">810 </span>        } else {
+<span class="line_number">811 </span>            set data($robot,hdg) \
+<span class="line_number">812 </span>                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
+<span class="line_number">813 </span>        }
+<span class="line_number">814 </span>        set data($robot,orgx)  $data($robot,x)
+<span class="line_number">815 </span>        set data($robot,orgy)  $data($robot,y)
+<span class="line_number">816 </span>        set data($robot,range) 0
+<span class="line_number">817 </span>    }
+<span class="line_number">818 </span>}
+</pre>
+<a name="robo19"></a>
+<a name="update5frobots2fupdate5fdistance"></a>
+<h5>2.2.1.2.9.  update_robots/update_distance [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   update_distance
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   update distance traveled on this heading
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">833 </span>proc update_distance {robot} {
+<span class="line_number">834 </span>    global data parms c_tab s_tab
+<span class="line_number">835 </span>
+<span class="line_number">836 </span>    if {$data($robot,speed) &gt; 0} {
+<span class="line_number">837 </span>        set data($robot,range) \
+<span class="line_number">838 </span>            [+ $data($robot,range) \
+<span class="line_number">839 </span>                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+<span class="line_number">840 </span>
+<span class="line_number">841 </span>        # Modify range with random factor to avoid totally
+<span class="line_number">842 </span>        # deterministic movement. Range is currently +- 1%.
+<span class="line_number">843 </span>        # Playtesting will tell if this should be lower or higher.
+<span class="line_number">844 </span>        set randfactor [/ [+ [mrand 100] 1.0] 10000]
+<span class="line_number">845 </span>        if {[mrand 2] == 0} {
+<span class="line_number">846 </span>            set randfactor [- $randfactor]
+<span class="line_number">847 </span>        }
+<span class="line_number">848 </span>        set data($robot,range) [+ $data($robot,range) \
+<span class="line_number">849 </span>                                    [* $data($robot,range) \
+<span class="line_number">850 </span>                                         $randfactor]]
+<span class="line_number">851 </span>
+<span class="line_number">852 </span>        set data($robot,x) \
+<span class="line_number">853 </span>            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
+<span class="line_number">854 </span>                         $data($robot,orgx)]]
+<span class="line_number">855 </span>
+<span class="line_number">856 </span>        set data($robot,y) \
+<span class="line_number">857 </span>            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
+<span class="line_number">858 </span>                        $data($robot,orgy)]]
+<span class="line_number">859 </span>    }
+<span class="line_number">860 </span>}
+</pre>
+<a name="robo20"></a>
+<a name="update5frobots2fcheck5fwall"></a>
+<h5>2.2.1.2.10.  update_robots/check_wall [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   check_wall
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   check for wall collision
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">875 </span>proc check_wall {robot} {
+<span class="line_number">876 </span>    global data parms
+<span class="line_number">877 </span>
+<span class="line_number">878 </span>    if {$data($robot,speed) &gt; 0} {
+<span class="line_number">879 </span>        if {($data($robot,x) &lt; 0) || ($data($robot,x) &gt; 999)} {
+<span class="line_number">880 </span>            if {$data($robot,x) &lt; 0} {
+<span class="line_number">881 </span>                set data($robot,x) 0
+<span class="line_number">882 </span>            } else {
+<span class="line_number">883 </span>                set data($robot,x) 999
+<span class="line_number">884 </span>            }
+<span class="line_number">885 </span>            set data($robot,orgx)    $data($robot,x)
+<span class="line_number">886 </span>            set data($robot,orgy)    $data($robot,y)
+<span class="line_number">887 </span>            set data($robot,range)   0
+<span class="line_number">888 </span>            set data($robot,speed)   0
+<span class="line_number">889 </span>            set data($robot,dspeed)  0
+<span class="line_number">890 </span>            incr data($robot,health) $parms(coll)
+<span class="line_number">891 </span>        }
+<span class="line_number">892 </span>        if {($data($robot,y) &lt; 0) || ($data($robot,y) &gt; 999)} {
+<span class="line_number">893 </span>            if {$data($robot,y) &lt; 0} {
+<span class="line_number">894 </span>                set data($robot,y) 0
+<span class="line_number">895 </span>            } else {
+<span class="line_number">896 </span>                set data($robot,y) 999
+<span class="line_number">897 </span>            }
+<span class="line_number">898 </span>            set data($robot,orgx)    $data($robot,x)
+<span class="line_number">899 </span>            set data($robot,orgy)    $data($robot,y)
+<span class="line_number">900 </span>            set data($robot,range)   0
+<span class="line_number">901 </span>            set data($robot,speed)   0
+<span class="line_number">902 </span>            set data($robot,dspeed)  0
+<span class="line_number">903 </span>            incr data($robot,health) $parms(coll)
+<span class="line_number">904 </span>        }
+<span class="line_number">905 </span>    }
+<span class="line_number">906 </span>}
+</pre>
+<a name="robo21"></a>
+<a name="update5frobots2fcheck5fhealth"></a>
+<h5>2.2.1.2.11.  update_robots/check_health [ Procedure ]  </h5>
+<p class="item_name">NAME</p>
+<pre>   check_health
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   check for robot health
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">921 </span>proc check_health {} {
+<span class="line_number">922 </span>    global activeRobots data tick
+<span class="line_number">923 </span>
+<span class="line_number">924 </span>    set num_rob  0
+<span class="line_number">925 </span>    set diffteam ""
+<span class="line_number">926 </span>    set num_team 0
+<span class="line_number">927 </span>    foreach robot $activeRobots {
+<span class="line_number">928 </span>        if {$data($robot,status)} {
+<span class="line_number">929 </span>            if {$data($robot,health) &lt;= 0 } {
+<span class="line_number">930 </span>                set data($robot,status) 0
+<span class="line_number">931 </span>                set data($robot,health) 0
+<span class="line_number">932 </span>                disable_robot $robot
+<span class="line_number">933 </span>                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+<span class="line_number">934 </span>                if {$::gui} {
+<span class="line_number">935 </span>                    after 1 "show_die $robot"
+<span class="line_number">936 </span>                }
+<span class="line_number">937 </span>            } else {
+<span class="line_number">938 </span>                incr num_rob
+<span class="line_number">939 </span>                if {$data($robot,team) != ""} {
+<span class="line_number">940 </span>                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+<span class="line_number">941 </span>                        lappend diffteam $data($robot,team)
+<span class="line_number">942 </span>                        incr num_team
+<span class="line_number">943 </span>                    }
+<span class="line_number">944 </span>                } else {
+<span class="line_number">945 </span>                    lappend diffteam $data($robot,name)
+<span class="line_number">946 </span>                    incr num_team
+<span class="line_number">947 </span>                }
+<span class="line_number">948 </span>            }
+<span class="line_number">949 </span>        }
+<span class="line_number">950 </span>    }
+<span class="line_number">951 </span>    return $num_rob $diffteam $num_team
+<span class="line_number">952 </span>}
+</pre>
+<a name="robo22"></a>
+<a name="check5fhealth2fdisable5frobot"></a>
+<h6>2.2.1.2.11.1.  check_health/disable_robot [ Procedure ]  </h6>
+<p class="item_name">NAME</p>
+<pre>   disable_robot
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">967 </span>proc disable_robot {robot} {
+<span class="line_number">968 </span>    global data activeRobots tick
+<span class="line_number">969 </span>
+<span class="line_number">970 </span>    interp delete $data($robot,interp)
+<span class="line_number">971 </span>    set index [lsearch -exact $activeRobots $robot]
+<span class="line_number">972 </span>    set activeRobots [lreplace $activeRobots $index $index]
+<span class="line_number">973 </span>    set data($robot,syscall,$tick) {}
+<span class="line_number">974 </span>}
+</pre>
+<a name="robo23"></a>
+<a name="run5frobots2ftick"></a>
+<h4>2.2.1.3.  run_robots/tick [ Procedure ]  </h4>
+<p class="item_name">NAME</p>
+<pre>   tick
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">989 </span>proc tick {} {
+<span class="line_number">990 </span>    if {$::tick &lt; $::max_ticks} {
+<span class="line_number">991 </span>        incr ::tick
+<span class="line_number">992 </span>    } else {
+<span class="line_number">993 </span>        set ::running 0
+<span class="line_number">994 </span>    }
+<span class="line_number">995 </span>}
+</pre>
+<a name="robo24"></a>
+<a name="run5fgame2ffind5fwinner"></a>
+<h3>2.2.2.  run_game/find_winner [ Procedure ]  </h3>
+<p class="item_name">NAME</p>
+<pre>   find_winner
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1010 </span>proc find_winner {} {
+<span class="line_number">1011 </span>    global data activeRobots
+<span class="line_number">1012 </span>
+<span class="line_number">1013 </span>    set alive 0
+<span class="line_number">1014 </span>    set winner ""
+<span class="line_number">1015 </span>    set num_team 0
+<span class="line_number">1016 </span>    set diffteam ""
+<span class="line_number">1017 </span>    set win_color black
+<span class="line_number">1018 </span>    foreach robot $activeRobots {
+<span class="line_number">1019 </span>        disable_robot $robot
+<span class="line_number">1020 </span>        incr alive
+<span class="line_number">1021 </span>        lappend winner $data($robot,name)
+<span class="line_number">1022 </span>
+<span class="line_number">1023 </span>        if {$data($robot,team) != ""} {
+<span class="line_number">1024 </span>            if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+<span class="line_number">1025 </span>                lappend diffteam $data($robot,team)
+<span class="line_number">1026 </span>                incr num_team
+<span class="line_number">1027 </span>            }
+<span class="line_number">1028 </span>        } else {
+<span class="line_number">1029 </span>            incr num_team
+<span class="line_number">1030 </span>        }
+<span class="line_number">1031 </span>    }
+<span class="line_number">1032 </span>
+<span class="line_number">1033 </span>    switch $alive {
+<span class="line_number">1034 </span>        0 {
+<span class="line_number">1035 </span>            set ::win_msg "No robots left alive"
+<span class="line_number">1036 </span>            puts $::win_msg
+<span class="line_number">1037 </span>        }
+<span class="line_number">1038 </span>        1 {
+<span class="line_number">1039 </span>            if {[string length $diffteam] &gt; 0} {
+<span class="line_number">1040 </span>                set diffteam "Team $diffteam"
+<span class="line_number">1041 </span>            }
+<span class="line_number">1042 </span>            set ::win_msg "\nWinner!\n\n$diffteam\n$winner\n"
+<span class="line_number">1043 </span>            puts $::win_msg
+<span class="line_number">1044 </span>        }
+<span class="line_number">1045 </span>        default {
+<span class="line_number">1046 </span>            # check for teams
+<span class="line_number">1047 </span>            if {$num_team == 1} {
+<span class="line_number">1048 </span>                set ::win_msg "Winner!\n\nTeam $diffteam\n$winner"
+<span class="line_number">1049 </span>                puts $::win_msg
+<span class="line_number">1050 </span>            } else {
+<span class="line_number">1051 </span>                set ::win_msg "Tie:\n\n$winner"
+<span class="line_number">1052 </span>                puts $::win_msg
+<span class="line_number">1053 </span>            }
+<span class="line_number">1054 </span>        }
+<span class="line_number">1055 </span>    }
+<span class="line_number">1056 </span>    set ::win_msg2 [join [split $::win_msg \n] " "]
+<span class="line_number">1057 </span>    set score "score: "
+<span class="line_number">1058 </span>    set points 1
+<span class="line_number">1059 </span>    foreach l [split $::finish \n] {
+<span class="line_number">1060 </span>        set n [lindex $l 0]
+<span class="line_number">1061 </span>        if {[string length $n] == 0} {continue}
+<span class="line_number">1062 </span>        set l [string last _ $n]
+<span class="line_number">1063 </span>        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
+<span class="line_number">1064 </span>        append score "$n = $points  "
+<span class="line_number">1065 </span>        incr points
+<span class="line_number">1066 </span>    }
+<span class="line_number">1067 </span>    foreach n $winner {
+<span class="line_number">1068 </span>        set l [string last _ $n]
+<span class="line_number">1069 </span>        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
+<span class="line_number">1070 </span>        append score "$n = $points  "
+<span class="line_number">1071 </span>    }
+<span class="line_number">1072 </span>    set players "battle: "
+<span class="line_number">1073 </span>    foreach robot $::allRobots {
+<span class="line_number">1074 </span>        append players "$data($robot,name) "
+<span class="line_number">1075 </span>    }
+<span class="line_number">1076 </span>    catch {write_file $outfile \
+<span class="line_number">1077 </span>               "$players\n$::finish\n$::win_msg2\n\n$score\n\n\n"}
+<span class="line_number">1078 </span>}
+</pre>
+<a name="robo25"></a>
+<a name="tclrobots2fsyscall"></a>
+<h1>3.  tclrobots/syscall [ Procedure ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   syscall
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Handle syscalls from robots
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1093 </span>proc syscall {args} {
+<span class="line_number">1094 </span>    global data tick
+<span class="line_number">1095 </span>
+<span class="line_number">1096 </span>    set robot [lindex $args 0]
+<span class="line_number">1097 </span>    set result 0
+<span class="line_number">1098 </span>
+<span class="line_number">1099 </span>    set syscall [lrange $args 1 end]
+<span class="line_number">1100 </span>
+<span class="line_number">1101 </span>    # Handle all immediate syscalls
+<span class="line_number">1102 </span>    switch [lindex $syscall 0] {
+<span class="line_number">1103 </span>        dputs {
+<span class="line_number">1104 </span>            sysDputs $robot [lrange $args 2 end]
+<span class="line_number">1105 </span>        }
+<span class="line_number">1106 </span>        rand {
+<span class="line_number">1107 </span>            set result [mrand [lindex $syscall 1]]
+<span class="line_number">1108 </span>        }
+<span class="line_number">1109 </span>        team_send {
+<span class="line_number">1110 </span>            sysTeamSend $robot [lindex $syscall 1]
+<span class="line_number">1111 </span>        }
+<span class="line_number">1112 </span>        team_get {
+<span class="line_number">1113 </span>            set result [sysTeamGet $robot]
+<span class="line_number">1114 </span>        }
+<span class="line_number">1115 </span>        callback {
+<span class="line_number">1116 </span>            set ticks  [lindex $syscall 1]
+<span class="line_number">1117 </span>            set script [lindex $syscall 2]
+<span class="line_number">1118 </span>            set when [+ $tick $ticks]
+<span class="line_number">1119 </span>            lappend data($robot,callbacks) [list $when $script]
+<span class="line_number">1120 </span>            set data($robot,callbacks) \
+<span class="line_number">1121 </span>                    [lsort -integer -index 0 $data($robot,callbacks)]
+<span class="line_number">1122 </span>        }
+<span class="line_number">1123 </span>        callbackcheck {
+<span class="line_number">1124 </span>            set when [lindex $data($robot,callbacks) 0 0]
+<span class="line_number">1125 </span>            if {$when ne "" &amp;&amp; $when &lt;= $tick} {
+<span class="line_number">1126 </span>                set result [lindex $data($robot,callbacks) 0 1]
+<span class="line_number">1127 </span>                set data($robot,callbacks) \
+<span class="line_number">1128 </span>                        [lrange $data($robot,callbacks) 1 end]
+<span class="line_number">1129 </span>            } else {
+<span class="line_number">1130 </span>                set result ""
+<span class="line_number">1131 </span>            }
+<span class="line_number">1132 </span>        }
+<span class="line_number">1133 </span>        default {
+<span class="line_number">1134 </span>            # All postponed syscalls ends up here
+<span class="line_number">1135 </span>            set data($robot,syscall,$tick) $syscall
+<span class="line_number">1136 </span>        }
+<span class="line_number">1137 </span>    }
+<span class="line_number">1138 </span>    return $result
+<span class="line_number">1139 </span>}
+</pre>
+<a name="robo26"></a>
+<a name="syscall2fsysScanner"></a>
+<h2>3.1.  syscall/sysScanner [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysScanner
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1154 </span>proc sysScanner {robot} {
+<span class="line_number">1155 </span>    global data parms tick activeRobots
+<span class="line_number">1156 </span>
+<span class="line_number">1157 </span>    if {($data($robot,syscall,$tick) eq \
+<span class="line_number">1158 </span>             $data($robot,syscall,[- $tick 1]))} {
+<span class="line_number">1159 </span>
+<span class="line_number">1160 </span>        set deg [lindex $data($robot,syscall,$tick) 1]
+<span class="line_number">1161 </span>        set res [lindex $data($robot,syscall,$tick) 2]
+<span class="line_number">1162 </span>
+<span class="line_number">1163 </span>        set dsp    0
+<span class="line_number">1164 </span>        set health 0
+<span class="line_number">1165 </span>        set near   9999
+<span class="line_number">1166 </span>        foreach target $activeRobots {
+<span class="line_number">1167 </span>            if {"$target" == "$robot"} {
+<span class="line_number">1168 </span>                continue
+<span class="line_number">1169 </span>            }
+<span class="line_number">1170 </span>            set x [- $data($target,x) $data($robot,x)]
+<span class="line_number">1171 </span>            set y [- $data($target,y) $data($robot,y)]
+<span class="line_number">1172 </span>            set d [round [* 57.2958 [atan2 $y $x]]]
+<span class="line_number">1173 </span>
+<span class="line_number">1174 </span>            if {$d &lt; 0} {
+<span class="line_number">1175 </span>                incr d 360
+<span class="line_number">1176 </span>            }
+<span class="line_number">1177 </span>            set d1  [% [+ [- $d $deg] 360] 360]
+<span class="line_number">1178 </span>            set d2  [% [+ [- $deg $d] 360] 360]
+<span class="line_number">1179 </span>
+<span class="line_number">1180 </span>            if {$d1 &lt; $d2} {
+<span class="line_number">1181 </span>                set f $d1
+<span class="line_number">1182 </span>            } else {
+<span class="line_number">1183 </span>                set f $d2
+<span class="line_number">1184 </span>            }
+<span class="line_number">1185 </span>            if {$f&lt;=$res} {
+<span class="line_number">1186 </span>                set data($target,ping) $data($robot,num)
+<span class="line_number">1187 </span>                set dist [round [hypot $x $y]]
+<span class="line_number">1188 </span>
+<span class="line_number">1189 </span>                if {$dist&lt;$near} {
+<span class="line_number">1190 </span>                    set derr [* $parms(errdist) $res]
+<span class="line_number">1191 </span>
+<span class="line_number">1192 </span>                    if {$res &gt; 0} {
+<span class="line_number">1193 </span>                        set terr [+ 5 [mrand $derr]]
+<span class="line_number">1194 </span>                    } else {
+<span class="line_number">1195 </span>                        set terr [+ 0 [mrand $derr]]
+<span class="line_number">1196 </span>                    }
+<span class="line_number">1197 </span>                    if {[mrand 2]} {
+<span class="line_number">1198 </span>                        set fud1 -
+<span class="line_number">1199 </span>                    } else {
+<span class="line_number">1200 </span>                        set fud1 +
+<span class="line_number">1201 </span>                    }
+<span class="line_number">1202 </span>                    if {[mrand 2]} {
+<span class="line_number">1203 </span>                        set fud2 -
+<span class="line_number">1204 </span>                    } else {
+<span class="line_number">1205 </span>                        set fud2 +
+<span class="line_number">1206 </span>                    }
+<span class="line_number">1207 </span>                    set near [$fud1 $dist [$fud2 $terr $data($robot,btemp)]]
+<span class="line_number">1208 </span>
+<span class="line_number">1209 </span>                    if {$near &lt; 1} {
+<span class="line_number">1210 </span>                        set near 1
+<span class="line_number">1211 </span>                    }
+<span class="line_number">1212 </span>                    set dsp    $data($robot,num)
+<span class="line_number">1213 </span>                    set health $data($robot,health)
+<span class="line_number">1214 </span>                }
+<span class="line_number">1215 </span>            }
+<span class="line_number">1216 </span>        }
+<span class="line_number">1217 </span>        # if cannon has overheated scanner, report 0
+<span class="line_number">1218 </span>        if {$data($robot,btemp) &gt;= $parms(scanbad)} {
+<span class="line_number">1219 </span>            set data($robot,sig) "0 0"
+<span class="line_number">1220 </span>            set val 0
+<span class="line_number">1221 </span>        } else {
+<span class="line_number">1222 </span>            set data($robot,sig) "$dsp $health"
+<span class="line_number">1223 </span>
+<span class="line_number">1224 </span>            if {$near == 9999} {
+<span class="line_number">1225 </span>                set val 0
+<span class="line_number">1226 </span>            } else {
+<span class="line_number">1227 </span>                set val $near
+<span class="line_number">1228 </span>            }
+<span class="line_number">1229 </span>        }
+<span class="line_number">1230 </span>        set data($robot,sysreturn,$tick) $val
+<span class="line_number">1231 </span>
+<span class="line_number">1232 </span>    } else {
+<span class="line_number">1233 </span>        set data($robot,sysreturn,$tick) 0
+<span class="line_number">1234 </span>    }
+<span class="line_number">1235 </span>}
+</pre>
+<a name="robo27"></a>
+<a name="syscall2fsysDsp"></a>
+<h2>3.2.  syscall/sysDsp [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysDsp
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1250 </span>proc sysDsp {robot} {
+<span class="line_number">1251 </span>    global data tick
+<span class="line_number">1252 </span>    set data($robot,sysreturn,$tick) $data($robot,sig)
+<span class="line_number">1253 </span>}
+</pre>
+<a name="robo28"></a>
+<a name="syscall2fsysAlert"></a>
+<h2>3.3.  syscall/sysAlert [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysAlert
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1268 </span>proc sysAlert {robot} {
+<span class="line_number">1269 </span>    global data tick
+<span class="line_number">1270 </span>    set data($robot,alert) [lindex $data($robot,syscall,$tick) 1]
+<span class="line_number">1271 </span>    set data($robot,sysreturn,$tick) 1
+<span class="line_number">1272 </span>}
+</pre>
+<a name="robo29"></a>
+<a name="syscall2fsysCannon"></a>
+<h2>3.4.  syscall/sysCannon [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysCannon
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1287 </span>proc sysCannon {robot} {
+<span class="line_number">1288 </span>    global data parms tick
+<span class="line_number">1289 </span>
+<span class="line_number">1290 </span>    set deg [lindex $data($robot,syscall,$tick) 1]
+<span class="line_number">1291 </span>    set rng [lindex $data($robot,syscall,$tick) 2]
+<span class="line_number">1292 </span>
+<span class="line_number">1293 </span>    set val 0
+<span class="line_number">1294 </span>
+<span class="line_number">1295 </span>    if {$data($robot,mstate)} {
+<span class="line_number">1296 </span>        set val 0
+<span class="line_number">1297 </span>    } elseif {$data($robot,reload)} {
+<span class="line_number">1298 </span>        set val 0
+<span class="line_number">1299 </span>    } elseif [catch {set deg [round $deg]}] {
+<span class="line_number">1300 </span>        set val -1
+<span class="line_number">1301 </span>    } elseif [catch {set rng [round $rng]}] {
+<span class="line_number">1302 </span>        set val -1
+<span class="line_number">1303 </span>    } elseif {($deg &lt; 0) || ($deg &gt; 359)} {
+<span class="line_number">1304 </span>        set val -1
+<span class="line_number">1305 </span>    } elseif {($rng &lt; 0) || ($rng &gt; $parms(mismax))} {
+<span class="line_number">1306 </span>        set val -1
+<span class="line_number">1307 </span>    } else {
+<span class="line_number">1308 </span>        set data($robot,mhdg)   $deg
+<span class="line_number">1309 </span>        set data($robot,mdist)  $rng
+<span class="line_number">1310 </span>        set data($robot,mrange) 0
+<span class="line_number">1311 </span>        set data($robot,mstate) 1
+<span class="line_number">1312 </span>        set data($robot,morgx)  $data($robot,x)
+<span class="line_number">1313 </span>        set data($robot,morgy)  $data($robot,y)
+<span class="line_number">1314 </span>        set data($robot,mx)     $data($robot,x)
+<span class="line_number">1315 </span>        set data($robot,my)     $data($robot,y)
+<span class="line_number">1316 </span>        incr data($robot,btemp) $parms(canheat)
+<span class="line_number">1317 </span>        incr data($robot,mused)
+<span class="line_number">1318 </span>        # set longer reload time if used all missiles in clip
+<span class="line_number">1319 </span>        if {$data($robot,mused) == $parms(clip)} {
+<span class="line_number">1320 </span>            set data($robot,reload) $parms(lreload)
+<span class="line_number">1321 </span>            set data($robot,mused) 0
+<span class="line_number">1322 </span>        } else {
+<span class="line_number">1323 </span>            set data($robot,reload) $parms(mreload)
+<span class="line_number">1324 </span>        }
+<span class="line_number">1325 </span>        set val 1
+<span class="line_number">1326 </span>    }
+<span class="line_number">1327 </span>    set data($robot,sysreturn,$tick) $val
+<span class="line_number">1328 </span>}
+</pre>
+<a name="robo30"></a>
+<a name="syscall2fsysDrive"></a>
+<h2>3.5.  syscall/sysDrive [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysDrive
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1343 </span>proc sysDrive {robot} {
+<span class="line_number">1344 </span>    global data parms tick
+<span class="line_number">1345 </span>
+<span class="line_number">1346 </span>    set deg [lindex $data($robot,syscall,$tick) 1]
+<span class="line_number">1347 </span>    set spd [lindex $data($robot,syscall,$tick) 2]
+<span class="line_number">1348 </span>
+<span class="line_number">1349 </span>    set d1  [% [+ [- $data($robot,hdg) $deg] 360] 360]
+<span class="line_number">1350 </span>    set d2  [% [+ [- $deg $data($robot,hdg)] 360] 360]
+<span class="line_number">1351 </span>
+<span class="line_number">1352 </span>    if {$d1 &lt; $d2} {
+<span class="line_number">1353 </span>        set d $d1
+<span class="line_number">1354 </span>    } else {
+<span class="line_number">1355 </span>        set d $d2
+<span class="line_number">1356 </span>    }
+<span class="line_number">1357 </span>    set data($robot,dhdg) $deg
+<span class="line_number">1358 </span>
+<span class="line_number">1359 </span>    if {$data($robot,hflag) &amp;&amp; ($spd &gt; $parms(heatsp))} {
+<span class="line_number">1360 </span>        set data($robot,dspeed) $parms(heatsp)
+<span class="line_number">1361 </span>    } else {
+<span class="line_number">1362 </span>        set data($robot,dspeed) $spd
+<span class="line_number">1363 </span>    }
+<span class="line_number">1364 </span>    # shutdown drive if turning too fast at current speed
+<span class="line_number">1365 </span>    set index [int [/ $d 25]]
+<span class="line_number">1366 </span>    if {$index &gt; 3} {
+<span class="line_number">1367 </span>        set index 3
+<span class="line_number">1368 </span>    }
+<span class="line_number">1369 </span>    if {$data($robot,speed) &gt; $parms(turn,$index)} {
+<span class="line_number">1370 </span>        set data($robot,dspeed) 0
+<span class="line_number">1371 </span>        set data($robot,dhdg)   $data($robot,hdg)
+<span class="line_number">1372 </span>    } else {
+<span class="line_number">1373 </span>        set data($robot,orgx)  $data($robot,x)
+<span class="line_number">1374 </span>        set data($robot,orgy)  $data($robot,y)
+<span class="line_number">1375 </span>        set data($robot,range) 0
+<span class="line_number">1376 </span>    }
+<span class="line_number">1377 </span>    # find direction of turn
+<span class="line_number">1378 </span>    if {($data($robot,hdg)+$d+360)%360==$deg} {
+<span class="line_number">1379 </span>        set data($robot,dir) +
+<span class="line_number">1380 </span>    } else {
+<span class="line_number">1381 </span>        set data($robot,dir) -
+<span class="line_number">1382 </span>    }
+<span class="line_number">1383 </span>
+<span class="line_number">1384 </span>    set data($robot,sysreturn,$tick) $data($robot,dspeed)
+<span class="line_number">1385 </span>}
+</pre>
+<a name="robo31"></a>
+<a name="syscall2fsysData"></a>
+<h2>3.6.  syscall/sysData [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysData
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1400 </span>proc sysData {robot} {
+<span class="line_number">1401 </span>    global data tick
+<span class="line_number">1402 </span>    set val 0
+<span class="line_number">1403 </span>
+<span class="line_number">1404 </span>    switch $data($robot,syscall,$tick) {
+<span class="line_number">1405 </span>        health {set val $data($robot,health)}
+<span class="line_number">1406 </span>        speed  {set val $data($robot,speed)}
+<span class="line_number">1407 </span>        heat   {set val $data($robot,heat)}
+<span class="line_number">1408 </span>        loc_x  {set val $data($robot,x)}
+<span class="line_number">1409 </span>        loc_y  {set val $data($robot,y)}
+<span class="line_number">1410 </span>    }
+<span class="line_number">1411 </span>    set data($robot,sysreturn,$tick) $val
+<span class="line_number">1412 </span>}
+</pre>
+<a name="robo32"></a>
+<a name="syscall2fsysTick"></a>
+<h2>3.7.  syscall/sysTick [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysTick
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1427 </span>proc sysTick {robot} {
+<span class="line_number">1428 </span>    global data tick
+<span class="line_number">1429 </span>    set data($robot,sysreturn,$tick) $tick
+<span class="line_number">1430 </span>}
+</pre>
+<a name="robo33"></a>
+<a name="syscall2fsysTeamDeclare"></a>
+<h2>3.8.  syscall/sysTeamDeclare [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysTeamDeclare
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1445 </span>proc sysTeamDeclare {robot} {
+<span class="line_number">1446 </span>    global data tick
+<span class="line_number">1447 </span>    set team [lindex $data($robot,syscall,$tick) 1]
+<span class="line_number">1448 </span>    set data($robot,team) $team
+<span class="line_number">1449 </span>    set data($robot,sysreturn,$tick) $team
+<span class="line_number">1450 </span>}
+</pre>
+<a name="robo34"></a>
+<a name="syscall2fsysTeamSend"></a>
+<h2>3.9.  syscall/sysTeamSend [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysTeamSend
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1465 </span>proc sysTeamSend {robot msg} {
+<span class="line_number">1466 </span>    global data
+<span class="line_number">1467 </span>    puts "sysTeamSend $robot $msg"
+<span class="line_number">1468 </span>    set data($robot,data) $msg
+<span class="line_number">1469 </span>}
+</pre>
+<a name="robo35"></a>
+<a name="syscall2fsysTeamGet"></a>
+<h2>3.10.  syscall/sysTeamGet [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysTeamGet
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1484 </span>proc sysTeamGet {robot} {
+<span class="line_number">1485 </span>    global data activeRobots tick
+<span class="line_number">1486 </span>    set val ""
+<span class="line_number">1487 </span>
+<span class="line_number">1488 </span>    if {$data($robot,team) ne {}} {
+<span class="line_number">1489 </span>        foreach target $activeRobots {
+<span class="line_number">1490 </span>            if {"$robot" eq "$target"} {continue}
+<span class="line_number">1491 </span>            if {"$data($robot,team)" eq "$data($target,team)"} {
+<span class="line_number">1492 </span>                lappend val [list $data($target,num) $data($target,data)]
+<span class="line_number">1493 </span>            }
+<span class="line_number">1494 </span>        }
+<span class="line_number">1495 </span>    }
+<span class="line_number">1496 </span>    if {$val ne {}} {
+<span class="line_number">1497 </span>        puts "sysTeamGet $robot $val"
+<span class="line_number">1498 </span>    }
+<span class="line_number">1499 </span>    return $val
+<span class="line_number">1500 </span>}
+</pre>
+<a name="robo36"></a>
+<a name="syscall2fsysDputs"></a>
+<h2>3.11.  syscall/sysDputs [ Procedure ]  </h2>
+<p class="item_name">NAME</p>
+<pre>   sysDputs
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1515 </span>proc sysDputs {robot msg} {
+<span class="line_number">1516 </span>    global gui
+<span class="line_number">1517 </span>
+<span class="line_number">1518 </span>    set msg [join $msg]
+<span class="line_number">1519 </span>
+<span class="line_number">1520 </span>    if {$gui} {
+<span class="line_number">1521 </span>        # Output to robot message box
+<span class="line_number">1522 </span>        show_msg $robot $msg
+<span class="line_number">1523 </span>        # Output to terminal for debugging
+<span class="line_number">1524 </span>        debug $robot: $msg ($::tick)
+<span class="line_number">1525 </span>    } else {
+<span class="line_number">1526 </span>        # Output to terminal
+<span class="line_number">1527 </span>        puts "$robot: $msg"
+<span class="line_number">1528 </span>    }
+<span class="line_number">1529 </span>}
+</pre>
+<a name="robo37"></a>
+<a name="tclrobots2frand"></a>
+<h1>4.  tclrobots/rand [ Procedure ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   mrand
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Return random integer 1-max
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1544 </span>proc mrand {max} {
+<span class="line_number">1545 </span>    return [int [* [rand] $max]]
+<span class="line_number">1546 </span>}
+</pre>
+<a name="robo38"></a>
+<a name="tclrobots2fdebug"></a>
+<h1>5.  tclrobots/debug [ Procedure ]  </h1>
+<p class="item_name">NAME</p>
+<pre>   debug
+</pre>
+<p class="item_name">DESCRIPTION</p>
+<pre>   Prints debug message. The proc name makes it easy to search for.
+   Precede other debug changes with the word debug in a comment.
+</pre>
+<p class="item_name">SOURCE</p>
+<pre class="source"><span class="line_number">1562 </span>proc debug {args} {
+<span class="line_number">1563 </span>    if {[lindex $args 0] ne "exit"} {
+<span class="line_number">1564 </span>        puts [join $args]
+<span class="line_number">1565 </span>    } else {
+<span class="line_number">1566 </span>        # Calling with 'debug exit "msg"' prints the message and then
+<span class="line_number">1567 </span>        # exits. This is useful for "checkpoint" style debugging.
+<span class="line_number">1568 </span>        puts [join [lrange $args 1 end]]
+<span class="line_number">1569 </span>        exit
+<span class="line_number">1570 </span>    }
+<span class="line_number">1571 </span>}
+</pre>
+<div id="footer">
+<p>Generated from ./ with ROBODoc V4.99.38 on Mon Mar 08 2010 20:32:17
+</p>
+</div> <!-- footer -->
+
+
+
+<div id='footer'>
+<p>Generated with ROBODoc V4.99.38
+</p>
+</div> <!-- footer -->
+</body>
+</html>
+
