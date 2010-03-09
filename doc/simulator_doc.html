@@ -56,281 +56,281 @@
 <pre>   start the simulator
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number"> 35 </span>proc init_sim {} {
-<span class="line_number"> 36 </span>    # Read from robot file names; only the first file is used
-<span class="line_number"> 37 </span>    if {[llength $::robotList] == 0} {
-<span class="line_number"> 38 </span>        return
-<span class="line_number"> 39 </span>    }
-<span class="line_number"> 40 </span>    set ::robotFiles [lrange $::robotList 0 0]
-<span class="line_number"> 41 </span>
-<span class="line_number"> 42 </span>    set halted  0
-<span class="line_number"> 43 </span>    set ticks   0
-<span class="line_number"> 44 </span>    set ::StatusBarMsg "Simulator"
-<span class="line_number"> 45 </span>
-<span class="line_number"> 46 </span>    grid forget $::sel_f
-<span class="line_number"> 47 </span>#    grid forget $::robotHealth_lb
-<span class="line_number"> 48 </span>#    grid forget $::robotMsg_lb
-<span class="line_number"> 49 </span>#    grid $::robotMsg_lb -column 1 -row 0
-<span class="line_number"> 50 </span>    grid $::game_f -column 0 -row 2 -sticky nsew
-<span class="line_number"> 51 </span>
-<span class="line_number"> 52 </span>    # show_arena is defined in gui.tcl
-<span class="line_number"> 53 </span>    show_arena
-<span class="line_number"> 54 </span>
-<span class="line_number"> 55 </span>    # start robots
-<span class="line_number"> 56 </span>    set ::StatusBarMsg "Running Simulator"
-<span class="line_number"> 57 </span>
-<span class="line_number"> 58 </span>    $::run_b   configure -state disabled -command reset
-<span class="line_number"> 59 </span>    $::sim_b   configure -state disabled
-<span class="line_number"> 60 </span>    $::tourn_b configure -state disabled
-<span class="line_number"> 61 </span>    $::about_b configure -state disabled
-<span class="line_number"> 62 </span>    $::quit_b  configure -state disabled
-<span class="line_number"> 63 </span>
-<span class="line_number"> 64 </span>    # init is defined in tclrobots.tcl
-<span class="line_number"> 65 </span>    init
-<span class="line_number"> 66 </span>
-<span class="line_number"> 67 </span>    set ::tick 0
-<span class="line_number"> 68 </span>
-<span class="line_number"> 69 </span>    set ::allRobots {r0 target}
-<span class="line_number"> 70 </span>
-<span class="line_number"> 71 </span>    set f [open [lindex $::robotList 0]]
-<span class="line_number"> 72 </span>    set ::data(r0,code) [read $f]
-<span class="line_number"> 73 </span>    close $f
-<span class="line_number"> 74 </span>
-<span class="line_number"> 75 </span>    set ::data(target,code) {while {1} {set x [loc_x]}}
-<span class="line_number"> 76 </span>
-<span class="line_number"> 77 </span>    set ::activeRobots $::allRobots
-<span class="line_number"> 78 </span>
-<span class="line_number"> 79 </span>    # init_robots is defined in tclrobots.tcl
-<span class="line_number"> 80 </span>    init_robots
-<span class="line_number"> 81 </span>
-<span class="line_number"> 82 </span>    # Set target signature, make it black and place it in center of the arena
-<span class="line_number"> 83 </span>    set ::data(target,num)   1
-<span class="line_number"> 84 </span>    set ::data(target,x)     500
-<span class="line_number"> 85 </span>    set ::data(target,y)     500
-<span class="line_number"> 86 </span>
-<span class="line_number"> 87 </span>    # gui_init_robots is defined in gui.tcl
-<span class="line_number"> 88 </span>    gui_init_robots 1
-<span class="line_number"> 89 </span>
-<span class="line_number"> 90 </span>    # act and tick are defined in tclrobots.tcl
-<span class="line_number"> 91 </span>    act
-<span class="line_number"> 92 </span>    tick
-<span class="line_number"> 93 </span>
-<span class="line_number"> 94 </span>    # Make room for simulation controls
-<span class="line_number"> 95 </span>    grid configure $::arena_c -rowspan 3
-<span class="line_number"> 96 </span>
-<span class="line_number"> 97 </span>    # Create and grid the simulation control box
-<span class="line_number"> 98 </span>    set  sim_f      [ttk::frame $::game_f.sim]
-<span class="line_number"> 99 </span>    grid $sim_f     -column 1 -row 1 -sticky nsew
-<span class="line_number">100 </span>
-<span class="line_number">101 </span>    # Create and grid first row of simulation control box
-<span class="line_number">102 </span>    set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
-<span class="line_number">103 </span>    set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
-<span class="line_number">104 </span>                        -variable ::step]
-<span class="line_number">105 </span>    set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
-<span class="line_number">106 </span>                        -command {set ::do_step 1}]
-<span class="line_number">107 </span>    set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
-<span class="line_number">108 </span>                        -command "incr ::data(r0,health) -5"]
-<span class="line_number">109 </span>    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan" \
-<span class="line_number">110 </span>                        -command "set ::data(r0,ping) 1"]
-<span class="line_number">111 </span>    set end_b      [ttk::button $sim_f.f0.end -text "Close" \
-<span class="line_number">112 </span>                        -command end_sim]
-<span class="line_number">113 </span>
-<span class="line_number">114 </span>    grid $simctrl0_f -column 0 -row 0 -sticky nsew
-<span class="line_number">115 </span>    grid $stepsys_cb -column 0 -row 0 -sticky nsew
-<span class="line_number">116 </span>    grid $step_b     -column 1 -row 0 -sticky nsew
-<span class="line_number">117 </span>    grid $damage_b   -column 2 -row 0 -sticky nsew
-<span class="line_number">118 </span>    grid $ping_b     -column 3 -row 0 -sticky nsew
-<span class="line_number">119 </span>    grid $end_b      -column 4 -row 0 -sticky nsew
-<span class="line_number">120 </span>
-<span class="line_number">121 </span>    # Create and grid second row of simulation control box
-<span class="line_number">122 </span>    # This frame contains three rows of status data
-<span class="line_number">123 </span>    # This is the first row of simulation status box
-<span class="line_number">124 </span>
-<span class="line_number">125 </span>    # Limit the width of the entry fields in the status box
-<span class="line_number">126 </span>    set e_width 4
-<span class="line_number">127 </span>
-<span class="line_number">128 </span>    set simctrl1_f  [ttk::frame $sim_f.f1     -relief raised -borderwidth 2]
-<span class="line_number">129 </span>    set xstat_l     [ttk::label $sim_f.f1.xl  -text "X"]
-<span class="line_number">130 </span>    set xstat_e     [ttk::entry $sim_f.f1.xe  -width $e_width \
-<span class="line_number">131 </span>                         -textvariable ::data(r0,x)]
-<span class="line_number">132 </span>    set ystat_l     [ttk::label $sim_f.f1.yl  -text "Y"]
-<span class="line_number">133 </span>    set ystat_e     [ttk::entry $sim_f.f1.ye  -width $e_width \
-<span class="line_number">134 </span>                     -textvariable ::data(r0,y)]
-<span class="line_number">135 </span>    set heatstat_l  [ttk::label $sim_f.f1.htl -text "Heat"]
-<span class="line_number">136 </span>    set heatstat_e  [ttk::entry $sim_f.f1.hte -width $e_width \
-<span class="line_number">137 </span>                     -textvariable ::data(r0,heat)]
-<span class="line_number">138 </span>
-<span class="line_number">139 </span>    grid $simctrl1_f -column 0 -row 1 -sticky nsew
-<span class="line_number">140 </span>    grid $xstat_l    -column 0 -row 0 -sticky nsew
-<span class="line_number">141 </span>    grid $xstat_e    -column 1 -row 0 -sticky nw
-<span class="line_number">142 </span>    grid $ystat_l    -column 2 -row 0 -sticky nsew
-<span class="line_number">143 </span>    grid $ystat_e    -column 3 -row 0 -sticky nw
-<span class="line_number">144 </span>    grid $heatstat_l -column 4 -row 0 -sticky nsew
-<span class="line_number">145 </span>    grid $heatstat_e -column 5 -row 0 -sticky nw
-<span class="line_number">146 </span>
-<span class="line_number">147 </span>    # Create bindings for user to set X, Y and Heat values manually
-<span class="line_number">148 </span>    bind  $xstat_e &lt;Return&gt; {
-<span class="line_number">149 </span>        ver_range x 0 999
-<span class="line_number">150 </span>        set ::data(r0,orgx)  $::data(r0,x)
-<span class="line_number">151 </span>        set ::data(r0,range) 0
-<span class="line_number">152 </span>    }
-<span class="line_number">153 </span>    bind  $xstat_e &lt;Leave&gt;  {
-<span class="line_number">154 </span>        ver_range x 0 999
-<span class="line_number">155 </span>        set ::data(r0,orgx)  $::data(r0,x)
-<span class="line_number">156 </span>        set ::data(r0,range) 0
-<span class="line_number">157 </span>    }
-<span class="line_number">158 </span>    bind  $ystat_e &lt;Return&gt; {
-<span class="line_number">159 </span>        ver_range y 0 999
-<span class="line_number">160 </span>        set ::data(r0,orgy)  $::data(r0,y)
-<span class="line_number">161 </span>        set ::data(r0,range) 0
-<span class="line_number">162 </span>    }
-<span class="line_number">163 </span>    bind  $ystat_e &lt;Leave&gt;  {
-<span class="line_number">164 </span>        ver_range y 0 999
-<span class="line_number">165 </span>        set ::data(r0,orgy)  $::data(r0,y)
-<span class="line_number">166 </span>        set ::data(r0,range) 0
-<span class="line_number">167 </span>    }
-<span class="line_number">168 </span>    bind  $heatstat_e &lt;Return&gt; {
-<span class="line_number">169 </span>        ver_range heat 0 200
-<span class="line_number">170 </span>    }
-<span class="line_number">171 </span>    bind  $heatstat_e &lt;Leave&gt;  {
-<span class="line_number">172 </span>        ver_range heat 0 200
-<span class="line_number">173 </span>    }
-<span class="line_number">174 </span>
-<span class="line_number">175 </span>    # Create and grid second row of simulation status box
-<span class="line_number">176 </span>    #set simctrl2_f   [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
-<span class="line_number">177 </span>    set speedstat_l  [ttk::label $sim_f.f1.sl   -text "Speed"]
-<span class="line_number">178 </span>    set speedstat_e  [ttk::entry $sim_f.f1.se   -width $e_width \
-<span class="line_number">179 </span>                          -textvariable ::data(r0,speed)]
-<span class="line_number">180 </span>    set hdgstat_l    [ttk::label $sim_f.f1.hdl  -text "Heading"]
-<span class="line_number">181 </span>    set hdgstat_e    [ttk::entry $sim_f.f1.hde  -width $e_width \
-<span class="line_number">182 </span>                          -textvariable ::data(r0,hdg)]
-<span class="line_number">183 </span>    set healthstat_l [ttk::label $sim_f.f1.hthl -text "Health"]
-<span class="line_number">184 </span>    set healthstat_e [ttk::entry $sim_f.f1.hthe -width $e_width \
-<span class="line_number">185 </span>                          -textvariable ::data(r0,health)]
-<span class="line_number">186 </span>
-<span class="line_number">187 </span>    #grid $simctrl2_f   -column 0 -row 2 -sticky nsew
-<span class="line_number">188 </span>    grid $speedstat_l  -column 0 -row 1 -sticky nsew
-<span class="line_number">189 </span>    grid $speedstat_e  -column 1 -row 1 -sticky nw
-<span class="line_number">190 </span>    grid $hdgstat_l    -column 2 -row 1 -sticky nsew
-<span class="line_number">191 </span>    grid $hdgstat_e    -column 3 -row 1 -sticky nw
-<span class="line_number">192 </span>    grid $healthstat_l -column 4 -row 1 -sticky nsew
-<span class="line_number">193 </span>    grid $healthstat_e -column 5 -row 1 -sticky nw
-<span class="line_number">194 </span>
-<span class="line_number">195 </span>    # Create bindings for user to set X, Y and Heat values manually
-<span class="line_number">196 </span>    bind  $speedstat_e &lt;Return&gt; {
-<span class="line_number">197 </span>        ver_range speed 0 100
-<span class="line_number">198 </span>        set ::data(r0,dspeed) $::data(r0,speed)
-<span class="line_number">199 </span>    }
-<span class="line_number">200 </span>    bind  $speedstat_e &lt;Leave&gt;  {
-<span class="line_number">201 </span>        ver_range speed 0 100
-<span class="line_number">202 </span>        set ::data(r0,dspeed) $::data(r0,speed)
-<span class="line_number">203 </span>    }
-<span class="line_number">204 </span>    bind  $hdgstat_e &lt;Return&gt; {
-<span class="line_number">205 </span>        ver_range hdg 0 359
-<span class="line_number">206 </span>        set ::data(r0,dhdg)  $::data(r0,hdg)
-<span class="line_number">207 </span>        set ::data(r0,range) 0
-<span class="line_number">208 </span>    }
-<span class="line_number">209 </span>    bind  $hdgstat_e &lt;Leave&gt;  {
-<span class="line_number">210 </span>        ver_range hdg 0 359
-<span class="line_number">211 </span>        set ::data(r0,dhdg)  $::data(r0,hdg)
-<span class="line_number">212 </span>        set ::data(r0,range) 0
-<span class="line_number">213 </span>    }
-<span class="line_number">214 </span>    bind  $healthstat_e &lt;Return&gt; {
-<span class="line_number">215 </span>        ver_range health 0 $::parms(health)
-<span class="line_number">216 </span>    }
-<span class="line_number">217 </span>    bind  $healthstat_e &lt;Leave&gt;  {
-<span class="line_number">218 </span>        ver_range health 0 $::parms(health)
-<span class="line_number">219 </span>    }
-<span class="line_number">220 </span>
-<span class="line_number">221 </span>    # Create and grid third row of simulation status box
-<span class="line_number">222 </span>    #set simctrl3_f [ttk::frame $sim_f.f3    -relief raised -borderwidth 2]
-<span class="line_number">223 </span>    set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
-<span class="line_number">224 </span>    set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
-<span class="line_number">225 </span>                        -textvariable ::sim_syscall -anchor w]
-<span class="line_number">226 </span>    set tick0_l    [ttk::label $sim_f.f1.t0 -text "Tick:"]
-<span class="line_number">227 </span>    set tick1_l    [ttk::label $sim_f.f1.t1 -width $e_width \
-<span class="line_number">228 </span>                        -textvariable ::tick]
-<span class="line_number">229 </span>    set barrel0_l  [ttk::label $sim_f.f1.b0 -text "Barrel:"]
-<span class="line_number">230 </span>    set barrel1_l  [ttk::label $sim_f.f1.b1 -width $e_width \
-<span class="line_number">231 </span>                        -textvariable ::data(r0,btemp)]
-<span class="line_number">232 </span>
-<span class="line_number">233 </span>    #grid $simctrl3_f -column 0 -row 3 -sticky nsew
-<span class="line_number">234 </span>    grid $lastsys0_l -column 0 -row 2 -sticky nsew
-<span class="line_number">235 </span>    grid $lastsys1_l -column 1 -row 2 -sticky nwe
-<span class="line_number">236 </span>    grid $tick0_l    -column 2 -row 2 -sticky nsew
-<span class="line_number">237 </span>    grid $tick1_l    -column 3 -row 2 -sticky nw
-<span class="line_number">238 </span>    grid $barrel0_l  -column 4 -row 2 -sticky nsew
-<span class="line_number">239 </span>    grid $barrel1_l  -column 5 -row 2 -sticky nw
-<span class="line_number">240 </span>
-<span class="line_number">241 </span>    # Create and grid third row of simulation control box
-<span class="line_number">242 </span>    set ::status_var {}
-<span class="line_number">243 </span>    set ::status_val {}
-<span class="line_number">244 </span>
-<span class="line_number">245 </span>    set simctrl2_f [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
-<span class="line_number">246 </span>    set var_l      [ttk::label $sim_f.f2.vrl -text "Variable:"]
-<span class="line_number">247 </span>    set var_e      [ttk::entry $sim_f.f2.vre \
-<span class="line_number">248 </span>                        -textvariable ::status_var]
-<span class="line_number">249 </span>    set val_l      [ttk::label $sim_f.f2.vll -text "Value:"]
-<span class="line_number">250 </span>    set val_e      [ttk::entry $sim_f.f2.vle -width $e_width \
-<span class="line_number">251 </span>                        -textvariable ::status_val]
-<span class="line_number">252 </span>    set examine_b  [ttk::button $sim_f.f2.xb -text "Examine" -command examine]
-<span class="line_number">253 </span>    set set_b      [ttk::button $sim_f.f2.sb -text "Set" -command setval]
-<span class="line_number">254 </span>
-<span class="line_number">255 </span>    grid $simctrl2_f -column 0 -row 2 -sticky nsew
-<span class="line_number">256 </span>    grid $var_l      -column 0 -row 0 -sticky nsew
-<span class="line_number">257 </span>    grid $var_e      -column 1 -row 0 -sticky nsew
-<span class="line_number">258 </span>    grid $val_l      -column 2 -row 0 -sticky nsew
-<span class="line_number">259 </span>    grid $val_e      -column 3 -row 0 -sticky nsew
-<span class="line_number">260 </span>    grid $examine_b  -column 4 -row 0 -sticky nsew
-<span class="line_number">261 </span>    grid $set_b      -column 5 -row 0 -sticky nsew
-<span class="line_number">262 </span>
-<span class="line_number">263 </span>    bind $var_e &lt;Key-Return&gt; "$examine_b invoke"
-<span class="line_number">264 </span>    bind $val_e &lt;Key-Return&gt; "$set_b     invoke"
-<span class="line_number">265 </span>
-<span class="line_number">266 </span>    # Make the simulation control box resizable
-<span class="line_number">267 </span>    foreach w [winfo children $sim_f] {
-<span class="line_number">268 </span>        grid columnconfigure $w 0 -weight 1
-<span class="line_number">269 </span>        for {set i 0} {$i &lt; 6} {incr i} {
-<span class="line_number">270 </span>            grid columnconfigure $w $i -weight 1
-<span class="line_number">271 </span>        }
-<span class="line_number">272 </span>    }
-<span class="line_number">273 </span>
-<span class="line_number">274 </span>
-<span class="line_number">275 </span>
-<span class="line_number">276 </span>    if 0 {
-<span class="line_number">277 </span>    for {set i 0} {$i &lt; 6} {incr i} {
-<span class="line_number">278 </span>        grid columnconfigure $sim_f.f2 $i -weight 1
-<span class="line_number">279 </span>    }
-<span class="line_number">280 </span>    }
-<span class="line_number">281 </span>
-<span class="line_number">282 </span>    grid columnconfigure $sim_f 0 -weight 1
-<span class="line_number">283 </span>
-<span class="line_number">284 </span>    # Start simulation
-<span class="line_number">285 </span>    set ::running 1
-<span class="line_number">286 </span>    set ::step 0
-<span class="line_number">287 </span>    coroutine sim_robotCo sim_robot
-<span class="line_number">288 </span>    vwait ::running
-<span class="line_number">289 </span>    puts "activerobots: $::activeRobots"
-<span class="line_number">290 </span>
-<span class="line_number">291 </span>    if 0 {
-<span class="line_number">292 </span>    set step 1
-<span class="line_number">293 </span>
-<span class="line_number">294 </span>    # override binding for Any-Keypress, but save others
-<span class="line_number">295 </span>    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
-<span class="line_number">296 </span>                   .debug.fb.h .debug.fb.d} {
-<span class="line_number">297 </span>        set cur_bind [bind Entry]
-<span class="line_number">298 </span>        foreach c $cur_bind {
-<span class="line_number">299 </span>            bind $e $c "[bind Entry $c] ; return -code break"
-<span class="line_number">300 </span>        }
-<span class="line_number">301 </span>        bind $e &lt;KeyPress&gt; {num_only %W %A}
-<span class="line_number">302 </span>    }
-<span class="line_number">303 </span>
-<span class="line_number">304 </span>    # set initial step state
-<span class="line_number">305 </span>    #do_step
-<span class="line_number">306 </span>    sim
-<span class="line_number">307 </span>}
-<span class="line_number">308 </span>
-<span class="line_number">309 </span>}
+<pre class="source">proc init_sim {} {
+    # Read from robot file names; only the first file is used
+    if {[llength $::robotList] == 0} {
+        return
+    }
+    set ::robotFiles [lrange $::robotList 0 0]
+
+    set halted  0
+    set ticks   0
+    set ::StatusBarMsg "Simulator"
+
+    grid forget $::sel_f
+#    grid forget $::robotHealth_lb
+#    grid forget $::robotMsg_lb
+#    grid $::robotMsg_lb -column 1 -row 0
+    grid $::game_f -column 0 -row 2 -sticky nsew
+
+    # show_arena is defined in gui.tcl
+    show_arena
+
+    # start robots
+    set ::StatusBarMsg "Running Simulator"
+
+    $::run_b   configure -state disabled -command reset
+    $::sim_b   configure -state disabled
+    $::tourn_b configure -state disabled
+    $::about_b configure -state disabled
+    $::quit_b  configure -state disabled
+
+    # init is defined in tclrobots.tcl
+    init
+
+    set ::tick 0
+
+    set ::allRobots {r0 target}
+
+    set f [open [lindex $::robotList 0]]
+    set ::data(r0,code) [read $f]
+    close $f
+
+    set ::data(target,code) {while {1} {set x [loc_x]}}
+
+    set ::activeRobots $::allRobots
+
+    # init_robots is defined in tclrobots.tcl
+    init_robots
+
+    # Set target signature, make it black and place it in center of the arena
+    set ::data(target,num)   1
+    set ::data(target,x)     500
+    set ::data(target,y)     500
+
+    # gui_init_robots is defined in gui.tcl
+    gui_init_robots 1
+
+    # act and tick are defined in tclrobots.tcl
+    act
+    tick
+
+    # Make room for simulation controls
+    grid configure $::arena_c -rowspan 3
+
+    # Create and grid the simulation control box
+    set  sim_f      [ttk::frame $::game_f.sim]
+    grid $sim_f     -column 1 -row 1 -sticky nsew
+
+    # Create and grid first row of simulation control box
+    set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
+    set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
+                        -variable ::step]
+    set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
+                        -command {set ::do_step 1}]
+    set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
+                        -command "incr ::data(r0,health) -5"]
+    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan" \
+                        -command "set ::data(r0,ping) 1"]
+    set end_b      [ttk::button $sim_f.f0.end -text "Close" \
+                        -command end_sim]
+
+    grid $simctrl0_f -column 0 -row 0 -sticky nsew
+    grid $stepsys_cb -column 0 -row 0 -sticky nsew
+    grid $step_b     -column 1 -row 0 -sticky nsew
+    grid $damage_b   -column 2 -row 0 -sticky nsew
+    grid $ping_b     -column 3 -row 0 -sticky nsew
+    grid $end_b      -column 4 -row 0 -sticky nsew
+
+    # Create and grid second row of simulation control box
+    # This frame contains three rows of status data
+    # This is the first row of simulation status box
+
+    # Limit the width of the entry fields in the status box
+    set e_width 4
+
+    set simctrl1_f  [ttk::frame $sim_f.f1     -relief raised -borderwidth 2]
+    set xstat_l     [ttk::label $sim_f.f1.xl  -text "X"]
+    set xstat_e     [ttk::entry $sim_f.f1.xe  -width $e_width \
+                         -textvariable ::data(r0,x)]
+    set ystat_l     [ttk::label $sim_f.f1.yl  -text "Y"]
+    set ystat_e     [ttk::entry $sim_f.f1.ye  -width $e_width \
+                     -textvariable ::data(r0,y)]
+    set heatstat_l  [ttk::label $sim_f.f1.htl -text "Heat"]
+    set heatstat_e  [ttk::entry $sim_f.f1.hte -width $e_width \
+                     -textvariable ::data(r0,heat)]
+
+    grid $simctrl1_f -column 0 -row 1 -sticky nsew
+    grid $xstat_l    -column 0 -row 0 -sticky nsew
+    grid $xstat_e    -column 1 -row 0 -sticky nw
+    grid $ystat_l    -column 2 -row 0 -sticky nsew
+    grid $ystat_e    -column 3 -row 0 -sticky nw
+    grid $heatstat_l -column 4 -row 0 -sticky nsew
+    grid $heatstat_e -column 5 -row 0 -sticky nw
+
+    # Create bindings for user to set X, Y and Heat values manually
+    bind  $xstat_e &lt;Return&gt; {
+        ver_range x 0 999
+        set ::data(r0,orgx)  $::data(r0,x)
+        set ::data(r0,range) 0
+    }
+    bind  $xstat_e &lt;Leave&gt;  {
+        ver_range x 0 999
+        set ::data(r0,orgx)  $::data(r0,x)
+        set ::data(r0,range) 0
+    }
+    bind  $ystat_e &lt;Return&gt; {
+        ver_range y 0 999
+        set ::data(r0,orgy)  $::data(r0,y)
+        set ::data(r0,range) 0
+    }
+    bind  $ystat_e &lt;Leave&gt;  {
+        ver_range y 0 999
+        set ::data(r0,orgy)  $::data(r0,y)
+        set ::data(r0,range) 0
+    }
+    bind  $heatstat_e &lt;Return&gt; {
+        ver_range heat 0 200
+    }
+    bind  $heatstat_e &lt;Leave&gt;  {
+        ver_range heat 0 200
+    }
+
+    # Create and grid second row of simulation status box
+    #set simctrl2_f   [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
+    set speedstat_l  [ttk::label $sim_f.f1.sl   -text "Speed"]
+    set speedstat_e  [ttk::entry $sim_f.f1.se   -width $e_width \
+                          -textvariable ::data(r0,speed)]
+    set hdgstat_l    [ttk::label $sim_f.f1.hdl  -text "Heading"]
+    set hdgstat_e    [ttk::entry $sim_f.f1.hde  -width $e_width \
+                          -textvariable ::data(r0,hdg)]
+    set healthstat_l [ttk::label $sim_f.f1.hthl -text "Health"]
+    set healthstat_e [ttk::entry $sim_f.f1.hthe -width $e_width \
+                          -textvariable ::data(r0,health)]
+
+    #grid $simctrl2_f   -column 0 -row 2 -sticky nsew
+    grid $speedstat_l  -column 0 -row 1 -sticky nsew
+    grid $speedstat_e  -column 1 -row 1 -sticky nw
+    grid $hdgstat_l    -column 2 -row 1 -sticky nsew
+    grid $hdgstat_e    -column 3 -row 1 -sticky nw
+    grid $healthstat_l -column 4 -row 1 -sticky nsew
+    grid $healthstat_e -column 5 -row 1 -sticky nw
+
+    # Create bindings for user to set X, Y and Heat values manually
+    bind  $speedstat_e &lt;Return&gt; {
+        ver_range speed 0 100
+        set ::data(r0,dspeed) $::data(r0,speed)
+    }
+    bind  $speedstat_e &lt;Leave&gt;  {
+        ver_range speed 0 100
+        set ::data(r0,dspeed) $::data(r0,speed)
+    }
+    bind  $hdgstat_e &lt;Return&gt; {
+        ver_range hdg 0 359
+        set ::data(r0,dhdg)  $::data(r0,hdg)
+        set ::data(r0,range) 0
+    }
+    bind  $hdgstat_e &lt;Leave&gt;  {
+        ver_range hdg 0 359
+        set ::data(r0,dhdg)  $::data(r0,hdg)
+        set ::data(r0,range) 0
+    }
+    bind  $healthstat_e &lt;Return&gt; {
+        ver_range health 0 $::parms(health)
+    }
+    bind  $healthstat_e &lt;Leave&gt;  {
+        ver_range health 0 $::parms(health)
+    }
+
+    # Create and grid third row of simulation status box
+    #set simctrl3_f [ttk::frame $sim_f.f3    -relief raised -borderwidth 2]
+    set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
+    set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
+                        -textvariable ::sim_syscall -anchor w]
+    set tick0_l    [ttk::label $sim_f.f1.t0 -text "Tick:"]
+    set tick1_l    [ttk::label $sim_f.f1.t1 -width $e_width \
+                        -textvariable ::tick]
+    set barrel0_l  [ttk::label $sim_f.f1.b0 -text "Barrel:"]
+    set barrel1_l  [ttk::label $sim_f.f1.b1 -width $e_width \
+                        -textvariable ::data(r0,btemp)]
+
+    #grid $simctrl3_f -column 0 -row 3 -sticky nsew
+    grid $lastsys0_l -column 0 -row 2 -sticky nsew
+    grid $lastsys1_l -column 1 -row 2 -sticky nwe
+    grid $tick0_l    -column 2 -row 2 -sticky nsew
+    grid $tick1_l    -column 3 -row 2 -sticky nw
+    grid $barrel0_l  -column 4 -row 2 -sticky nsew
+    grid $barrel1_l  -column 5 -row 2 -sticky nw
+
+    # Create and grid third row of simulation control box
+    set ::status_var {}
+    set ::status_val {}
+
+    set simctrl2_f [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
+    set var_l      [ttk::label $sim_f.f2.vrl -text "Variable:"]
+    set var_e      [ttk::entry $sim_f.f2.vre \
+                        -textvariable ::status_var]
+    set val_l      [ttk::label $sim_f.f2.vll -text "Value:"]
+    set val_e      [ttk::entry $sim_f.f2.vle -width $e_width \
+                        -textvariable ::status_val]
+    set examine_b  [ttk::button $sim_f.f2.xb -text "Examine" -command examine]
+    set set_b      [ttk::button $sim_f.f2.sb -text "Set" -command setval]
+
+    grid $simctrl2_f -column 0 -row 2 -sticky nsew
+    grid $var_l      -column 0 -row 0 -sticky nsew
+    grid $var_e      -column 1 -row 0 -sticky nsew
+    grid $val_l      -column 2 -row 0 -sticky nsew
+    grid $val_e      -column 3 -row 0 -sticky nsew
+    grid $examine_b  -column 4 -row 0 -sticky nsew
+    grid $set_b      -column 5 -row 0 -sticky nsew
+
+    bind $var_e &lt;Key-Return&gt; "$examine_b invoke"
+    bind $val_e &lt;Key-Return&gt; "$set_b     invoke"
+
+    # Make the simulation control box resizable
+    foreach w [winfo children $sim_f] {
+        grid columnconfigure $w 0 -weight 1
+        for {set i 0} {$i &lt; 6} {incr i} {
+            grid columnconfigure $w $i -weight 1
+        }
+    }
+
+
+
+    if 0 {
+    for {set i 0} {$i &lt; 6} {incr i} {
+        grid columnconfigure $sim_f.f2 $i -weight 1
+    }
+    }
+
+    grid columnconfigure $sim_f 0 -weight 1
+
+    # Start simulation
+    set ::running 1
+    set ::step 0
+    coroutine sim_robotCo sim_robot
+    vwait ::running
+    puts "activerobots: $::activeRobots"
+
+    if 0 {
+    set step 1
+
+    # override binding for Any-Keypress, but save others
+    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
+                   .debug.fb.h .debug.fb.d} {
+        set cur_bind [bind Entry]
+        foreach c $cur_bind {
+            bind $e $c "[bind Entry $c] ; return -code break"
+        }
+        bind $e &lt;KeyPress&gt; {num_only %W %A}
+    }
+
+    # set initial step state
+    #do_step
+    sim
+}
+
+}
 </pre>
 <a name="robo2"></a>
 <a name="init5fsim2fend5fsim"></a>
@@ -342,10 +342,10 @@
 <pre>   End simulation.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">324 </span>proc end_sim {} {
-<span class="line_number">325 </span>    # reset is defined in gui.tcl
-<span class="line_number">326 </span>    reset
-<span class="line_number">327 </span>}
+<pre class="source">proc end_sim {} {
+    # reset is defined in gui.tcl
+    reset
+}
 </pre>
 <a name="robo3"></a>
 <a name="init5fsim2fver5frange"></a>
@@ -357,16 +357,16 @@
 <pre>   Verify range of an entry for simulated robot.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">342 </span>proc ver_range {var low high} {
-<span class="line_number">343 </span>    set val $::data(r0,$var)
-<span class="line_number">344 </span>    if {$val &lt; $low} {
-<span class="line_number">345 </span>        set $var $low
-<span class="line_number">346 </span>    }
-<span class="line_number">347 </span>    if {$val &gt; $high} {
-<span class="line_number">348 </span>        set $var $high
-<span class="line_number">349 </span>    }
-<span class="line_number">350 </span>    set ::data(r0,$var) $val
-<span class="line_number">351 </span>}
+<pre class="source">proc ver_range {var low high} {
+    set val $::data(r0,$var)
+    if {$val &lt; $low} {
+        set $var $low
+    }
+    if {$val &gt; $high} {
+        set $var $high
+    }
+    set ::data(r0,$var) $val
+}
 </pre>
 <a name="robo4"></a>
 <a name="init5fsim2fexamine"></a>
@@ -378,11 +378,11 @@
 <pre>   Examine a variable in the simulated robot.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">366 </span>proc examine {} {
-<span class="line_number">367 </span>    puts $::data(r0,interp)
-<span class="line_number">368 </span>    set ::status_val [$::data(r0,interp) eval set $::status_var]
-<span class="line_number">369 </span>    puts $::status_val
-<span class="line_number">370 </span>}
+<pre class="source">proc examine {} {
+    puts $::data(r0,interp)
+    set ::status_val [$::data(r0,interp) eval set $::status_var]
+    puts $::status_val
+}
 </pre>
 <a name="robo5"></a>
 <a name="init5fsim2fsetval"></a>
@@ -394,9 +394,9 @@
 <pre>   Set a variable in the simulated robot.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">385 </span>proc setval {} {
-<span class="line_number">386 </span>    $::data(r0,interp) eval set $::status_var $::status_val
-<span class="line_number">387 </span>}
+<pre class="source">proc setval {} {
+    $::data(r0,interp) eval set $::status_var $::status_val
+}
 </pre>
 <a name="robo6"></a>
 <a name="init5fsim2fsim5frobot"></a>
@@ -406,54 +406,54 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">402 </span>proc sim_robot {} {
-<span class="line_number">403 </span>    while {$::running == 1} {
-<span class="line_number">404 </span>        # Reset health of target
-<span class="line_number">405 </span>        set ::data(target,health) $::parms(health)
-<span class="line_number">406 </span>
-<span class="line_number">407 </span>        foreach robot $::activeRobots {
-<span class="line_number">408 </span>            if {($::data($robot,alert) ne {}) &amp;&amp; \
-<span class="line_number">409 </span>                    ($::data($robot,ping) ne {})} {
-<span class="line_number">410 </span>                # Prepend alert data to sysreturn no notify robot it's
-<span class="line_number">411 </span>                # been scanned.
-<span class="line_number">412 </span>                set ::data($robot,sysreturn,[- $::tick 1]) \
-<span class="line_number">413 </span>                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
-<span class="line_number">414 </span>
-<span class="line_number">415 </span>                # Robot is notified; reset alert request
-<span class="line_number">416 </span>                set ::data($robot,ping) {}
-<span class="line_number">417 </span>            }
-<span class="line_number">418 </span>            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-<span class="line_number">419 </span>        }
-<span class="line_number">420 </span>
-<span class="line_number">421 </span>        set ::sim_syscall $::data(r0,syscall,$::tick)
-<span class="line_number">422 </span>
-<span class="line_number">423 </span>        act
-<span class="line_number">424 </span>
-<span class="line_number">425 </span>        if {$::data(r0,sysreturn,$::tick) ne ""} {
-<span class="line_number">426 </span>            lappend ::sim_syscall "=&gt;" $::data(r0,sysreturn,$::tick)
-<span class="line_number">427 </span>        }
-<span class="line_number">428 </span>
-<span class="line_number">429 </span>        update_robots
-<span class="line_number">430 </span>
-<span class="line_number">431 </span>        # GUI
-<span class="line_number">432 </span>        show_robots
-<span class="line_number">433 </span>        show_scan
-<span class="line_number">434 </span>        show_health
-<span class="line_number">435 </span>
-<span class="line_number">436 </span>        tick
-<span class="line_number">437 </span>
-<span class="line_number">438 </span>        if {$::step} {
-<span class="line_number">439 </span>            vwait ::do_step
-<span class="line_number">440 </span>            set ::do_step 0
-<span class="line_number">441 </span>        }
-<span class="line_number">442 </span>
-<span class="line_number">443 </span>        after $::parms(tick) [info coroutine]
-<span class="line_number">444 </span>        yield
-<span class="line_number">445 </span>    }
-<span class="line_number">446 </span>}
+<pre class="source">proc sim_robot {} {
+    while {$::running == 1} {
+        # Reset health of target
+        set ::data(target,health) $::parms(health)
+
+        foreach robot $::activeRobots {
+            if {($::data($robot,alert) ne {}) &amp;&amp; \
+                    ($::data($robot,ping) ne {})} {
+                # Prepend alert data to sysreturn no notify robot it's
+                # been scanned.
+                set ::data($robot,sysreturn,[- $::tick 1]) \
+                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
+
+                # Robot is notified; reset alert request
+                set ::data($robot,ping) {}
+            }
+            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
+        }
+
+        set ::sim_syscall $::data(r0,syscall,$::tick)
+
+        act
+
+        if {$::data(r0,sysreturn,$::tick) ne ""} {
+            lappend ::sim_syscall "=&gt;" $::data(r0,sysreturn,$::tick)
+        }
+
+        update_robots
+
+        # GUI
+        show_robots
+        show_scan
+        show_health
+
+        tick
+
+        if {$::step} {
+            vwait ::do_step
+            set ::do_step 0
+        }
+
+        after $::parms(tick) [info coroutine]
+        yield
+    }
+}
 </pre>
 <div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 20:35:17
+<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 21:08:49
 </p>
 </div> <!-- footer -->
 

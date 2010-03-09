@@ -10,14 +10,18 @@ foreach file $srcfiles {
         set srcfile "syscalls.tcl"
         set docfile "api_doc"
         # Generate doc.html
-        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless --internalonly
+        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile \
+            --html --sections --toc --rc $docpath/robodoc.rc --nosort \
+            --headless --footless \
+            --internalonly
     } else {
         set srcfile "${file}.tcl"
         set docfile "${file}_doc"
         # Generate doc.html
-    exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless
+        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile \
+            --html --sections --toc --rc $docpath/robodoc.rc --nosort \
+            --headless --footless
     }
-
     # Remove extra css file
     file delete $docpath/$docfile.css
 
