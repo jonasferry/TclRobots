@@ -1,32 +1,52 @@
 #!/usr/bin/env tclsh
 
-set docpath "./doc"
-set srcfiles {tclrobots syscalls api gui simulator}
+proc main {} {
+    set srcfiles  {tclrobots syscalls gui simulator}
+    set ::srcdocs {}
 
-source $docpath/web.tcl
+    source ./doc/src/web.tcl
 
-foreach file $srcfiles {
-    if {$file eq "api"} {
-        set srcfile "syscalls.tcl"
-        set docfile "api_doc"
-        # Generate doc.html
-        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile \
-            --html --sections --toc --rc $docpath/robodoc.rc --nosort \
-            --headless --footless \
-            --internalonly
-    } else {
-        set srcfile "${file}.tcl"
-        set docfile "${file}_doc"
-        # Generate doc.html
-        exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile \
-            --html --sections --toc --rc $docpath/robodoc.rc --nosort \
-            --headless --footless
+    foreach file $srcfiles {
+        # Generate documentation for source code
+        gen_src_doc ${file}.tcl ${file}_doc
+        clean_file  ${file}_doc
     }
-    # Remove extra css file
-    file delete $docpath/$docfile.css
+    gen_doc_overview
 
+    # Generate documentation for robot API
+    gen_api_doc syscalls.tcl api_doc
+    clean_file  api_doc
+}
+
+proc gen_src_doc {srcfile docfile} {
+    global srcdocs
+
+    # Generate html
+    exec robodoc --src $srcfile --doc ./doc/$docfile --singlefile \
+        --html --sections --toc --rc ./doc/script/robodoc.rc --nosort \
+        --headless --footless
+
+    # Remove extra css file
+    file delete ./doc/$docfile.css
+
+    # Append file name for documentation overview page
+    append srcdocs "<a href='${docfile}.html'>$docfile</a>\n"
+}
+
+proc gen_api_doc {srcfile docfile} {
+    # Generate html
+    exec robodoc --src $srcfile --doc ./doc/$docfile --singlefile \
+        --html --sections --toc --rc ./doc/script/robodoc.rc --nosort \
+        --headless --footless \
+        --internalonly
+
+    # Remove extra css file
+    file delete ./doc/$docfile.css
+}
+
+proc clean_file {docfile} {
     # Clean up file
-    set f [open $docpath/${docfile}.html]
+    set f [open ./doc/${docfile}.html]
     set toc 0
     set content 0
     set out {}
@@ -59,9 +79,24 @@ foreach file $srcfiles {
     }
     close $f
 
-    set f [open $docpath/${docfile}.html w]
+    set f [open ./doc/${docfile}.html w]
     puts $f [header $docfile]
     puts $f $out
     puts $f [footer]
     close $f
 }
+
+proc gen_doc_overview {} {
+    global srcdocs
+
+    # Generate documentation overview page
+    source ./doc/src/doc_overview.tcl
+    set    f  [open ./doc/doc_overview.html w]
+    puts   $f [header doc_overview]
+    puts   $f [doc_overview $srcdocs]
+    puts   $f [footer]
+    close  $f
+}
+
+# All procedures are sourced; run main
+main
