@@ -15,8 +15,8 @@
 #
 # COPYRIGHT
 #
-#   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
-#   details.
+#   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+#   Simplified BSD License. See LICENSE file for details.
 #
 #******
 

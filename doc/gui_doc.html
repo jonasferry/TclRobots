@@ -57,23 +57,22 @@
 <li>2.8.3.2. <a href="#robo23">gui_init_robots/brightness</a></li>
 </ul>
 </ul>
-<li>2.9. <a href="#robo24">init_gui/init_sim</a></li>
-<li>2.10. <a href="#robo25">init_gui/tournament</a></li>
-<li>2.11. <a href="#robo26">init_gui/about</a></li>
+<li>2.9. <a href="#robo24">init_gui/tournament</a></li>
+<li>2.10. <a href="#robo25">init_gui/about</a></li>
 </ul>
-<li>3. <a href="#robo27">gui/update_gui</a></li>
+<li>3. <a href="#robo26">gui/update_gui</a></li>
 <ul>
-<li>3.1. <a href="#robo28">update_gui/show_robots</a></li>
-<li>3.2. <a href="#robo29">update_gui/show_scan</a></li>
+<li>3.1. <a href="#robo27">update_gui/show_robots</a></li>
+<li>3.2. <a href="#robo28">update_gui/show_scan</a></li>
 <ul>
-<li>3.2.1. <a href="#robo30">show_scan/arc_path</a></li>
+<li>3.2.1. <a href="#robo29">show_scan/arc_path</a></li>
 </ul>
-<li>3.3. <a href="#robo31">update_gui/show_health</a></li>
+<li>3.3. <a href="#robo30">update_gui/show_health</a></li>
 </ul>
-<li>4. <a href="#robo32">gui/tk_dialog2</a></li>
-<li>5. <a href="#robo33">gui/show_explode</a></li>
-<li>6. <a href="#robo34">gui/show_die</a></li>
-<li>7. <a href="#robo35">gui/show_msg</a></li>
+<li>4. <a href="#robo31">gui/tk_dialog2</a></li>
+<li>5. <a href="#robo32">gui/show_explode</a></li>
+<li>6. <a href="#robo33">gui/show_die</a></li>
+<li>7. <a href="#robo34">gui/show_msg</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="gui2ffile5fheader"></a>
@@ -90,8 +89,8 @@
    See http://tclrobots.org for more information.
 </pre>
 <p class="item_name">COPYRIGHT</p>
-<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
-   details.
+<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+   Simplified BSD License. See LICENSE file for details.
 </pre>
 <a name="robo1"></a>
 <a name="gui2finit5fgui"></a>
@@ -160,118 +159,119 @@
 <span class="line_number"> 91 </span>    # Create button frame and buttons
 <span class="line_number"> 92 </span>    set ::buttons_f [ttk::frame .f1]
 <span class="line_number"> 93 </span>    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" -command init_battle]
-<span class="line_number"> 94 </span>    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
-<span class="line_number"> 95 </span>                         -command {source $::thisDir/simulator.tcl; init_sim}]
-<span class="line_number"> 96 </span>    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
-<span class="line_number"> 97 </span>                         -command tournament]
-<span class="line_number"> 98 </span>    set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
-<span class="line_number"> 99 </span>    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
-<span class="line_number">100 </span>                         -command "destroy ."]
-<span class="line_number">101 </span>
-<span class="line_number">102 </span>    # Grid button frame and buttons
-<span class="line_number">103 </span>    grid $::buttons_f -column 0 -row 0 -sticky nsew
-<span class="line_number">104 </span>    grid $::run_b     -column 0 -row 0 -sticky nsew
-<span class="line_number">105 </span>    grid $::sim_b     -column 1 -row 0 -sticky nsew
-<span class="line_number">106 </span>    grid $::tourn_b   -column 2 -row 0 -sticky nsew
-<span class="line_number">107 </span>    grid $::about_b   -column 3 -row 0 -sticky nsew
-<span class="line_number">108 </span>    grid $::quit_b    -column 4 -row 0 -sticky nsew
-<span class="line_number">109 </span>
-<span class="line_number">110 </span>    grid columnconfigure $::buttons_f all -weight 1
-<span class="line_number">111 </span>
-<span class="line_number">112 </span>    wm title . "TclRobots"
-<span class="line_number">113 </span>    wm iconname . TclRobots
-<span class="line_number">114 </span>    wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
-<span class="line_number">115 </span>
-<span class="line_number">116 </span>    # The info label
-<span class="line_number">117 </span>    set ::StatusBarMsg "Select robot files for battle"
-<span class="line_number">118 </span>    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w -width 1]
-<span class="line_number">119 </span>
-<span class="line_number">120 </span>    # Add a size grip over the status bar
-<span class="line_number">121 </span>    ttk::sizegrip .sg
-<span class="line_number">122 </span>    place .sg -anchor se -relx 1.0 -rely 1.0
-<span class="line_number">123 </span>
-<span class="line_number">124 </span>    # The contents frame contains two frames
-<span class="line_number">125 </span>    set ::sel_f [ttk::frame .f2]
-<span class="line_number">126 </span>
-<span class="line_number">127 </span>    # Contents left frame
-<span class="line_number">128 </span>    set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 1]
-<span class="line_number">129 </span>
-<span class="line_number">130 </span>    # Contents right frame
-<span class="line_number">131 </span>    set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 1]
-<span class="line_number">132 </span>
-<span class="line_number">133 </span>    # The file selection box
-<span class="line_number">134 </span>    set ::files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
-<span class="line_number">135 </span>
-<span class="line_number">136 </span>    # The robot list info label
-<span class="line_number">137 </span>    set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
-<span class="line_number">138 </span>
-<span class="line_number">139 </span>    # A frame with the robot list and a scrollbar
-<span class="line_number">140 </span>    set robotlist_f  [ttk::frame $::sel_f.fr.f]
-<span class="line_number">141 </span>
-<span class="line_number">142 </span>    # The robot list
-<span class="line_number">143 </span>    set ::robotList $::robotFiles
-<span class="line_number">144 </span>    set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
-<span class="line_number">145 </span>                            -yscrollcommand "$::sel_f.fr.f.s set" \
-<span class="line_number">146 </span>                            -selectmode single -listvariable ::robotList]
-<span class="line_number">147 </span>
-<span class="line_number">148 </span>    # The scrollbar
-<span class="line_number">149 </span>    set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
-<span class="line_number">150 </span>                            -command "$::robotlist_lb yview"]
-<span class="line_number">151 </span>
-<span class="line_number">152 </span>    # A frame with the two remove buttons
-<span class="line_number">153 </span>    set remove_f     [ttk::frame  $::sel_f.fr.r]
-<span class="line_number">154 </span>
-<span class="line_number">155 </span>    # Remove single file
-<span class="line_number">156 </span>    set remove_b     [ttk::button $::sel_f.fr.r.b1 -text " Remove " \
-<span class="line_number">157 </span>                          -command remove_file]
-<span class="line_number">158 </span>
-<span class="line_number">159 </span>    # Remove all files
-<span class="line_number">160 </span>    set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
-<span class="line_number">161 </span>                          -command remove_all]
-<span class="line_number">162 </span>
-<span class="line_number">163 </span>    grid $info_l         -column 0 -row 3 -sticky nsew
-<span class="line_number">164 </span>    grid $::sel_f        -column 0 -row 2 -sticky nsew
-<span class="line_number">165 </span>    grid $sel0_f         -column 0 -row 0 -sticky nsew
-<span class="line_number">166 </span>    grid $sel1_f         -column 1 -row 0 -sticky nsew
-<span class="line_number">167 </span>
-<span class="line_number">168 </span>    grid $robotlist_l    -column 0 -row 0 -sticky nsew
-<span class="line_number">169 </span>    grid $robotlist_f    -column 0 -row 1 -sticky nsew
-<span class="line_number">170 </span>    grid $::robotlist_lb -column 0 -row 0 -sticky nsew
-<span class="line_number">171 </span>    grid $::robotlist_s  -column 1 -row 0 -sticky nsew
-<span class="line_number">172 </span>    grid $remove_f       -column 0 -row 2 -sticky nsew
-<span class="line_number">173 </span>    grid $remove_b       -column 0 -row 0 -sticky nsew
-<span class="line_number">174 </span>    grid $removeall_b    -column 1 -row 0 -sticky nsew
-<span class="line_number">175 </span>
-<span class="line_number">176 </span>    grid rowconfigure $::sel_f       0 -weight 1
-<span class="line_number">177 </span>    grid columnconfigure $::sel_f    0 -weight 1
-<span class="line_number">178 </span>    grid rowconfigure $sel1_f        1 -weight 1
-<span class="line_number">179 </span>    grid rowconfigure $robotlist_f all -weight 1
-<span class="line_number">180 </span>
-<span class="line_number">181 </span>    # The contents frame contains two frames
-<span class="line_number">182 </span>    #set ::game_f [ttk::frame .f3 -width 520 -height 520]
-<span class="line_number">183 </span>    set ::game_f [ttk::frame .f3]
-<span class="line_number">184 </span>
-<span class="line_number">185 </span>    create_arena
-<span class="line_number">186 </span>
-<span class="line_number">187 </span>    # The robot health list
-<span class="line_number">188 </span>    set ::robotHealth {}
-<span class="line_number">189 </span>    set ::robotHealth_lb [listbox $::game_f.h -background black \
-<span class="line_number">190 </span>                              -listvariable ::robotHealth]
-<span class="line_number">191 </span>    bind $::robotHealth_lb &lt;&lt;ListboxSelect&gt;&gt; highlightRobot
-<span class="line_number">192 </span>
-<span class="line_number">193 </span>    # The robot message box
-<span class="line_number">194 </span>    set ::robotMsg {}
-<span class="line_number">195 </span>    set ::robotMsg_lb [listbox $::game_f.msg -background black \
-<span class="line_number">196 </span>                           -listvariable ::robotMsg]
-<span class="line_number">197 </span>
-<span class="line_number">198 </span>    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-<span class="line_number">199 </span>    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
-<span class="line_number">200 </span>    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
-<span class="line_number">201 </span>    grid columnconfigure $::game_f 0 -weight 1
-<span class="line_number">202 </span>    grid rowconfigure    $::game_f 0 -weight 1
-<span class="line_number">203 </span>    grid columnconfigure $::game_f 1 -weight 1
-<span class="line_number">204 </span>
-<span class="line_number">205 </span>}
+<span class="line_number"> 94 </span>    # init_sim is defined in simulator.tcl
+<span class="line_number"> 95 </span>    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
+<span class="line_number"> 96 </span>                         -command {source $::thisDir/simulator.tcl; init_sim}]
+<span class="line_number"> 97 </span>    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
+<span class="line_number"> 98 </span>                         -command tournament]
+<span class="line_number"> 99 </span>    set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
+<span class="line_number">100 </span>    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
+<span class="line_number">101 </span>                         -command "destroy ."]
+<span class="line_number">102 </span>
+<span class="line_number">103 </span>    # Grid button frame and buttons
+<span class="line_number">104 </span>    grid $::buttons_f -column 0 -row 0 -sticky nsew
+<span class="line_number">105 </span>    grid $::run_b     -column 0 -row 0 -sticky nsew
+<span class="line_number">106 </span>    grid $::sim_b     -column 1 -row 0 -sticky nsew
+<span class="line_number">107 </span>    grid $::tourn_b   -column 2 -row 0 -sticky nsew
+<span class="line_number">108 </span>    grid $::about_b   -column 3 -row 0 -sticky nsew
+<span class="line_number">109 </span>    grid $::quit_b    -column 4 -row 0 -sticky nsew
+<span class="line_number">110 </span>
+<span class="line_number">111 </span>    grid columnconfigure $::buttons_f all -weight 1
+<span class="line_number">112 </span>
+<span class="line_number">113 </span>    wm title . "TclRobots"
+<span class="line_number">114 </span>    wm iconname . TclRobots
+<span class="line_number">115 </span>    wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
+<span class="line_number">116 </span>
+<span class="line_number">117 </span>    # The info label
+<span class="line_number">118 </span>    set ::StatusBarMsg "Select robot files for battle"
+<span class="line_number">119 </span>    set info_l [ttk::label .l -textvariable ::StatusBarMsg -anchor w -width 1]
+<span class="line_number">120 </span>
+<span class="line_number">121 </span>    # Add a size grip over the status bar
+<span class="line_number">122 </span>    ttk::sizegrip .sg
+<span class="line_number">123 </span>    place .sg -anchor se -relx 1.0 -rely 1.0
+<span class="line_number">124 </span>
+<span class="line_number">125 </span>    # The contents frame contains two frames
+<span class="line_number">126 </span>    set ::sel_f [ttk::frame .f2]
+<span class="line_number">127 </span>
+<span class="line_number">128 </span>    # Contents left frame
+<span class="line_number">129 </span>    set sel0_f [ttk::frame $::sel_f.fl -relief sunken -borderwidth 1]
+<span class="line_number">130 </span>
+<span class="line_number">131 </span>    # Contents right frame
+<span class="line_number">132 </span>    set sel1_f [ttk::frame $::sel_f.fr -relief sunken -borderwidth 1]
+<span class="line_number">133 </span>
+<span class="line_number">134 </span>    # The file selection box
+<span class="line_number">135 </span>    set ::files_fb [fileBox $::sel_f.fl "Select" *.tr "" [pwd] choose_file]
+<span class="line_number">136 </span>
+<span class="line_number">137 </span>    # The robot list info label
+<span class="line_number">138 </span>    set robotlist_l  [ttk::label $::sel_f.fr.l -text "Robot files selected"]
+<span class="line_number">139 </span>
+<span class="line_number">140 </span>    # A frame with the robot list and a scrollbar
+<span class="line_number">141 </span>    set robotlist_f  [ttk::frame $::sel_f.fr.f]
+<span class="line_number">142 </span>
+<span class="line_number">143 </span>    # The robot list
+<span class="line_number">144 </span>    set ::robotList $::robotFiles
+<span class="line_number">145 </span>    set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
+<span class="line_number">146 </span>                            -yscrollcommand "$::sel_f.fr.f.s set" \
+<span class="line_number">147 </span>                            -selectmode single -listvariable ::robotList]
+<span class="line_number">148 </span>
+<span class="line_number">149 </span>    # The scrollbar
+<span class="line_number">150 </span>    set ::robotlist_s  [ttk::scrollbar $::sel_f.fr.f.s \
+<span class="line_number">151 </span>                            -command "$::robotlist_lb yview"]
+<span class="line_number">152 </span>
+<span class="line_number">153 </span>    # A frame with the two remove buttons
+<span class="line_number">154 </span>    set remove_f     [ttk::frame  $::sel_f.fr.r]
+<span class="line_number">155 </span>
+<span class="line_number">156 </span>    # Remove single file
+<span class="line_number">157 </span>    set remove_b     [ttk::button $::sel_f.fr.r.b1 -text " Remove " \
+<span class="line_number">158 </span>                          -command remove_file]
+<span class="line_number">159 </span>
+<span class="line_number">160 </span>    # Remove all files
+<span class="line_number">161 </span>    set removeall_b  [ttk::button $::sel_f.fr.r.b2 -text " Remove All " \
+<span class="line_number">162 </span>                          -command remove_all]
+<span class="line_number">163 </span>
+<span class="line_number">164 </span>    grid $info_l         -column 0 -row 3 -sticky nsew
+<span class="line_number">165 </span>    grid $::sel_f        -column 0 -row 2 -sticky nsew
+<span class="line_number">166 </span>    grid $sel0_f         -column 0 -row 0 -sticky nsew
+<span class="line_number">167 </span>    grid $sel1_f         -column 1 -row 0 -sticky nsew
+<span class="line_number">168 </span>
+<span class="line_number">169 </span>    grid $robotlist_l    -column 0 -row 0 -sticky nsew
+<span class="line_number">170 </span>    grid $robotlist_f    -column 0 -row 1 -sticky nsew
+<span class="line_number">171 </span>    grid $::robotlist_lb -column 0 -row 0 -sticky nsew
+<span class="line_number">172 </span>    grid $::robotlist_s  -column 1 -row 0 -sticky nsew
+<span class="line_number">173 </span>    grid $remove_f       -column 0 -row 2 -sticky nsew
+<span class="line_number">174 </span>    grid $remove_b       -column 0 -row 0 -sticky nsew
+<span class="line_number">175 </span>    grid $removeall_b    -column 1 -row 0 -sticky nsew
+<span class="line_number">176 </span>
+<span class="line_number">177 </span>    grid rowconfigure $::sel_f       0 -weight 1
+<span class="line_number">178 </span>    grid columnconfigure $::sel_f    0 -weight 1
+<span class="line_number">179 </span>    grid rowconfigure $sel1_f        1 -weight 1
+<span class="line_number">180 </span>    grid rowconfigure $robotlist_f all -weight 1
+<span class="line_number">181 </span>
+<span class="line_number">182 </span>    # The contents frame contains two frames
+<span class="line_number">183 </span>    #set ::game_f [ttk::frame .f3 -width 520 -height 520]
+<span class="line_number">184 </span>    set ::game_f [ttk::frame .f3]
+<span class="line_number">185 </span>
+<span class="line_number">186 </span>    create_arena
+<span class="line_number">187 </span>
+<span class="line_number">188 </span>    # The robot health list
+<span class="line_number">189 </span>    set ::robotHealth {}
+<span class="line_number">190 </span>    set ::robotHealth_lb [listbox $::game_f.h -background black \
+<span class="line_number">191 </span>                              -listvariable ::robotHealth]
+<span class="line_number">192 </span>    bind $::robotHealth_lb &lt;&lt;ListboxSelect&gt;&gt; highlightRobot
+<span class="line_number">193 </span>
+<span class="line_number">194 </span>    # The robot message box
+<span class="line_number">195 </span>    set ::robotMsg {}
+<span class="line_number">196 </span>    set ::robotMsg_lb [listbox $::game_f.msg -background black \
+<span class="line_number">197 </span>                           -listvariable ::robotMsg]
+<span class="line_number">198 </span>
+<span class="line_number">199 </span>    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+<span class="line_number">200 </span>    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
+<span class="line_number">201 </span>    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
+<span class="line_number">202 </span>    grid columnconfigure $::game_f 0 -weight 1
+<span class="line_number">203 </span>    grid rowconfigure    $::game_f 0 -weight 1
+<span class="line_number">204 </span>    grid columnconfigure $::game_f 1 -weight 1
+<span class="line_number">205 </span>
+<span class="line_number">206 </span>}
 </pre>
 <a name="robo2"></a>
 <a name="init5fgui2fgui5fsettings"></a>
@@ -283,12 +283,12 @@
 <pre>   Copy some settings from Ttk to Tk
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">220 </span>proc gui_settings {} {
-<span class="line_number">221 </span>    set bg [ttk::style configure . -background]
-<span class="line_number">222 </span>    option add *Listbox.background $bg
-<span class="line_number">223 </span>    option add *Menubutton.background $bg
-<span class="line_number">224 </span>    option add *Menu.background $bg
-<span class="line_number">225 </span>}
+<pre class="source"><span class="line_number">221 </span>proc gui_settings {} {
+<span class="line_number">222 </span>    set bg [ttk::style configure . -background]
+<span class="line_number">223 </span>    option add *Listbox.background $bg
+<span class="line_number">224 </span>    option add *Menubutton.background $bg
+<span class="line_number">225 </span>    option add *Menu.background $bg
+<span class="line_number">226 </span>}
 </pre>
 <a name="robo3"></a>
 <a name="init5fgui2fellipsepath"></a>
@@ -298,13 +298,13 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">275 </span>proc ellipsepath {x y rx ry} {
-<span class="line_number">276 </span>    list \
-<span class="line_number">277 </span>            M $x [- $y $ry] \
-<span class="line_number">278 </span>            a $rx $ry 0 1 1 0 [*  2 $ry] \
-<span class="line_number">279 </span>            a $rx $ry 0 1 1 0 [* -2 $ry] \
-<span class="line_number">280 </span>            Z
-<span class="line_number">281 </span>}
+<pre class="source"><span class="line_number">276 </span>proc ellipsepath {x y rx ry} {
+<span class="line_number">277 </span>    list \
+<span class="line_number">278 </span>            M $x [- $y $ry] \
+<span class="line_number">279 </span>            a $rx $ry 0 1 1 0 [*  2 $ry] \
+<span class="line_number">280 </span>            a $rx $ry 0 1 1 0 [* -2 $ry] \
+<span class="line_number">281 </span>            Z
+<span class="line_number">282 </span>}
 </pre>
 <a name="robo4"></a>
 <a name="init5fgui2ffileBox"></a>
@@ -323,59 +323,59 @@
    execproc - proc to exec with selected file name
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">303 </span>proc fileBox {win txt filt initfile startdir execproc} {
-<span class="line_number">304 </span>
-<span class="line_number">305 </span>    if {[string length $startdir] == 0} {
-<span class="line_number">306 </span>        set startdir [pwd]
-<span class="line_number">307 </span>    }
-<span class="line_number">308 </span>
-<span class="line_number">309 </span>    ttk::label $win.l1   -text "File Filter" -anchor w
-<span class="line_number">310 </span>    ttk::entry $win.fil
-<span class="line_number">311 </span>    $win.fil insert 0 $filt
-<span class="line_number">312 </span>    ttk::label $win.l2   -text "Files" -anchor w
-<span class="line_number">313 </span>    ttk::frame $win.l
-<span class="line_number">314 </span>    ttk::scrollbar $win.l.hor -orient horizontal -command "$win.l.lst xview"
-<span class="line_number">315 </span>    ttk::scrollbar $win.l.ver -orient vertical   -command "$win.l.lst yview"
-<span class="line_number">316 </span>    listbox $win.l.lst -yscroll "$win.l.ver set" -xscroll "$win.l.hor set" \
-<span class="line_number">317 </span>            -selectmode single -relief sunken
-<span class="line_number">318 </span>
-<span class="line_number">319 </span>    ttk::label $win.l3   -text "Selection" -anchor w
-<span class="line_number">320 </span>    ttk::scrollbar $win.scrl -orient horizontal \
-<span class="line_number">321 </span>        -command "$win.sel xview"
-<span class="line_number">322 </span>    ttk::entry $win.sel -xscroll "$win.scrl set"
-<span class="line_number">323 </span>    selInsert $win $initfile
-<span class="line_number">324 </span>    grid $win.l.lst $win.l.ver -sticky news
-<span class="line_number">325 </span>    grid $win.l.hor            -sticky we
-<span class="line_number">326 </span>    grid columnconfigure $win.l $win.l.lst -weight 1
-<span class="line_number">327 </span>    grid rowconfigure    $win.l $win.l.lst -weight 1
-<span class="line_number">328 </span>
-<span class="line_number">329 </span>    ttk::button $win.ok -text " $txt " -command "fileOK $win $execproc" \
-<span class="line_number">330 </span>            -default active
-<span class="line_number">331 </span>    ttk::button $win.all -text " Select All " -command "choose_all"
-<span class="line_number">332 </span>    ttk::button $win.filter -text " Filter " \
-<span class="line_number">333 </span>            -command "fillLst $win \[$win.fil get\] \[pwd\]"
-<span class="line_number">334 </span>
-<span class="line_number">335 </span>    pack $win.l1 -side top -fill x
-<span class="line_number">336 </span>    pack $win.fil -side top -pady 2 -fill x -ipadx 5
-<span class="line_number">337 </span>    pack $win.l2 -side top -fill x
-<span class="line_number">338 </span>    pack $win.l  -side top -fill both -expand 1
-<span class="line_number">339 </span>    pack $win.l3 -side top -fill x
-<span class="line_number">340 </span>    pack $win.sel -side top -pady 5 -fill x -ipadx 5
-<span class="line_number">341 </span>    pack $win.scrl -side top -fill x
-<span class="line_number">342 </span>    pack $win.ok $win.all $win.filter  -side left -padx 5 -pady 10
-<span class="line_number">343 </span>
-<span class="line_number">344 </span>    bind $win.fil &lt;KeyPress-Return&gt; "$win.filter invoke"
-<span class="line_number">345 </span>    bind $win.sel &lt;KeyPress-Return&gt; "$win.ok     invoke"
-<span class="line_number">346 </span>    bind $win.l.lst &lt;ButtonRelease-1&gt; \
-<span class="line_number">347 </span>        "+selInsert $win \[%W get \[ %W nearest %y \] \] "
-<span class="line_number">348 </span>    bind $win.l.lst &lt;Double-1&gt; "$win.ok invoke"
-<span class="line_number">349 </span>
+<pre class="source"><span class="line_number">304 </span>proc fileBox {win txt filt initfile startdir execproc} {
+<span class="line_number">305 </span>
+<span class="line_number">306 </span>    if {[string length $startdir] == 0} {
+<span class="line_number">307 </span>        set startdir [pwd]
+<span class="line_number">308 </span>    }
+<span class="line_number">309 </span>
+<span class="line_number">310 </span>    ttk::label $win.l1   -text "File Filter" -anchor w
+<span class="line_number">311 </span>    ttk::entry $win.fil
+<span class="line_number">312 </span>    $win.fil insert 0 $filt
+<span class="line_number">313 </span>    ttk::label $win.l2   -text "Files" -anchor w
+<span class="line_number">314 </span>    ttk::frame $win.l
+<span class="line_number">315 </span>    ttk::scrollbar $win.l.hor -orient horizontal -command "$win.l.lst xview"
+<span class="line_number">316 </span>    ttk::scrollbar $win.l.ver -orient vertical   -command "$win.l.lst yview"
+<span class="line_number">317 </span>    listbox $win.l.lst -yscroll "$win.l.ver set" -xscroll "$win.l.hor set" \
+<span class="line_number">318 </span>            -selectmode single -relief sunken
+<span class="line_number">319 </span>
+<span class="line_number">320 </span>    ttk::label $win.l3   -text "Selection" -anchor w
+<span class="line_number">321 </span>    ttk::scrollbar $win.scrl -orient horizontal \
+<span class="line_number">322 </span>        -command "$win.sel xview"
+<span class="line_number">323 </span>    ttk::entry $win.sel -xscroll "$win.scrl set"
+<span class="line_number">324 </span>    selInsert $win $initfile
+<span class="line_number">325 </span>    grid $win.l.lst $win.l.ver -sticky news
+<span class="line_number">326 </span>    grid $win.l.hor            -sticky we
+<span class="line_number">327 </span>    grid columnconfigure $win.l $win.l.lst -weight 1
+<span class="line_number">328 </span>    grid rowconfigure    $win.l $win.l.lst -weight 1
+<span class="line_number">329 </span>
+<span class="line_number">330 </span>    ttk::button $win.ok -text " $txt " -command "fileOK $win $execproc" \
+<span class="line_number">331 </span>            -default active
+<span class="line_number">332 </span>    ttk::button $win.all -text " Select All " -command "choose_all"
+<span class="line_number">333 </span>    ttk::button $win.filter -text " Filter " \
+<span class="line_number">334 </span>            -command "fillLst $win \[$win.fil get\] \[pwd\]"
+<span class="line_number">335 </span>
+<span class="line_number">336 </span>    pack $win.l1 -side top -fill x
+<span class="line_number">337 </span>    pack $win.fil -side top -pady 2 -fill x -ipadx 5
+<span class="line_number">338 </span>    pack $win.l2 -side top -fill x
+<span class="line_number">339 </span>    pack $win.l  -side top -fill both -expand 1
+<span class="line_number">340 </span>    pack $win.l3 -side top -fill x
+<span class="line_number">341 </span>    pack $win.sel -side top -pady 5 -fill x -ipadx 5
+<span class="line_number">342 </span>    pack $win.scrl -side top -fill x
+<span class="line_number">343 </span>    pack $win.ok $win.all $win.filter  -side left -padx 5 -pady 10
+<span class="line_number">344 </span>
+<span class="line_number">345 </span>    bind $win.fil &lt;KeyPress-Return&gt; "$win.filter invoke"
+<span class="line_number">346 </span>    bind $win.sel &lt;KeyPress-Return&gt; "$win.ok     invoke"
+<span class="line_number">347 </span>    bind $win.l.lst &lt;ButtonRelease-1&gt; \
+<span class="line_number">348 </span>        "+selInsert $win \[%W get \[ %W nearest %y \] \] "
+<span class="line_number">349 </span>    bind $win.l.lst &lt;Double-1&gt; "$win.ok invoke"
 <span class="line_number">350 </span>
-<span class="line_number">351 </span>    fillLst $win $filt $startdir
-<span class="line_number">352 </span>    selection own $win
-<span class="line_number">353 </span>    focus $win.sel
-<span class="line_number">354 </span>    return $win
-<span class="line_number">355 </span>}
+<span class="line_number">351 </span>
+<span class="line_number">352 </span>    fillLst $win $filt $startdir
+<span class="line_number">353 </span>    selection own $win
+<span class="line_number">354 </span>    focus $win.sel
+<span class="line_number">355 </span>    return $win
+<span class="line_number">356 </span>}
 </pre>
 <a name="robo5"></a>
 <a name="fileBox2ffileOK"></a>
@@ -387,25 +387,25 @@
 <pre>   do the OK processing for fileBox
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">370 </span>proc fileOK {win execproc} {
-<span class="line_number">371 </span>
-<span class="line_number">372 </span>    # might not have a valid selection, so catch the selection
-<span class="line_number">373 </span>    # catch {  selInsert $win [lindex [selection get] 0] }
-<span class="line_number">374 </span>    catch {  selInsert $win [$win.l.lst get [$win.l.lst curselection]] }
-<span class="line_number">375 </span>
-<span class="line_number">376 </span>    set f [lindex [$win.sel get] 0]
-<span class="line_number">377 </span>    if {[file isdirectory $f]} {
-<span class="line_number">378 </span>        #set f [file dirname $f]
+<pre class="source"><span class="line_number">371 </span>proc fileOK {win execproc} {
+<span class="line_number">372 </span>
+<span class="line_number">373 </span>    # might not have a valid selection, so catch the selection
+<span class="line_number">374 </span>    # catch {  selInsert $win [lindex [selection get] 0] }
+<span class="line_number">375 </span>    catch {  selInsert $win [$win.l.lst get [$win.l.lst curselection]] }
+<span class="line_number">376 </span>
+<span class="line_number">377 </span>    set f [lindex [$win.sel get] 0]
+<span class="line_number">378 </span>    if {[file isdirectory $f]} {
 <span class="line_number">379 </span>        #set f [file dirname $f]
-<span class="line_number">380 </span>        cd $f
-<span class="line_number">381 </span>        set f [pwd]
-<span class="line_number">382 </span>        fillLst $win [$win.fil get] $f
-<span class="line_number">383 </span>    } else {
-<span class="line_number">384 </span>        # we don't know if a file is really there or not, let the execproc
-<span class="line_number">385 </span>        # figure it out.  also, window is passed if execproc wants to kill it.
-<span class="line_number">386 </span>        $execproc $win $f
-<span class="line_number">387 </span>    }
-<span class="line_number">388 </span>}
+<span class="line_number">380 </span>        #set f [file dirname $f]
+<span class="line_number">381 </span>        cd $f
+<span class="line_number">382 </span>        set f [pwd]
+<span class="line_number">383 </span>        fillLst $win [$win.fil get] $f
+<span class="line_number">384 </span>    } else {
+<span class="line_number">385 </span>        # we don't know if a file is really there or not, let the execproc
+<span class="line_number">386 </span>        # figure it out.  also, window is passed if execproc wants to kill it.
+<span class="line_number">387 </span>        $execproc $win $f
+<span class="line_number">388 </span>    }
+<span class="line_number">389 </span>}
 </pre>
 <a name="robo6"></a>
 <a name="fileBox2fchoose5ffile"></a>
@@ -415,17 +415,17 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">403 </span>proc choose_file {win filename} {
-<span class="line_number">404 </span>    lappend ::robotList $filename
-<span class="line_number">405 </span>    set dir $filename
-<span class="line_number">406 </span>    foreach d $::robotList {
-<span class="line_number">407 </span>        if {[string length $d] &gt; [string length $dir]} {
-<span class="line_number">408 </span>            set dir $d
-<span class="line_number">409 </span>        }
-<span class="line_number">410 </span>    }
-<span class="line_number">411 </span>    set index [+ [string length [file dirname [file dirname $dir]]] 1]
-<span class="line_number">412 </span>    $::robotlist_lb xview $index
-<span class="line_number">413 </span>}
+<pre class="source"><span class="line_number">404 </span>proc choose_file {win filename} {
+<span class="line_number">405 </span>    lappend ::robotList $filename
+<span class="line_number">406 </span>    set dir $filename
+<span class="line_number">407 </span>    foreach d $::robotList {
+<span class="line_number">408 </span>        if {[string length $d] &gt; [string length $dir]} {
+<span class="line_number">409 </span>            set dir $d
+<span class="line_number">410 </span>        }
+<span class="line_number">411 </span>    }
+<span class="line_number">412 </span>    set index [+ [string length [file dirname [file dirname $dir]]] 1]
+<span class="line_number">413 </span>    $::robotlist_lb xview $index
+<span class="line_number">414 </span>}
 </pre>
 <a name="robo7"></a>
 <a name="fileBox2fchoose5fall"></a>
@@ -435,17 +435,17 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">428 </span>proc choose_all {} {
-<span class="line_number">429 </span>    set win $::files_fb
-<span class="line_number">430 </span>    set lsize [$win.l.lst size]
-<span class="line_number">431 </span>    for {set i 0} {$i &lt; $lsize} {incr i} {
-<span class="line_number">432 </span>        set f [string trim [$win.l.lst get $i]]
-<span class="line_number">433 </span>        if {![string match */ $f]} {
-<span class="line_number">434 </span>            choose_file $win $f
-<span class="line_number">435 </span>        }
-<span class="line_number">436 </span>    }
-<span class="line_number">437 </span>
-<span class="line_number">438 </span>}
+<pre class="source"><span class="line_number">429 </span>proc choose_all {} {
+<span class="line_number">430 </span>    set win $::files_fb
+<span class="line_number">431 </span>    set lsize [$win.l.lst size]
+<span class="line_number">432 </span>    for {set i 0} {$i &lt; $lsize} {incr i} {
+<span class="line_number">433 </span>        set f [string trim [$win.l.lst get $i]]
+<span class="line_number">434 </span>        if {![string match */ $f]} {
+<span class="line_number">435 </span>            choose_file $win $f
+<span class="line_number">436 </span>        }
+<span class="line_number">437 </span>    }
+<span class="line_number">438 </span>
+<span class="line_number">439 </span>}
 </pre>
 <a name="robo8"></a>
 <a name="fileBox2fselInsert"></a>
@@ -457,16 +457,16 @@
 <pre>   insert into a selection entry, scroll to root name
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">453 </span>proc selInsert {win pathname} {
-<span class="line_number">454 </span>
-<span class="line_number">455 </span>    $win.sel delete 0 end
-<span class="line_number">456 </span>    $win.sel insert 0 $pathname
-<span class="line_number">457 </span>    set index [+ [string length [file dirname [file dirname $pathname]]] 1]
-<span class="line_number">458 </span>    #set index [$win.sel index end]
-<span class="line_number">459 </span>    $win.sel xview $index
-<span class="line_number">460 </span>    after idle $win.sel xview $index
-<span class="line_number">461 </span>    #$win.sel select range 0 0
-<span class="line_number">462 </span>}
+<pre class="source"><span class="line_number">454 </span>proc selInsert {win pathname} {
+<span class="line_number">455 </span>
+<span class="line_number">456 </span>    $win.sel delete 0 end
+<span class="line_number">457 </span>    $win.sel insert 0 $pathname
+<span class="line_number">458 </span>    set index [+ [string length [file dirname [file dirname $pathname]]] 1]
+<span class="line_number">459 </span>    #set index [$win.sel index end]
+<span class="line_number">460 </span>    $win.sel xview $index
+<span class="line_number">461 </span>    after idle $win.sel xview $index
+<span class="line_number">462 </span>    #$win.sel select range 0 0
+<span class="line_number">463 </span>}
 </pre>
 <a name="robo9"></a>
 <a name="fileBox2ffillLst"></a>
@@ -478,46 +478,46 @@
 <pre>   fill the fillBox listbox with selection entries
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">477 </span>proc fillLst {win filt dir} {
-<span class="line_number">478 </span>
-<span class="line_number">479 </span>    $win.l.lst delete 0 end
-<span class="line_number">480 </span>
-<span class="line_number">481 </span>    cd $dir
-<span class="line_number">482 </span>
-<span class="line_number">483 </span>    set dir [pwd]
-<span class="line_number">484 </span>
-<span class="line_number">485 </span>    if {[string length $filt] == 0} {
-<span class="line_number">486 </span>        set filt *
-<span class="line_number">487 </span>    }
-<span class="line_number">488 </span>    set all_list [lsort -dictionary [glob -nocomplain -type d $dir/*]]
-<span class="line_number">489 </span>    lappend all_list \
-<span class="line_number">490 </span>            {*}[lsort -dictionary [glob -nocomplain -type f $dir/$filt]]
-<span class="line_number">491 </span>
-<span class="line_number">492 </span>    set dlist [list "$dir/../"]
-<span class="line_number">493 </span>    set flist ""
-<span class="line_number">494 </span>
-<span class="line_number">495 </span>    foreach f $all_list {
-<span class="line_number">496 </span>        if {[file isfile $f]} {
-<span class="line_number">497 </span>            lappend flist $f
-<span class="line_number">498 </span>        }
-<span class="line_number">499 </span>        if {[file isdirectory $f]} {
-<span class="line_number">500 </span>            lappend dlist ${f}/
-<span class="line_number">501 </span>        }
-<span class="line_number">502 </span>    }
-<span class="line_number">503 </span>
-<span class="line_number">504 </span>    foreach d $dlist {
-<span class="line_number">505 </span>        $win.l.lst insert end $d
-<span class="line_number">506 </span>    }
-<span class="line_number">507 </span>    foreach f $flist {
-<span class="line_number">508 </span>        $win.l.lst insert end $f
-<span class="line_number">509 </span>    }
-<span class="line_number">510 </span>
-<span class="line_number">511 </span>    $win.l.lst yview 0
-<span class="line_number">512 </span>
-<span class="line_number">513 </span>    set index [+ [string length [file dirname [file dirname $dir]]] 1]
-<span class="line_number">514 </span>
-<span class="line_number">515 </span>    $win.l.lst xview $index
-<span class="line_number">516 </span>}
+<pre class="source"><span class="line_number">478 </span>proc fillLst {win filt dir} {
+<span class="line_number">479 </span>
+<span class="line_number">480 </span>    $win.l.lst delete 0 end
+<span class="line_number">481 </span>
+<span class="line_number">482 </span>    cd $dir
+<span class="line_number">483 </span>
+<span class="line_number">484 </span>    set dir [pwd]
+<span class="line_number">485 </span>
+<span class="line_number">486 </span>    if {[string length $filt] == 0} {
+<span class="line_number">487 </span>        set filt *
+<span class="line_number">488 </span>    }
+<span class="line_number">489 </span>    set all_list [lsort -dictionary [glob -nocomplain -type d $dir/*]]
+<span class="line_number">490 </span>    lappend all_list \
+<span class="line_number">491 </span>            {*}[lsort -dictionary [glob -nocomplain -type f $dir/$filt]]
+<span class="line_number">492 </span>
+<span class="line_number">493 </span>    set dlist [list "$dir/../"]
+<span class="line_number">494 </span>    set flist ""
+<span class="line_number">495 </span>
+<span class="line_number">496 </span>    foreach f $all_list {
+<span class="line_number">497 </span>        if {[file isfile $f]} {
+<span class="line_number">498 </span>            lappend flist $f
+<span class="line_number">499 </span>        }
+<span class="line_number">500 </span>        if {[file isdirectory $f]} {
+<span class="line_number">501 </span>            lappend dlist ${f}/
+<span class="line_number">502 </span>        }
+<span class="line_number">503 </span>    }
+<span class="line_number">504 </span>
+<span class="line_number">505 </span>    foreach d $dlist {
+<span class="line_number">506 </span>        $win.l.lst insert end $d
+<span class="line_number">507 </span>    }
+<span class="line_number">508 </span>    foreach f $flist {
+<span class="line_number">509 </span>        $win.l.lst insert end $f
+<span class="line_number">510 </span>    }
+<span class="line_number">511 </span>
+<span class="line_number">512 </span>    $win.l.lst yview 0
+<span class="line_number">513 </span>
+<span class="line_number">514 </span>    set index [+ [string length [file dirname [file dirname $dir]]] 1]
+<span class="line_number">515 </span>
+<span class="line_number">516 </span>    $win.l.lst xview $index
+<span class="line_number">517 </span>}
 </pre>
 <a name="robo10"></a>
 <a name="init5fgui2fremove5ffile"></a>
@@ -527,13 +527,13 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">531 </span>proc remove_file {} {
-<span class="line_number">532 </span>    set index -1
-<span class="line_number">533 </span>    catch {set index [$::robotlist_lb curselection]}
-<span class="line_number">534 </span>    if {$index &gt;= 0} {
-<span class="line_number">535 </span>        $::robotlist_lb delete $index
-<span class="line_number">536 </span>    }
-<span class="line_number">537 </span>}
+<pre class="source"><span class="line_number">532 </span>proc remove_file {} {
+<span class="line_number">533 </span>    set index -1
+<span class="line_number">534 </span>    catch {set index [$::robotlist_lb curselection]}
+<span class="line_number">535 </span>    if {$index &gt;= 0} {
+<span class="line_number">536 </span>        $::robotlist_lb delete $index
+<span class="line_number">537 </span>    }
+<span class="line_number">538 </span>}
 </pre>
 <a name="robo11"></a>
 <a name="init5fgui2fremove5fall"></a>
@@ -543,9 +543,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">552 </span>proc remove_all {} {
-<span class="line_number">553 </span>    set ::robotList {}
-<span class="line_number">554 </span>}
+<pre class="source"><span class="line_number">553 </span>proc remove_all {} {
+<span class="line_number">554 </span>    set ::robotList {}
+<span class="line_number">555 </span>}
 </pre>
 <a name="robo12"></a>
 <a name="init5fgui2fcreate5farena"></a>
@@ -557,26 +557,26 @@
 <pre>   The battle field canvas
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">569 </span>proc create_arena {} {
-<span class="line_number">570 </span>    if {[info commands ::tkp::canvas] ne ""} {
-<span class="line_number">571 </span>        set ::tkp::depixelize 0
-<span class="line_number">572 </span>        set ::arena_c [tkp::canvas $::game_f.c -background white]
-<span class="line_number">573 </span>        set ::data(tkp) 1
-<span class="line_number">574 </span>
-<span class="line_number">575 </span>        # A gradient for a ball. Used for explosion
-<span class="line_number">576 </span>        set ::data(gradient,expl) [$::arena_c gradient create radial \
-<span class="line_number">577 </span>                -stops "{0 red 0.8} {1 yellow 0}" \
-<span class="line_number">578 </span>                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
-<span class="line_number">579 </span>        # A gradient for a ball. Used for missile
-<span class="line_number">580 </span>        set ::data(gradient,miss) [$::arena_c gradient create radial \
-<span class="line_number">581 </span>                -stops "{0 darkgray} {1 black}" \
-<span class="line_number">582 </span>                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
-<span class="line_number">583 </span>    } else {
-<span class="line_number">584 </span>        set ::arena_c [canvas $::game_f.c -background white]
-<span class="line_number">585 </span>        set ::data(tkp) 0
-<span class="line_number">586 </span>    }
-<span class="line_number">587 </span>    bind $::arena_c &lt;Configure&gt; {show_arena}
-<span class="line_number">588 </span>}
+<pre class="source"><span class="line_number">570 </span>proc create_arena {} {
+<span class="line_number">571 </span>    if {[info commands ::tkp::canvas] ne ""} {
+<span class="line_number">572 </span>        set ::tkp::depixelize 0
+<span class="line_number">573 </span>        set ::arena_c [tkp::canvas $::game_f.c -background white]
+<span class="line_number">574 </span>        set ::data(tkp) 1
+<span class="line_number">575 </span>
+<span class="line_number">576 </span>        # A gradient for a ball. Used for explosion
+<span class="line_number">577 </span>        set ::data(gradient,expl) [$::arena_c gradient create radial \
+<span class="line_number">578 </span>                -stops "{0 red 0.8} {1 yellow 0}" \
+<span class="line_number">579 </span>                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
+<span class="line_number">580 </span>        # A gradient for a ball. Used for missile
+<span class="line_number">581 </span>        set ::data(gradient,miss) [$::arena_c gradient create radial \
+<span class="line_number">582 </span>                -stops "{0 darkgray} {1 black}" \
+<span class="line_number">583 </span>                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+<span class="line_number">584 </span>    } else {
+<span class="line_number">585 </span>        set ::arena_c [canvas $::game_f.c -background white]
+<span class="line_number">586 </span>        set ::data(tkp) 0
+<span class="line_number">587 </span>    }
+<span class="line_number">588 </span>    bind $::arena_c &lt;Configure&gt; {show_arena}
+<span class="line_number">589 </span>}
 </pre>
 <a name="robo13"></a>
 <a name="init5fgui2fhighlightRobot"></a>
@@ -588,17 +588,17 @@
 <pre>   Highlight a robot selected in health listbox
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">603 </span>proc highlightRobot {} {
-<span class="line_number">604 </span>    foreach robot $::allRobots {
-<span class="line_number">605 </span>        set ::data($robot,highlight) 0
-<span class="line_number">606 </span>    }
-<span class="line_number">607 </span>    set sel [$::robotHealth_lb curselection]
-<span class="line_number">608 </span>
-<span class="line_number">609 </span>    if {[string is integer -strict $sel]} {
-<span class="line_number">610 </span>        set robot [lindex $::allRobots $sel]
-<span class="line_number">611 </span>        set ::data($robot,highlight) 1
-<span class="line_number">612 </span>    }
-<span class="line_number">613 </span>}
+<pre class="source"><span class="line_number">604 </span>proc highlightRobot {} {
+<span class="line_number">605 </span>    foreach robot $::allRobots {
+<span class="line_number">606 </span>        set ::data($robot,highlight) 0
+<span class="line_number">607 </span>    }
+<span class="line_number">608 </span>    set sel [$::robotHealth_lb curselection]
+<span class="line_number">609 </span>
+<span class="line_number">610 </span>    if {[string is integer -strict $sel]} {
+<span class="line_number">611 </span>        set robot [lindex $::allRobots $sel]
+<span class="line_number">612 </span>        set ::data($robot,highlight) 1
+<span class="line_number">613 </span>    }
+<span class="line_number">614 </span>}
 </pre>
 <a name="robo14"></a>
 <a name="init5fgui2finit5fbattle"></a>
@@ -610,54 +610,54 @@
 <pre>   Start a match
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">628 </span>proc init_battle {} {
-<span class="line_number">629 </span>
-<span class="line_number">630 </span>    if {[llength $::robotList] &lt; 2} {
-<span class="line_number">631 </span>        tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
-<span class="line_number">632 </span>        return
-<span class="line_number">633 </span>    }
-<span class="line_number">634 </span>
-<span class="line_number">635 </span>    set ::halted  0
-<span class="line_number">636 </span>
-<span class="line_number">637 </span>    set ::StatusBarMsg "Initializing..."
-<span class="line_number">638 </span>
-<span class="line_number">639 </span>    # get robot filenames from window
-<span class="line_number">640 </span>    set ::robotFiles $::robotList
-<span class="line_number">641 </span>
-<span class="line_number">642 </span>    grid forget $::sel_f
-<span class="line_number">643 </span>    grid $::game_f -column 0 -row 2 -sticky nsew
-<span class="line_number">644 </span>    show_arena
-<span class="line_number">645 </span>
-<span class="line_number">646 </span>    # Clear message boxes
-<span class="line_number">647 </span>    set ::robotHealth {}
-<span class="line_number">648 </span>    set ::robotMsg    {}
-<span class="line_number">649 </span>
-<span class="line_number">650 </span>    # start robots
-<span class="line_number">651 </span>    set ::StatusBarMsg "Running"
-<span class="line_number">652 </span>    $::run_b   configure -state normal   -text "Halt" -command halt
-<span class="line_number">653 </span>    $::sim_b   configure -state disabled
-<span class="line_number">654 </span>    $::tourn_b configure -state disabled
-<span class="line_number">655 </span>    $::about_b configure -state disabled
-<span class="line_number">656 </span>    $::quit_b  configure -state disabled
-<span class="line_number">657 </span>
-<span class="line_number">658 </span>    # Init robots
-<span class="line_number">659 </span>    init
-<span class="line_number">660 </span>
-<span class="line_number">661 </span>    # Init robots on GUI
-<span class="line_number">662 </span>    gui_init_robots
-<span class="line_number">663 </span>
-<span class="line_number">664 </span>    # Start game
-<span class="line_number">665 </span>    run_game
-<span class="line_number">666 </span>
-<span class="line_number">667 </span>    # find winnner
-<span class="line_number">668 </span>    if {$::halted} {
-<span class="line_number">669 </span>        set ::StatusBarMsg "Battle halted"
-<span class="line_number">670 </span>    } else {
-<span class="line_number">671 </span>        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
-<span class="line_number">672 </span>    }
-<span class="line_number">673 </span>
-<span class="line_number">674 </span>    $::run_b configure -state normal -text "Reset" -command reset
-<span class="line_number">675 </span>}
+<pre class="source"><span class="line_number">629 </span>proc init_battle {} {
+<span class="line_number">630 </span>
+<span class="line_number">631 </span>    if {[llength $::robotList] &lt; 2} {
+<span class="line_number">632 </span>        tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
+<span class="line_number">633 </span>        return
+<span class="line_number">634 </span>    }
+<span class="line_number">635 </span>
+<span class="line_number">636 </span>    set ::halted  0
+<span class="line_number">637 </span>
+<span class="line_number">638 </span>    set ::StatusBarMsg "Initializing..."
+<span class="line_number">639 </span>
+<span class="line_number">640 </span>    # get robot filenames from window
+<span class="line_number">641 </span>    set ::robotFiles $::robotList
+<span class="line_number">642 </span>
+<span class="line_number">643 </span>    grid forget $::sel_f
+<span class="line_number">644 </span>    grid $::game_f -column 0 -row 2 -sticky nsew
+<span class="line_number">645 </span>    show_arena
+<span class="line_number">646 </span>
+<span class="line_number">647 </span>    # Clear message boxes
+<span class="line_number">648 </span>    set ::robotHealth {}
+<span class="line_number">649 </span>    set ::robotMsg    {}
+<span class="line_number">650 </span>
+<span class="line_number">651 </span>    # start robots
+<span class="line_number">652 </span>    set ::StatusBarMsg "Running"
+<span class="line_number">653 </span>    $::run_b   configure -state normal   -text "Halt" -command halt
+<span class="line_number">654 </span>    $::sim_b   configure -state disabled
+<span class="line_number">655 </span>    $::tourn_b configure -state disabled
+<span class="line_number">656 </span>    $::about_b configure -state disabled
+<span class="line_number">657 </span>    $::quit_b  configure -state disabled
+<span class="line_number">658 </span>
+<span class="line_number">659 </span>    # Init robots
+<span class="line_number">660 </span>    init
+<span class="line_number">661 </span>
+<span class="line_number">662 </span>    # Init robots on GUI
+<span class="line_number">663 </span>    gui_init_robots
+<span class="line_number">664 </span>
+<span class="line_number">665 </span>    # Start game
+<span class="line_number">666 </span>    run_game
+<span class="line_number">667 </span>
+<span class="line_number">668 </span>    # find winnner
+<span class="line_number">669 </span>    if {$::halted} {
+<span class="line_number">670 </span>        set ::StatusBarMsg "Battle halted"
+<span class="line_number">671 </span>    } else {
+<span class="line_number">672 </span>        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
+<span class="line_number">673 </span>    }
+<span class="line_number">674 </span>
+<span class="line_number">675 </span>    $::run_b configure -state normal -text "Reset" -command reset
+<span class="line_number">676 </span>}
 </pre>
 <a name="robo15"></a>
 <a name="init5fbattle2fshow5farena"></a>
@@ -669,30 +669,30 @@
 <pre>   update canvas and find current width
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">690 </span>proc show_arena {} {
-<span class="line_number">691 </span>    update
-<span class="line_number">692 </span>    set w [winfo width  $::arena_c]
-<span class="line_number">693 </span>    set h [winfo height $::arena_c]
-<span class="line_number">694 </span>
-<span class="line_number">695 </span>    if {$w &lt; $h} {
-<span class="line_number">696 </span>        set val [- $w 20]
-<span class="line_number">697 </span>    } else {
-<span class="line_number">698 </span>        set val [- $h 20]
-<span class="line_number">699 </span>    }
-<span class="line_number">700 </span>
-<span class="line_number">701 </span>    set ::scale  [/ $val 1000.0]
-<span class="line_number">702 </span>    set ::side   [int [* 1000 $::scale]]
-<span class="line_number">703 </span>
-<span class="line_number">704 </span>    $::arena_c delete wall
-<span class="line_number">705 </span>
-<span class="line_number">706 </span>    # Put an invisible rectangle outside to create some padding in the bbox
-<span class="line_number">707 </span>    $::arena_c create rectangle -8 -8 [+ $::side 8] [+ $::side 8] -tags wall \
-<span class="line_number">708 </span>            -outline "" -fill ""
-<span class="line_number">709 </span>    $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
-<span class="line_number">710 </span>
-<span class="line_number">711 </span>    $::arena_c configure -scrollregion [$::arena_c bbox wall]
-<span class="line_number">712 </span>    $::arena_c lower wall
-<span class="line_number">713 </span>}
+<pre class="source"><span class="line_number">691 </span>proc show_arena {} {
+<span class="line_number">692 </span>    update
+<span class="line_number">693 </span>    set w [winfo width  $::arena_c]
+<span class="line_number">694 </span>    set h [winfo height $::arena_c]
+<span class="line_number">695 </span>
+<span class="line_number">696 </span>    if {$w &lt; $h} {
+<span class="line_number">697 </span>        set val [- $w 20]
+<span class="line_number">698 </span>    } else {
+<span class="line_number">699 </span>        set val [- $h 20]
+<span class="line_number">700 </span>    }
+<span class="line_number">701 </span>
+<span class="line_number">702 </span>    set ::scale  [/ $val 1000.0]
+<span class="line_number">703 </span>    set ::side   [int [* 1000 $::scale]]
+<span class="line_number">704 </span>
+<span class="line_number">705 </span>    $::arena_c delete wall
+<span class="line_number">706 </span>
+<span class="line_number">707 </span>    # Put an invisible rectangle outside to create some padding in the bbox
+<span class="line_number">708 </span>    $::arena_c create rectangle -8 -8 [+ $::side 8] [+ $::side 8] -tags wall \
+<span class="line_number">709 </span>            -outline "" -fill ""
+<span class="line_number">710 </span>    $::arena_c create rectangle 0 0 $::side $::side -tags wall -width 2
+<span class="line_number">711 </span>
+<span class="line_number">712 </span>    $::arena_c configure -scrollregion [$::arena_c bbox wall]
+<span class="line_number">713 </span>    $::arena_c lower wall
+<span class="line_number">714 </span>}
 </pre>
 <a name="robo16"></a>
 <a name="init5fbattle2fhalt"></a>
@@ -704,17 +704,17 @@
 <pre>   halt a running match
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">728 </span>proc halt {} {
-<span class="line_number">729 </span>    set ::running 0
-<span class="line_number">730 </span>    set ::StatusBarMsg "Stopping battle, standby"
-<span class="line_number">731 </span>    set ::halted 1
-<span class="line_number">732 </span>
-<span class="line_number">733 </span>    $::run_b   configure -state normal -text "Reset" -command reset
-<span class="line_number">734 </span>    $::sim_b   configure -state disabled
-<span class="line_number">735 </span>    $::tourn_b configure -state disabled
-<span class="line_number">736 </span>    $::about_b configure -state disabled
-<span class="line_number">737 </span>    $::quit_b  configure -state disabled
-<span class="line_number">738 </span>}
+<pre class="source"><span class="line_number">729 </span>proc halt {} {
+<span class="line_number">730 </span>    set ::running 0
+<span class="line_number">731 </span>    set ::StatusBarMsg "Stopping battle, standby"
+<span class="line_number">732 </span>    set ::halted 1
+<span class="line_number">733 </span>
+<span class="line_number">734 </span>    $::run_b   configure -state normal -text "Reset" -command reset
+<span class="line_number">735 </span>    $::sim_b   configure -state disabled
+<span class="line_number">736 </span>    $::tourn_b configure -state disabled
+<span class="line_number">737 </span>    $::about_b configure -state disabled
+<span class="line_number">738 </span>    $::quit_b  configure -state disabled
+<span class="line_number">739 </span>}
 </pre>
 <a name="robo17"></a>
 <a name="halt2freset"></a>
@@ -726,26 +726,26 @@
 <pre>   reset to file select state
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">753 </span>proc reset {} {
-<span class="line_number">754 </span>    clean_up
-<span class="line_number">755 </span>
-<span class="line_number">756 </span>    if {$::data(tkp)} {
-<span class="line_number">757 </span>        $::arena_c delete {*}[$::arena_c children 0]
-<span class="line_number">758 </span>    } else {
-<span class="line_number">759 </span>        $::arena_c delete all
-<span class="line_number">760 </span>    }
-<span class="line_number">761 </span>
-<span class="line_number">762 </span>    grid forget $::game_f
-<span class="line_number">763 </span>    destroy $::game_f.sim
-<span class="line_number">764 </span>    grid $::sel_f -column 0 -row 2 -sticky nsew
-<span class="line_number">765 </span>
-<span class="line_number">766 </span>    set ::StatusBarMsg "Select robot files for battle"
-<span class="line_number">767 </span>    $::run_b   configure -state normal -text "Run Battle" -command init_battle
-<span class="line_number">768 </span>    $::sim_b   configure -state normal
-<span class="line_number">769 </span>    $::tourn_b configure -state normal
-<span class="line_number">770 </span>    $::about_b configure -state normal
-<span class="line_number">771 </span>    $::quit_b  configure -state normal
-<span class="line_number">772 </span>}
+<pre class="source"><span class="line_number">754 </span>proc reset {} {
+<span class="line_number">755 </span>    clean_up
+<span class="line_number">756 </span>
+<span class="line_number">757 </span>    if {$::data(tkp)} {
+<span class="line_number">758 </span>        $::arena_c delete {*}[$::arena_c children 0]
+<span class="line_number">759 </span>    } else {
+<span class="line_number">760 </span>        $::arena_c delete all
+<span class="line_number">761 </span>    }
+<span class="line_number">762 </span>
+<span class="line_number">763 </span>    grid forget $::game_f
+<span class="line_number">764 </span>    destroy $::game_f.sim
+<span class="line_number">765 </span>    grid $::sel_f -column 0 -row 2 -sticky nsew
+<span class="line_number">766 </span>
+<span class="line_number">767 </span>    set ::StatusBarMsg "Select robot files for battle"
+<span class="line_number">768 </span>    $::run_b   configure -state normal -text "Run Battle" -command init_battle
+<span class="line_number">769 </span>    $::sim_b   configure -state normal
+<span class="line_number">770 </span>    $::tourn_b configure -state normal
+<span class="line_number">771 </span>    $::about_b configure -state normal
+<span class="line_number">772 </span>    $::quit_b  configure -state normal
+<span class="line_number">773 </span>}
 </pre>
 <a name="robo18"></a>
 <a name="reset2fclean5fup"></a>
@@ -757,14 +757,14 @@
 <pre>   clean up all left overs
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">787 </span>proc clean_up {} {
-<span class="line_number">788 </span>    set ::StatusBarMsg "Standby, cleaning up any left overs...."
-<span class="line_number">789 </span>    update
-<span class="line_number">790 </span>
-<span class="line_number">791 </span>    foreach robot $::activeRobots {
-<span class="line_number">792 </span>        disable_robot $robot
-<span class="line_number">793 </span>    }
-<span class="line_number">794 </span>}
+<pre class="source"><span class="line_number">788 </span>proc clean_up {} {
+<span class="line_number">789 </span>    set ::StatusBarMsg "Standby, cleaning up any left overs...."
+<span class="line_number">790 </span>    update
+<span class="line_number">791 </span>
+<span class="line_number">792 </span>    foreach robot $::activeRobots {
+<span class="line_number">793 </span>        disable_robot $robot
+<span class="line_number">794 </span>    }
+<span class="line_number">795 </span>}
 </pre>
 <a name="robo19"></a>
 <a name="init5fbattle2fgui5finit5frobots"></a>
@@ -774,63 +774,63 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">809 </span>proc gui_init_robots {{lastblack 0}} {
-<span class="line_number">810 </span>    # Give the robots colors
-<span class="line_number">811 </span>    set colors [distinct_colors [llength $::allRobots]]
-<span class="line_number">812 </span>
-<span class="line_number">813 </span>    # For the simulator, force the last robot to be black
-<span class="line_number">814 </span>    if {$lastblack} {
-<span class="line_number">815 </span>        lset colors end black
-<span class="line_number">816 </span>    }
-<span class="line_number">817 </span>
-<span class="line_number">818 </span>    # Remove old canvas items
-<span class="line_number">819 </span>    $::arena_c delete robot
-<span class="line_number">820 </span>    $::arena_c delete scan
-<span class="line_number">821 </span>
-<span class="line_number">822 </span>    set i 0
-<span class="line_number">823 </span>    foreach robot $::allRobots color $colors {
-<span class="line_number">824 </span>        # Set colors as far away as possible from each other visually
-<span class="line_number">825 </span>        set ::data($robot,color) $color
-<span class="line_number">826 </span>        set ::data($robot,brightness) [brightness $color]
-<span class="line_number">827 </span>        # Precreate robot on canvas
-<span class="line_number">828 </span>        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-<span class="line_number">829 </span>        set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
-<span class="line_number">830 </span>        if {$::data(tkp)} {
-<span class="line_number">831 </span>            foreach {path opts} $::data($robot,paths) {
-<span class="line_number">832 </span>                $::arena_c create path $path \
-<span class="line_number">833 </span>                        -fill "" -stroke $color \
-<span class="line_number">834 </span>                        {*}$opts \
-<span class="line_number">835 </span>                        -tags "robot r$::data($robot,num)"
-<span class="line_number">836 </span>            }
-<span class="line_number">837 </span>            set ::data($robot,robotid) r$::data($robot,num)
-<span class="line_number">838 </span>            # Auto-adapt scale to a robot size
-<span class="line_number">839 </span>            set bbox [$::arena_c bbox r$::data($robot,num)]
-<span class="line_number">840 </span>            lassign $bbox x1 y1 x2 y2
-<span class="line_number">841 </span>            set size [max [- $x2 $x1] [- $y2 $y1]]
-<span class="line_number">842 </span>            set ::data($robot,scale) [expr {80.0 / $size}]
-<span class="line_number">843 </span>        } else {
-<span class="line_number">844 </span>            set ::data($robot,robotid) [$::arena_c create line \
-<span class="line_number">845 </span>                    -100 -100 -100 -100 \
-<span class="line_number">846 </span>                    -fill $::data($robot,color) \
-<span class="line_number">847 </span>                    -arrow last -arrowshape $::data($robot,shape) \
-<span class="line_number">848 </span>                    -tags "r$::data($robot,num) robot"]
-<span class="line_number">849 </span>        }
-<span class="line_number">850 </span>        set ::data($robot,highlight) 0
-<span class="line_number">851 </span>        # Precreate scan mark on canvas
-<span class="line_number">852 </span>        if {$::data(tkp)} {
-<span class="line_number">853 </span>            set path [arc_path 0 1]
-<span class="line_number">854 </span>            set ::data($robot,scanid) [$::arena_c create path $path \
-<span class="line_number">855 </span>                    -fill "" -fillopacity 0.2 -stroke "" \
-<span class="line_number">856 </span>                    -tags "scan s$::data($robot,num)"]
-<span class="line_number">857 </span>        } else {
-<span class="line_number">858 </span>            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-<span class="line_number">859 </span>                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-<span class="line_number">860 </span>                    -width 1 -tags "scan s$::data($robot,num)"]
-<span class="line_number">861 </span>        }
-<span class="line_number">862 </span>
-<span class="line_number">863 </span>        incr i
-<span class="line_number">864 </span>    }
-<span class="line_number">865 </span>}
+<pre class="source"><span class="line_number">810 </span>proc gui_init_robots {{lastblack 0}} {
+<span class="line_number">811 </span>    # Give the robots colors
+<span class="line_number">812 </span>    set colors [distinct_colors [llength $::allRobots]]
+<span class="line_number">813 </span>
+<span class="line_number">814 </span>    # For the simulator, force the last robot to be black
+<span class="line_number">815 </span>    if {$lastblack} {
+<span class="line_number">816 </span>        lset colors end black
+<span class="line_number">817 </span>    }
+<span class="line_number">818 </span>
+<span class="line_number">819 </span>    # Remove old canvas items
+<span class="line_number">820 </span>    $::arena_c delete robot
+<span class="line_number">821 </span>    $::arena_c delete scan
+<span class="line_number">822 </span>
+<span class="line_number">823 </span>    set i 0
+<span class="line_number">824 </span>    foreach robot $::allRobots color $colors {
+<span class="line_number">825 </span>        # Set colors as far away as possible from each other visually
+<span class="line_number">826 </span>        set ::data($robot,color) $color
+<span class="line_number">827 </span>        set ::data($robot,brightness) [brightness $color]
+<span class="line_number">828 </span>        # Precreate robot on canvas
+<span class="line_number">829 </span>        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
+<span class="line_number">830 </span>        set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
+<span class="line_number">831 </span>        if {$::data(tkp)} {
+<span class="line_number">832 </span>            foreach {path opts} $::data($robot,paths) {
+<span class="line_number">833 </span>                $::arena_c create path $path \
+<span class="line_number">834 </span>                        -fill "" -stroke $color \
+<span class="line_number">835 </span>                        {*}$opts \
+<span class="line_number">836 </span>                        -tags "robot r$::data($robot,num)"
+<span class="line_number">837 </span>            }
+<span class="line_number">838 </span>            set ::data($robot,robotid) r$::data($robot,num)
+<span class="line_number">839 </span>            # Auto-adapt scale to a robot size
+<span class="line_number">840 </span>            set bbox [$::arena_c bbox r$::data($robot,num)]
+<span class="line_number">841 </span>            lassign $bbox x1 y1 x2 y2
+<span class="line_number">842 </span>            set size [max [- $x2 $x1] [- $y2 $y1]]
+<span class="line_number">843 </span>            set ::data($robot,scale) [expr {80.0 / $size}]
+<span class="line_number">844 </span>        } else {
+<span class="line_number">845 </span>            set ::data($robot,robotid) [$::arena_c create line \
+<span class="line_number">846 </span>                    -100 -100 -100 -100 \
+<span class="line_number">847 </span>                    -fill $::data($robot,color) \
+<span class="line_number">848 </span>                    -arrow last -arrowshape $::data($robot,shape) \
+<span class="line_number">849 </span>                    -tags "r$::data($robot,num) robot"]
+<span class="line_number">850 </span>        }
+<span class="line_number">851 </span>        set ::data($robot,highlight) 0
+<span class="line_number">852 </span>        # Precreate scan mark on canvas
+<span class="line_number">853 </span>        if {$::data(tkp)} {
+<span class="line_number">854 </span>            set path [arc_path 0 1]
+<span class="line_number">855 </span>            set ::data($robot,scanid) [$::arena_c create path $path \
+<span class="line_number">856 </span>                    -fill "" -fillopacity 0.2 -stroke "" \
+<span class="line_number">857 </span>                    -tags "scan s$::data($robot,num)"]
+<span class="line_number">858 </span>        } else {
+<span class="line_number">859 </span>            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
+<span class="line_number">860 </span>                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+<span class="line_number">861 </span>                    -width 1 -tags "scan s$::data($robot,num)"]
+<span class="line_number">862 </span>        }
+<span class="line_number">863 </span>
+<span class="line_number">864 </span>        incr i
+<span class="line_number">865 </span>    }
+<span class="line_number">866 </span>}
 </pre>
 <a name="robo20"></a>
 <a name="gui5finit5frobots2fdistinct5fcolors"></a>
@@ -842,27 +842,27 @@
 <pre>   Returns a list of colors. From http://wiki.tcl.tk/666
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">880 </span>proc distinct_colors {n} {
-<span class="line_number">881 </span>    set nn 1
-<span class="line_number">882 </span>    set hue_increment .15
-<span class="line_number">883 </span>    set s 1.0 ;# non-variable saturation
-<span class="line_number">884 </span>
-<span class="line_number">885 </span>    set lum_steps [expr {$n * $hue_increment}]
-<span class="line_number">886 </span>    set int_lum_steps [int $lum_steps]
-<span class="line_number">887 </span>    if {$lum_steps &gt; $int_lum_steps} { ;# round up
-<span class="line_number">888 </span>        set lum_steps [+ $int_lum_steps 1]
-<span class="line_number">889 </span>    }
-<span class="line_number">890 </span>    set lum_increment [/ .7 $lum_steps]
-<span class="line_number">891 </span>
-<span class="line_number">892 </span>    for {set l 1.0} {$l &gt; 0.3} {set l [expr {$l - $lum_increment}]} {
-<span class="line_number">893 </span>        for {set h 0.0} {$h &lt; 1.0} {set h [expr {$h + $hue_increment}]} {
-<span class="line_number">894 </span>            lappend rc [hls2tk $h $l $s]
-<span class="line_number">895 </span>            incr nn
-<span class="line_number">896 </span>            if {$nn &gt; $n} { return $rc }
-<span class="line_number">897 </span>        }
-<span class="line_number">898 </span>    }
-<span class="line_number">899 </span>    return $rc
-<span class="line_number">900 </span>}
+<pre class="source"><span class="line_number">881 </span>proc distinct_colors {n} {
+<span class="line_number">882 </span>    set nn 1
+<span class="line_number">883 </span>    set hue_increment .15
+<span class="line_number">884 </span>    set s 1.0 ;# non-variable saturation
+<span class="line_number">885 </span>
+<span class="line_number">886 </span>    set lum_steps [expr {$n * $hue_increment}]
+<span class="line_number">887 </span>    set int_lum_steps [int $lum_steps]
+<span class="line_number">888 </span>    if {$lum_steps &gt; $int_lum_steps} { ;# round up
+<span class="line_number">889 </span>        set lum_steps [+ $int_lum_steps 1]
+<span class="line_number">890 </span>    }
+<span class="line_number">891 </span>    set lum_increment [/ .7 $lum_steps]
+<span class="line_number">892 </span>
+<span class="line_number">893 </span>    for {set l 1.0} {$l &gt; 0.3} {set l [expr {$l - $lum_increment}]} {
+<span class="line_number">894 </span>        for {set h 0.0} {$h &lt; 1.0} {set h [expr {$h + $hue_increment}]} {
+<span class="line_number">895 </span>            lappend rc [hls2tk $h $l $s]
+<span class="line_number">896 </span>            incr nn
+<span class="line_number">897 </span>            if {$nn &gt; $n} { return $rc }
+<span class="line_number">898 </span>        }
+<span class="line_number">899 </span>    }
+<span class="line_number">900 </span>    return $rc
+<span class="line_number">901 </span>}
 </pre>
 <a name="robo21"></a>
 <a name="distinct5fcolors2fhls2tk"></a>
@@ -872,16 +872,16 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">915 </span>proc hls2tk {h l s} {
-<span class="line_number">916 </span>    set rgb [hls2rgb $h $l $s]
-<span class="line_number">917 </span>    foreach c $rgb {
-<span class="line_number">918 </span>        set intc [expr {int($c * 256)}]
-<span class="line_number">919 </span>        if {$intc == 256} { set intc 255 }
-<span class="line_number">920 </span>        set c1 [format %02X $intc]
-<span class="line_number">921 </span>        append init $c1
-<span class="line_number">922 </span>    }
-<span class="line_number">923 </span>    return #$init
-<span class="line_number">924 </span>}
+<pre class="source"><span class="line_number">916 </span>proc hls2tk {h l s} {
+<span class="line_number">917 </span>    set rgb [hls2rgb $h $l $s]
+<span class="line_number">918 </span>    foreach c $rgb {
+<span class="line_number">919 </span>        set intc [expr {int($c * 256)}]
+<span class="line_number">920 </span>        if {$intc == 256} { set intc 255 }
+<span class="line_number">921 </span>        set c1 [format %02X $intc]
+<span class="line_number">922 </span>        append init $c1
+<span class="line_number">923 </span>    }
+<span class="line_number">924 </span>    return #$init
+<span class="line_number">925 </span>}
 </pre>
 <a name="robo22"></a>
 <a name="hls2tk2fhls2rgb"></a>
@@ -896,25 +896,25 @@
    h = 2/3 =&gt; blue
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">942 </span>proc hls2rgb {h l s} {
-<span class="line_number">943 </span>    set h6 [expr {($h-floor($h))*6}]
-<span class="line_number">944 </span>    set r [expr {  $h6 &lt;= 3 ? 2-$h6
-<span class="line_number">945 </span>                            : $h6-4}]
-<span class="line_number">946 </span>    set g [expr {  $h6 &lt;= 2 ? $h6
-<span class="line_number">947 </span>                            : $h6 &lt;= 5 ? 4-$h6
-<span class="line_number">948 </span>                            : $h6-6}]
-<span class="line_number">949 </span>    set b [expr {  $h6 &lt;= 1 ? -$h6
-<span class="line_number">950 </span>                            : $h6 &lt;= 4 ? $h6-2
-<span class="line_number">951 </span>                            : 6-$h6}]
-<span class="line_number">952 </span>    set r [expr {$r &lt; 0.0 ? 0.0 : $r &gt; 1.0 ? 1.0 : double($r)}]
-<span class="line_number">953 </span>    set g [expr {$g &lt; 0.0 ? 0.0 : $g &gt; 1.0 ? 1.0 : double($g)}]
-<span class="line_number">954 </span>    set b [expr {$b &lt; 0.0 ? 0.0 : $b &gt; 1.0 ? 1.0 : double($b)}]
-<span class="line_number">955 </span>
-<span class="line_number">956 </span>    set r [expr {(($r-1)*$s+1)*$l}]
-<span class="line_number">957 </span>    set g [expr {(($g-1)*$s+1)*$l}]
-<span class="line_number">958 </span>    set b [expr {(($b-1)*$s+1)*$l}]
-<span class="line_number">959 </span>    return [list $r $g $b]
-<span class="line_number">960 </span>}
+<pre class="source"><span class="line_number">943 </span>proc hls2rgb {h l s} {
+<span class="line_number">944 </span>    set h6 [expr {($h-floor($h))*6}]
+<span class="line_number">945 </span>    set r [expr {  $h6 &lt;= 3 ? 2-$h6
+<span class="line_number">946 </span>                            : $h6-4}]
+<span class="line_number">947 </span>    set g [expr {  $h6 &lt;= 2 ? $h6
+<span class="line_number">948 </span>                            : $h6 &lt;= 5 ? 4-$h6
+<span class="line_number">949 </span>                            : $h6-6}]
+<span class="line_number">950 </span>    set b [expr {  $h6 &lt;= 1 ? -$h6
+<span class="line_number">951 </span>                            : $h6 &lt;= 4 ? $h6-2
+<span class="line_number">952 </span>                            : 6-$h6}]
+<span class="line_number">953 </span>    set r [expr {$r &lt; 0.0 ? 0.0 : $r &gt; 1.0 ? 1.0 : double($r)}]
+<span class="line_number">954 </span>    set g [expr {$g &lt; 0.0 ? 0.0 : $g &gt; 1.0 ? 1.0 : double($g)}]
+<span class="line_number">955 </span>    set b [expr {$b &lt; 0.0 ? 0.0 : $b &gt; 1.0 ? 1.0 : double($b)}]
+<span class="line_number">956 </span>
+<span class="line_number">957 </span>    set r [expr {(($r-1)*$s+1)*$l}]
+<span class="line_number">958 </span>    set g [expr {(($g-1)*$s+1)*$l}]
+<span class="line_number">959 </span>    set b [expr {(($b-1)*$s+1)*$l}]
+<span class="line_number">960 </span>    return [list $r $g $b]
+<span class="line_number">961 </span>}
 </pre>
 <a name="robo23"></a>
 <a name="gui5finit5frobots2fbrightness"></a>
@@ -926,33 +926,24 @@
 <pre>   Author: RS, after Kevin Kenny
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">975 </span>proc brightness color {
-<span class="line_number">976 </span>    foreach {r g b} [winfo rgb . $color] break
-<span class="line_number">977 </span>    set max [lindex [winfo rgb . white] 0]
-<span class="line_number">978 </span>    expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
-<span class="line_number">979 </span>}
+<pre class="source"><span class="line_number">976 </span>proc brightness color {
+<span class="line_number">977 </span>    foreach {r g b} [winfo rgb . $color] break
+<span class="line_number">978 </span>    set max [lindex [winfo rgb . white] 0]
+<span class="line_number">979 </span>    expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
+<span class="line_number">980 </span>}
 </pre>
 <a name="robo24"></a>
-<a name="init5fgui2finit5fsim"></a>
-<h2>2.9.  init_gui/init_sim [ info ]  </h2>
-<p class="item_name">NAME</p>
-<pre>   init_sim
-</pre>
-<p class="item_name">DESCRIPTION</p>
-<pre>   See simulator.tcl
-</pre>
-<a name="robo25"></a>
 <a name="init5fgui2ftournament"></a>
-<h2>2.10.  init_gui/tournament [ procedure ]  </h2>
+<h2>2.9.  init_gui/tournament [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <pre>   tournament
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <pre>   TBD
 </pre>
-<a name="robo26"></a>
+<a name="robo25"></a>
 <a name="init5fgui2fabout"></a>
-<h2>2.11.  init_gui/about [ procedure ]  </h2>
+<h2>2.10.  init_gui/about [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <pre>   about
 </pre>
@@ -960,12 +951,12 @@
 <pre>   about box
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1018 </span>proc about {} {
-<span class="line_number">1019 </span>    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
-<span class="line_number">1020 </span>
-<span class="line_number">1021 </span>}
+<pre class="source"><span class="line_number">1007 </span>proc about {} {
+<span class="line_number">1008 </span>    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
+<span class="line_number">1009 </span>
+<span class="line_number">1010 </span>}
 </pre>
-<a name="robo27"></a>
+<a name="robo26"></a>
 <a name="gui2fupdate5fgui"></a>
 <h1>3.  gui/update_gui [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -973,14 +964,14 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1036 </span>proc update_gui {} {
-<span class="line_number">1037 </span>    show_robots
-<span class="line_number">1038 </span>    show_scan
-<span class="line_number">1039 </span>    show_health
-<span class="line_number">1040 </span>    update
-<span class="line_number">1041 </span>}
+<pre class="source"><span class="line_number">1025 </span>proc update_gui {} {
+<span class="line_number">1026 </span>    show_robots
+<span class="line_number">1027 </span>    show_scan
+<span class="line_number">1028 </span>    show_health
+<span class="line_number">1029 </span>    update
+<span class="line_number">1030 </span>}
 </pre>
-<a name="robo28"></a>
+<a name="robo27"></a>
 <a name="update5fgui2fshow5frobots"></a>
 <h2>3.1.  update_gui/show_robots [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -990,57 +981,57 @@
 <pre>   update canvas with position of missiles and robots
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1056 </span>proc show_robots {} {
-<span class="line_number">1057 </span>    $::arena_c delete highlight
-<span class="line_number">1058 </span>    foreach robot $::allRobots {
-<span class="line_number">1059 </span>        # check robots
-<span class="line_number">1060 </span>        if {$::data($robot,status)} {
-<span class="line_number">1061 </span>            set x [* $::data($robot,x) $::scale]
-<span class="line_number">1062 </span>            set y [* [- 1000 $::data($robot,y)] $::scale]
-<span class="line_number">1063 </span>            #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-<span class="line_number">1064 </span>            if {$::data(tkp)} {
-<span class="line_number">1065 </span>                set val [* $::data($robot,scale) $::scale]
-<span class="line_number">1066 </span>                set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
-<span class="line_number">1067 </span>                set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
-<span class="line_number">1068 </span>                set msinPhi [- $sinPhi]
-<span class="line_number">1069 </span>                set matrix \
-<span class="line_number">1070 </span>                        [list [list $cosPhi $msinPhi] [list $sinPhi $cosPhi] \
-<span class="line_number">1071 </span>                        [list $x $y]]
-<span class="line_number">1072 </span>                $::arena_c itemconfigure $::data($robot,robotid) \
-<span class="line_number">1073 </span>                        -matrix $matrix
-<span class="line_number">1074 </span>            } else {
-<span class="line_number">1075 </span>                $::arena_c coords $::data($robot,robotid) $x $y \
-<span class="line_number">1076 </span>                        [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
-<span class="line_number">1077 </span>                        [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
-<span class="line_number">1078 </span>            }
-<span class="line_number">1079 </span>            if {$::data($robot,highlight)} {
-<span class="line_number">1080 </span>                set r [* 50 $::scale]
-<span class="line_number">1081 </span>                $::arena_c create oval \
-<span class="line_number">1082 </span>                        [- $x $r] [- $y $r] [+ $x $r] [+ $y $r] \
-<span class="line_number">1083 </span>                        -outline $::data($robot,color) -tags highlight
-<span class="line_number">1084 </span>                $::arena_c lower highlight
-<span class="line_number">1085 </span>            }
-<span class="line_number">1086 </span>        }
-<span class="line_number">1087 </span>        # check missiles
-<span class="line_number">1088 </span>        if {$::data($robot,mstate)} {
-<span class="line_number">1089 </span>            $::arena_c delete m$::data($robot,num)
-<span class="line_number">1090 </span>            set x [* $::data($robot,mx) $::scale]
-<span class="line_number">1091 </span>            set y [* [- 1000 $::data($robot,my)] $::scale]
-<span class="line_number">1092 </span>            set val [* 6 $::scale]
-<span class="line_number">1093 </span>            if {$::data(tkp)} {
-<span class="line_number">1094 </span>                $::arena_c create circle $x $y -r $val \
-<span class="line_number">1095 </span>                        -fill $::data(gradient,miss) \
-<span class="line_number">1096 </span>                        -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
-<span class="line_number">1097 </span>            } else {
-<span class="line_number">1098 </span>                $::arena_c create oval \
-<span class="line_number">1099 </span>                        [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-<span class="line_number">1100 </span>                        -fill black -tags m$::data($robot,num)
-<span class="line_number">1101 </span>            }
-<span class="line_number">1102 </span>        }
-<span class="line_number">1103 </span>    }
-<span class="line_number">1104 </span>}
+<pre class="source"><span class="line_number">1045 </span>proc show_robots {} {
+<span class="line_number">1046 </span>    $::arena_c delete highlight
+<span class="line_number">1047 </span>    foreach robot $::allRobots {
+<span class="line_number">1048 </span>        # check robots
+<span class="line_number">1049 </span>        if {$::data($robot,status)} {
+<span class="line_number">1050 </span>            set x [* $::data($robot,x) $::scale]
+<span class="line_number">1051 </span>            set y [* [- 1000 $::data($robot,y)] $::scale]
+<span class="line_number">1052 </span>            #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
+<span class="line_number">1053 </span>            if {$::data(tkp)} {
+<span class="line_number">1054 </span>                set val [* $::data($robot,scale) $::scale]
+<span class="line_number">1055 </span>                set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
+<span class="line_number">1056 </span>                set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
+<span class="line_number">1057 </span>                set msinPhi [- $sinPhi]
+<span class="line_number">1058 </span>                set matrix \
+<span class="line_number">1059 </span>                        [list [list $cosPhi $msinPhi] [list $sinPhi $cosPhi] \
+<span class="line_number">1060 </span>                        [list $x $y]]
+<span class="line_number">1061 </span>                $::arena_c itemconfigure $::data($robot,robotid) \
+<span class="line_number">1062 </span>                        -matrix $matrix
+<span class="line_number">1063 </span>            } else {
+<span class="line_number">1064 </span>                $::arena_c coords $::data($robot,robotid) $x $y \
+<span class="line_number">1065 </span>                        [expr {$x+($::c_tab($::data($robot,hdg))*5)}] \
+<span class="line_number">1066 </span>                        [expr {$y-($::s_tab($::data($robot,hdg))*5)}]
+<span class="line_number">1067 </span>            }
+<span class="line_number">1068 </span>            if {$::data($robot,highlight)} {
+<span class="line_number">1069 </span>                set r [* 50 $::scale]
+<span class="line_number">1070 </span>                $::arena_c create oval \
+<span class="line_number">1071 </span>                        [- $x $r] [- $y $r] [+ $x $r] [+ $y $r] \
+<span class="line_number">1072 </span>                        -outline $::data($robot,color) -tags highlight
+<span class="line_number">1073 </span>                $::arena_c lower highlight
+<span class="line_number">1074 </span>            }
+<span class="line_number">1075 </span>        }
+<span class="line_number">1076 </span>        # check missiles
+<span class="line_number">1077 </span>        if {$::data($robot,mstate)} {
+<span class="line_number">1078 </span>            $::arena_c delete m$::data($robot,num)
+<span class="line_number">1079 </span>            set x [* $::data($robot,mx) $::scale]
+<span class="line_number">1080 </span>            set y [* [- 1000 $::data($robot,my)] $::scale]
+<span class="line_number">1081 </span>            set val [* 6 $::scale]
+<span class="line_number">1082 </span>            if {$::data(tkp)} {
+<span class="line_number">1083 </span>                $::arena_c create circle $x $y -r $val \
+<span class="line_number">1084 </span>                        -fill $::data(gradient,miss) \
+<span class="line_number">1085 </span>                        -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
+<span class="line_number">1086 </span>            } else {
+<span class="line_number">1087 </span>                $::arena_c create oval \
+<span class="line_number">1088 </span>                        [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+<span class="line_number">1089 </span>                        -fill black -tags m$::data($robot,num)
+<span class="line_number">1090 </span>            }
+<span class="line_number">1091 </span>        }
+<span class="line_number">1092 </span>    }
+<span class="line_number">1093 </span>}
 </pre>
-<a name="robo29"></a>
+<a name="robo28"></a>
 <a name="update5fgui2fshow5fscan"></a>
 <h2>3.2.  update_gui/show_scan [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -1050,49 +1041,49 @@
 <pre>   show scanner from a robot
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1119 </span>proc show_scan {} {
-<span class="line_number">1120 </span>    # Hide the scan arcs by default
-<span class="line_number">1121 </span>    if {$::data(tkp)} {
-<span class="line_number">1122 </span>        $::arena_c itemconfigure scan -fill ""
-<span class="line_number">1123 </span>    } else {
-<span class="line_number">1124 </span>        $::arena_c itemconfigure scan -outline ""
-<span class="line_number">1125 </span>    }
-<span class="line_number">1126 </span>
-<span class="line_number">1127 </span>    foreach robot $::activeRobots {
-<span class="line_number">1128 </span>        if {$::data($robot,status)} {
-<span class="line_number">1129 </span>            lassign $::data($robot,syscall,$::tick) cmd deg res
-<span class="line_number">1130 </span>            if {($cmd eq "scanner") &amp;&amp; \
-<span class="line_number">1131 </span>                    ($::data($robot,syscall,$::tick) eq \
-<span class="line_number">1132 </span>                    $::data($robot,syscall,[- $::tick 1]))} {
-<span class="line_number">1133 </span>
-<span class="line_number">1134 </span>                #puts "deg: $deg, res: $res"
-<span class="line_number">1135 </span>
-<span class="line_number">1136 </span>                set x [* $::data($robot,x) $::scale]
-<span class="line_number">1137 </span>                set y [* [- 1000 $::data($robot,y)] $::scale]
-<span class="line_number">1138 </span>                #puts "scan $robot $x $y"
-<span class="line_number">1139 </span>                set val [* $::parms(mismax) $::scale]
-<span class="line_number">1140 </span>                if {$::data(tkp)} {
-<span class="line_number">1141 </span>                    set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
-<span class="line_number">1142 </span>                    # Scale to radius and move to location
-<span class="line_number">1143 </span>                    set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
-<span class="line_number">1144 </span>                    $::arena_c coords $::data($robot,scanid) $path
-<span class="line_number">1145 </span>                    $::arena_c itemconfigure $::data($robot,scanid) \
-<span class="line_number">1146 </span>                            -fill $::data($robot,color) -matrix $matrix
-<span class="line_number">1147 </span>                } else {
-<span class="line_number">1148 </span>                    $::arena_c coords $::data($robot,scanid) \
-<span class="line_number">1149 </span>                            [- $x $val] [- $y $val] \
-<span class="line_number">1150 </span>                            [+ $x $val] [+ $y $val]
-<span class="line_number">1151 </span>                    $::arena_c itemconfigure $::data($robot,scanid) \
-<span class="line_number">1152 </span>                            -start [expr {$deg-$res}] \
-<span class="line_number">1153 </span>                            -extent [expr {2*$res + 1}] \
-<span class="line_number">1154 </span>                            -outline $::data($robot,color)
-<span class="line_number">1155 </span>                }
-<span class="line_number">1156 </span>            }
-<span class="line_number">1157 </span>        }
-<span class="line_number">1158 </span>    }
-<span class="line_number">1159 </span>}
+<pre class="source"><span class="line_number">1108 </span>proc show_scan {} {
+<span class="line_number">1109 </span>    # Hide the scan arcs by default
+<span class="line_number">1110 </span>    if {$::data(tkp)} {
+<span class="line_number">1111 </span>        $::arena_c itemconfigure scan -fill ""
+<span class="line_number">1112 </span>    } else {
+<span class="line_number">1113 </span>        $::arena_c itemconfigure scan -outline ""
+<span class="line_number">1114 </span>    }
+<span class="line_number">1115 </span>
+<span class="line_number">1116 </span>    foreach robot $::activeRobots {
+<span class="line_number">1117 </span>        if {$::data($robot,status)} {
+<span class="line_number">1118 </span>            lassign $::data($robot,syscall,$::tick) cmd deg res
+<span class="line_number">1119 </span>            if {($cmd eq "scanner") &amp;&amp; \
+<span class="line_number">1120 </span>                    ($::data($robot,syscall,$::tick) eq \
+<span class="line_number">1121 </span>                    $::data($robot,syscall,[- $::tick 1]))} {
+<span class="line_number">1122 </span>
+<span class="line_number">1123 </span>                #puts "deg: $deg, res: $res"
+<span class="line_number">1124 </span>
+<span class="line_number">1125 </span>                set x [* $::data($robot,x) $::scale]
+<span class="line_number">1126 </span>                set y [* [- 1000 $::data($robot,y)] $::scale]
+<span class="line_number">1127 </span>                #puts "scan $robot $x $y"
+<span class="line_number">1128 </span>                set val [* $::parms(mismax) $::scale]
+<span class="line_number">1129 </span>                if {$::data(tkp)} {
+<span class="line_number">1130 </span>                    set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
+<span class="line_number">1131 </span>                    # Scale to radius and move to location
+<span class="line_number">1132 </span>                    set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
+<span class="line_number">1133 </span>                    $::arena_c coords $::data($robot,scanid) $path
+<span class="line_number">1134 </span>                    $::arena_c itemconfigure $::data($robot,scanid) \
+<span class="line_number">1135 </span>                            -fill $::data($robot,color) -matrix $matrix
+<span class="line_number">1136 </span>                } else {
+<span class="line_number">1137 </span>                    $::arena_c coords $::data($robot,scanid) \
+<span class="line_number">1138 </span>                            [- $x $val] [- $y $val] \
+<span class="line_number">1139 </span>                            [+ $x $val] [+ $y $val]
+<span class="line_number">1140 </span>                    $::arena_c itemconfigure $::data($robot,scanid) \
+<span class="line_number">1141 </span>                            -start [expr {$deg-$res}] \
+<span class="line_number">1142 </span>                            -extent [expr {2*$res + 1}] \
+<span class="line_number">1143 </span>                            -outline $::data($robot,color)
+<span class="line_number">1144 </span>                }
+<span class="line_number">1145 </span>            }
+<span class="line_number">1146 </span>        }
+<span class="line_number">1147 </span>    }
+<span class="line_number">1148 </span>}
 </pre>
-<a name="robo30"></a>
+<a name="robo29"></a>
 <a name="show5fscan2farc5fpath"></a>
 <h3>3.2.1.  show_scan/arc_path [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -1102,25 +1093,25 @@
 <pre>   Create a path for a pie-slice circular arc, center in origo, radius 1
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1174 </span>proc arc_path {phi extend} {
-<span class="line_number">1175 </span>    set path [list M 0 0]
+<pre class="source"><span class="line_number">1163 </span>proc arc_path {phi extend} {
+<span class="line_number">1164 </span>    set path [list M 0 0]
+<span class="line_number">1165 </span>
+<span class="line_number">1166 </span>    set phiRad    [expr {$phi/180.0*3.1415926}]
+<span class="line_number">1167 </span>    set extendRad [expr {$extend/180.0*3.1415926}]
+<span class="line_number">1168 </span>
+<span class="line_number">1169 </span>    set x1 [expr {cos($phiRad)}]
+<span class="line_number">1170 </span>    set y1 [expr {-sin($phiRad)}]
+<span class="line_number">1171 </span>    lappend path L $x1 $y1
+<span class="line_number">1172 </span>
+<span class="line_number">1173 </span>    set x2 [expr {cos($phiRad+$extendRad)}]
+<span class="line_number">1174 </span>    set y2 [expr {-sin($phiRad+$extendRad)}]
+<span class="line_number">1175 </span>    lappend path A 1 1 0 [expr {$extend &gt; 180}] 0 $x2 $y2
 <span class="line_number">1176 </span>
-<span class="line_number">1177 </span>    set phiRad    [expr {$phi/180.0*3.1415926}]
-<span class="line_number">1178 </span>    set extendRad [expr {$extend/180.0*3.1415926}]
-<span class="line_number">1179 </span>
-<span class="line_number">1180 </span>    set x1 [expr {cos($phiRad)}]
-<span class="line_number">1181 </span>    set y1 [expr {-sin($phiRad)}]
-<span class="line_number">1182 </span>    lappend path L $x1 $y1
-<span class="line_number">1183 </span>
-<span class="line_number">1184 </span>    set x2 [expr {cos($phiRad+$extendRad)}]
-<span class="line_number">1185 </span>    set y2 [expr {-sin($phiRad+$extendRad)}]
-<span class="line_number">1186 </span>    lappend path A 1 1 0 [expr {$extend &gt; 180}] 0 $x2 $y2
-<span class="line_number">1187 </span>
-<span class="line_number">1188 </span>    lappend path Z
-<span class="line_number">1189 </span>    return $path
-<span class="line_number">1190 </span>}
+<span class="line_number">1177 </span>    lappend path Z
+<span class="line_number">1178 </span>    return $path
+<span class="line_number">1179 </span>}
 </pre>
-<a name="robo31"></a>
+<a name="robo30"></a>
 <a name="update5fgui2fshow5fhealth"></a>
 <h2>3.3.  update_gui/show_health [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -1128,20 +1119,20 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1205 </span>proc show_health {} {
-<span class="line_number">1206 </span>    set ::robotHealth {}
-<span class="line_number">1207 </span>    set index 0
-<span class="line_number">1208 </span>    foreach robot $::allRobots {
-<span class="line_number">1209 </span>        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
-<span class="line_number">1210 </span>        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
-<span class="line_number">1211 </span>        if {$::data($robot,brightness) &gt; 0.5} {
-<span class="line_number">1212 </span>            $::robotHealth_lb itemconfigure $index -background black
-<span class="line_number">1213 </span>        }
-<span class="line_number">1214 </span>        incr index
-<span class="line_number">1215 </span>    }
-<span class="line_number">1216 </span>}
+<pre class="source"><span class="line_number">1194 </span>proc show_health {} {
+<span class="line_number">1195 </span>    set ::robotHealth {}
+<span class="line_number">1196 </span>    set index 0
+<span class="line_number">1197 </span>    foreach robot $::allRobots {
+<span class="line_number">1198 </span>        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
+<span class="line_number">1199 </span>        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+<span class="line_number">1200 </span>        if {$::data($robot,brightness) &gt; 0.5} {
+<span class="line_number">1201 </span>            $::robotHealth_lb itemconfigure $index -background black
+<span class="line_number">1202 </span>        }
+<span class="line_number">1203 </span>        incr index
+<span class="line_number">1204 </span>    }
+<span class="line_number">1205 </span>}
 </pre>
-<a name="robo32"></a>
+<a name="robo31"></a>
 <a name="gui2ftk5fdialog2"></a>
 <h1>4.  gui/tk_dialog2 [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1151,113 +1142,113 @@
 <pre>   standard tk_dialog modified to use -image on label
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1231 </span>proc tk_dialog2 {w title text bitmap default args} {
-<span class="line_number">1232 </span>    if {!$::gui} return
-<span class="line_number">1233 </span>
-<span class="line_number">1234 </span>    # 1. Create the top-level window and divide it into top
-<span class="line_number">1235 </span>    # and bottom parts.
-<span class="line_number">1236 </span>
-<span class="line_number">1237 </span>    catch {destroy $w}
-<span class="line_number">1238 </span>    toplevel $w -class Dialog
-<span class="line_number">1239 </span>    if {[tk windowingsystem] eq "aqua"} {
-<span class="line_number">1240 </span>        # Trick to try to get rid of the odd-looking resize grip on Mac
-<span class="line_number">1241 </span>        wm resizable $w 0 0
-<span class="line_number">1242 </span>    }
-<span class="line_number">1243 </span>    ttk::frame $w.background
-<span class="line_number">1244 </span>    place $w.background -x 0 -y 0 -relwidth 1.0 -relheight 1.0
-<span class="line_number">1245 </span>    wm title $w $title
-<span class="line_number">1246 </span>    wm iconname $w Dialog
-<span class="line_number">1247 </span>    wm protocol $w WM_DELETE_WINDOW { }
-<span class="line_number">1248 </span>    wm transient $w [winfo toplevel [winfo parent $w]]
-<span class="line_number">1249 </span>    ttk::frame $w.top
-<span class="line_number">1250 </span>    pack $w.top -side top -fill both
-<span class="line_number">1251 </span>    ttk::frame $w.bot
-<span class="line_number">1252 </span>    pack $w.bot -side bottom -fill both
-<span class="line_number">1253 </span>
-<span class="line_number">1254 </span>    # 2. Fill the top part with bitmap and message.
-<span class="line_number">1255 </span>
-<span class="line_number">1256 </span>    ttk::label $w.msg -wraplength 3i -justify left -text $text
-<span class="line_number">1257 </span>    pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 3m -pady 3m
-<span class="line_number">1258 </span>    if {$bitmap != ""} {
-<span class="line_number">1259 </span>        if {[llength $bitmap] &gt; 1} {
-<span class="line_number">1260 </span>            switch -- [lindex $bitmap 0] {
-<span class="line_number">1261 </span>                -image {set type -image; set bitmap [lindex $bitmap 1]}
-<span class="line_number">1262 </span>                -bitmap {set type -bitmap; set bitmap [lindex $bitmap 1]}
-<span class="line_number">1263 </span>                default {set type -bitmap; set bitmap [lindex $bitmap 1]}
-<span class="line_number">1264 </span>            }
-<span class="line_number">1265 </span>        } else {
-<span class="line_number">1266 </span>            set type -bitmap
-<span class="line_number">1267 </span>        }
-<span class="line_number">1268 </span>        ttk::label $w.bitmap $type $bitmap
-<span class="line_number">1269 </span>        pack $w.bitmap -in $w.top -side left -padx 3m -pady 3m
-<span class="line_number">1270 </span>    }
-<span class="line_number">1271 </span>
-<span class="line_number">1272 </span>    # 3. Create a row of buttons at the bottom of the dialog.
-<span class="line_number">1273 </span>
-<span class="line_number">1274 </span>    set i 0
-<span class="line_number">1275 </span>    foreach but $args {
-<span class="line_number">1276 </span>        ttk::button $w.button$i -text $but -command "set ::tkPriv(button) $i"
-<span class="line_number">1277 </span>        if {$i == $default} {
-<span class="line_number">1278 </span>            $w.button$i configure -default active
-<span class="line_number">1279 </span>            #frame $w.default -relief sunken -bd 1
-<span class="line_number">1280 </span>            #raise $w.button$i $w.default
-<span class="line_number">1281 </span>            #pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
-<span class="line_number">1282 </span>            pack $w.button$i -padx 2m -pady 2m
-<span class="line_number">1283 </span>            bind $w &lt;Return&gt; "set tkPriv(button) $i"
-<span class="line_number">1284 </span>        } else {
-<span class="line_number">1285 </span>            pack $w.button$i -in $w.bot -side left -expand 1  -padx 3m -pady 2m
-<span class="line_number">1286 </span>        }
-<span class="line_number">1287 </span>        incr i
-<span class="line_number">1288 </span>    }
-<span class="line_number">1289 </span>
-<span class="line_number">1290 </span>    # 4. Withdraw the window, then update all the geometry information
-<span class="line_number">1291 </span>    # so we know how big it wants to be, then center the window in the
-<span class="line_number">1292 </span>    # display and de-iconify it.
+<pre class="source"><span class="line_number">1220 </span>proc tk_dialog2 {w title text bitmap default args} {
+<span class="line_number">1221 </span>    if {!$::gui} return
+<span class="line_number">1222 </span>
+<span class="line_number">1223 </span>    # 1. Create the top-level window and divide it into top
+<span class="line_number">1224 </span>    # and bottom parts.
+<span class="line_number">1225 </span>
+<span class="line_number">1226 </span>    catch {destroy $w}
+<span class="line_number">1227 </span>    toplevel $w -class Dialog
+<span class="line_number">1228 </span>    if {[tk windowingsystem] eq "aqua"} {
+<span class="line_number">1229 </span>        # Trick to try to get rid of the odd-looking resize grip on Mac
+<span class="line_number">1230 </span>        wm resizable $w 0 0
+<span class="line_number">1231 </span>    }
+<span class="line_number">1232 </span>    ttk::frame $w.background
+<span class="line_number">1233 </span>    place $w.background -x 0 -y 0 -relwidth 1.0 -relheight 1.0
+<span class="line_number">1234 </span>    wm title $w $title
+<span class="line_number">1235 </span>    wm iconname $w Dialog
+<span class="line_number">1236 </span>    wm protocol $w WM_DELETE_WINDOW { }
+<span class="line_number">1237 </span>    wm transient $w [winfo toplevel [winfo parent $w]]
+<span class="line_number">1238 </span>    ttk::frame $w.top
+<span class="line_number">1239 </span>    pack $w.top -side top -fill both
+<span class="line_number">1240 </span>    ttk::frame $w.bot
+<span class="line_number">1241 </span>    pack $w.bot -side bottom -fill both
+<span class="line_number">1242 </span>
+<span class="line_number">1243 </span>    # 2. Fill the top part with bitmap and message.
+<span class="line_number">1244 </span>
+<span class="line_number">1245 </span>    ttk::label $w.msg -wraplength 3i -justify left -text $text
+<span class="line_number">1246 </span>    pack $w.msg -in $w.top -side right -expand 1 -fill both -padx 3m -pady 3m
+<span class="line_number">1247 </span>    if {$bitmap != ""} {
+<span class="line_number">1248 </span>        if {[llength $bitmap] &gt; 1} {
+<span class="line_number">1249 </span>            switch -- [lindex $bitmap 0] {
+<span class="line_number">1250 </span>                -image {set type -image; set bitmap [lindex $bitmap 1]}
+<span class="line_number">1251 </span>                -bitmap {set type -bitmap; set bitmap [lindex $bitmap 1]}
+<span class="line_number">1252 </span>                default {set type -bitmap; set bitmap [lindex $bitmap 1]}
+<span class="line_number">1253 </span>            }
+<span class="line_number">1254 </span>        } else {
+<span class="line_number">1255 </span>            set type -bitmap
+<span class="line_number">1256 </span>        }
+<span class="line_number">1257 </span>        ttk::label $w.bitmap $type $bitmap
+<span class="line_number">1258 </span>        pack $w.bitmap -in $w.top -side left -padx 3m -pady 3m
+<span class="line_number">1259 </span>    }
+<span class="line_number">1260 </span>
+<span class="line_number">1261 </span>    # 3. Create a row of buttons at the bottom of the dialog.
+<span class="line_number">1262 </span>
+<span class="line_number">1263 </span>    set i 0
+<span class="line_number">1264 </span>    foreach but $args {
+<span class="line_number">1265 </span>        ttk::button $w.button$i -text $but -command "set ::tkPriv(button) $i"
+<span class="line_number">1266 </span>        if {$i == $default} {
+<span class="line_number">1267 </span>            $w.button$i configure -default active
+<span class="line_number">1268 </span>            #frame $w.default -relief sunken -bd 1
+<span class="line_number">1269 </span>            #raise $w.button$i $w.default
+<span class="line_number">1270 </span>            #pack $w.default -in $w.bot -side left -expand 1 -padx 3m -pady 2m
+<span class="line_number">1271 </span>            pack $w.button$i -padx 2m -pady 2m
+<span class="line_number">1272 </span>            bind $w &lt;Return&gt; "set tkPriv(button) $i"
+<span class="line_number">1273 </span>        } else {
+<span class="line_number">1274 </span>            pack $w.button$i -in $w.bot -side left -expand 1  -padx 3m -pady 2m
+<span class="line_number">1275 </span>        }
+<span class="line_number">1276 </span>        incr i
+<span class="line_number">1277 </span>    }
+<span class="line_number">1278 </span>
+<span class="line_number">1279 </span>    # 4. Withdraw the window, then update all the geometry information
+<span class="line_number">1280 </span>    # so we know how big it wants to be, then center the window in the
+<span class="line_number">1281 </span>    # display and de-iconify it.
+<span class="line_number">1282 </span>
+<span class="line_number">1283 </span>    wm withdraw $w
+<span class="line_number">1284 </span>    update idletasks
+<span class="line_number">1285 </span>    set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2  - \
+<span class="line_number">1286 </span>            [winfo vrootx [winfo parent $w]]}]
+<span class="line_number">1287 </span>    set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2  - \
+<span class="line_number">1288 </span>            [winfo vrooty [winfo parent $w]]}]
+<span class="line_number">1289 </span>    wm geom $w +$x+$y
+<span class="line_number">1290 </span>    wm deiconify $w
+<span class="line_number">1291 </span>
+<span class="line_number">1292 </span>    # 5. Set a grab and claim the focus too.
 <span class="line_number">1293 </span>
-<span class="line_number">1294 </span>    wm withdraw $w
-<span class="line_number">1295 </span>    update idletasks
-<span class="line_number">1296 </span>    set x [expr {[winfo screenwidth $w]/2 - [winfo reqwidth $w]/2  - \
-<span class="line_number">1297 </span>            [winfo vrootx [winfo parent $w]]}]
-<span class="line_number">1298 </span>    set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2  - \
-<span class="line_number">1299 </span>            [winfo vrooty [winfo parent $w]]}]
-<span class="line_number">1300 </span>    wm geom $w +$x+$y
-<span class="line_number">1301 </span>    wm deiconify $w
-<span class="line_number">1302 </span>
-<span class="line_number">1303 </span>    # 5. Set a grab and claim the focus too.
-<span class="line_number">1304 </span>
-<span class="line_number">1305 </span>    set oldFocus [focus]
-<span class="line_number">1306 </span>    set oldGrab [grab current $w]
-<span class="line_number">1307 </span>    if {$oldGrab != ""} {
-<span class="line_number">1308 </span>        set grabStatus [grab status $oldGrab]
-<span class="line_number">1309 </span>    }
-<span class="line_number">1310 </span>    grab $w
-<span class="line_number">1311 </span>    tkwait visibility $w
-<span class="line_number">1312 </span>    if {$default &gt;= 0} {
-<span class="line_number">1313 </span>        focus $w.button$default
-<span class="line_number">1314 </span>    } else {
-<span class="line_number">1315 </span>        focus $w
-<span class="line_number">1316 </span>    }
-<span class="line_number">1317 </span>
-<span class="line_number">1318 </span>    # 6. Wait for the user to respond, then restore the focus and
-<span class="line_number">1319 </span>    # return the index of the selected button.  Restore the focus
-<span class="line_number">1320 </span>    # before deleting the window, since otherwise the window manager
-<span class="line_number">1321 </span>    # may take the focus away so we can't redirect it.  Finally,
-<span class="line_number">1322 </span>    # restore any grab that was in effect.
-<span class="line_number">1323 </span>
-<span class="line_number">1324 </span>    tkwait variable ::tkPriv(button)
-<span class="line_number">1325 </span>    catch {focus $oldFocus}
-<span class="line_number">1326 </span>    destroy $w
-<span class="line_number">1327 </span>    if {$oldGrab != ""} {
-<span class="line_number">1328 </span>        if {$grabStatus == "global"} {
-<span class="line_number">1329 </span>            grab -global $oldGrab
-<span class="line_number">1330 </span>        } else {
-<span class="line_number">1331 </span>            grab $oldGrab
-<span class="line_number">1332 </span>        }
-<span class="line_number">1333 </span>    }
-<span class="line_number">1334 </span>    return $::tkPriv(button)
-<span class="line_number">1335 </span>}
+<span class="line_number">1294 </span>    set oldFocus [focus]
+<span class="line_number">1295 </span>    set oldGrab [grab current $w]
+<span class="line_number">1296 </span>    if {$oldGrab != ""} {
+<span class="line_number">1297 </span>        set grabStatus [grab status $oldGrab]
+<span class="line_number">1298 </span>    }
+<span class="line_number">1299 </span>    grab $w
+<span class="line_number">1300 </span>    tkwait visibility $w
+<span class="line_number">1301 </span>    if {$default &gt;= 0} {
+<span class="line_number">1302 </span>        focus $w.button$default
+<span class="line_number">1303 </span>    } else {
+<span class="line_number">1304 </span>        focus $w
+<span class="line_number">1305 </span>    }
+<span class="line_number">1306 </span>
+<span class="line_number">1307 </span>    # 6. Wait for the user to respond, then restore the focus and
+<span class="line_number">1308 </span>    # return the index of the selected button.  Restore the focus
+<span class="line_number">1309 </span>    # before deleting the window, since otherwise the window manager
+<span class="line_number">1310 </span>    # may take the focus away so we can't redirect it.  Finally,
+<span class="line_number">1311 </span>    # restore any grab that was in effect.
+<span class="line_number">1312 </span>
+<span class="line_number">1313 </span>    tkwait variable ::tkPriv(button)
+<span class="line_number">1314 </span>    catch {focus $oldFocus}
+<span class="line_number">1315 </span>    destroy $w
+<span class="line_number">1316 </span>    if {$oldGrab != ""} {
+<span class="line_number">1317 </span>        if {$grabStatus == "global"} {
+<span class="line_number">1318 </span>            grab -global $oldGrab
+<span class="line_number">1319 </span>        } else {
+<span class="line_number">1320 </span>            grab $oldGrab
+<span class="line_number">1321 </span>        }
+<span class="line_number">1322 </span>    }
+<span class="line_number">1323 </span>    return $::tkPriv(button)
+<span class="line_number">1324 </span>}
 </pre>
-<a name="robo33"></a>
+<a name="robo32"></a>
 <a name="gui2fshow5fexplode"></a>
 <h1>5.  gui/show_explode [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1267,58 +1258,58 @@
 <pre>   Show explosion of missile. Called directly from tclrobots.tcl.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1350 </span>proc show_explode {robot} {
-<span class="line_number">1351 </span>    # Delete the missile
-<span class="line_number">1352 </span>    $::arena_c delete m$::data($robot,num)
-<span class="line_number">1353 </span>
-<span class="line_number">1354 </span>    set x [* $::data($robot,mx) $::scale]
-<span class="line_number">1355 </span>    set y [* [- 1000 $::data($robot,my)] $::scale]
-<span class="line_number">1356 </span>
-<span class="line_number">1357 </span>    if {$::data(tkp)} {
-<span class="line_number">1358 </span>        set id [$::arena_c create circle $x $y -r 0 \
-<span class="line_number">1359 </span>                -fill $::data(gradient,expl) \
-<span class="line_number">1360 </span>                -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
-<span class="line_number">1361 </span>
-<span class="line_number">1362 </span>        # Loop over all animation frames
-<span class="line_number">1363 </span>        for {set i 0} {$i &lt; $::parms(explosion,numbooms)} {incr i} {
-<span class="line_number">1364 </span>            set delay [expr {$i * $::parms(explosion,duration) / $::parms(explosion,numbooms)}]
-<span class="line_number">1365 </span>            set radius [expr {40 * $i * $::scale / $::parms(explosion,numbooms)}]
-<span class="line_number">1366 </span>            after $delay [string map [list %id% $id %val% $radius] {
-<span class="line_number">1367 </span>                $::arena_c itemconfigure %id% -r %val%
-<span class="line_number">1368 </span>            }]
-<span class="line_number">1369 </span>        }
-<span class="line_number">1370 </span>    } else {
-<span class="line_number">1371 </span>        set val  [*  6 $::scale] ; #It's easier that way
-<span class="line_number">1372 </span>        set val2 [* 10 $::scale]
-<span class="line_number">1373 </span>        set val3 [* 20 $::scale]
-<span class="line_number">1374 </span>        set val4 [* 40 $::scale]
-<span class="line_number">1375 </span>        set id [$::arena_c create oval \
-<span class="line_number">1376 </span>                [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-<span class="line_number">1377 </span>                -outline red    -fill red     -width 1  \
-<span class="line_number">1378 </span>                -tags e$::data($robot,num)]
-<span class="line_number">1379 </span>        set coords2 [list [- $x $val2] [- $y $val2] [+ $x $val2] [+ $y $val2]]
-<span class="line_number">1380 </span>        set coords3 [list [- $x $val3] [- $y $val3] [+ $x $val3] [+ $y $val3]]
-<span class="line_number">1381 </span>        set coords4 [list [- $x $val4] [- $y $val4] [+ $x $val4] [+ $y $val4]]
-<span class="line_number">1382 </span>
-<span class="line_number">1383 </span>        update
-<span class="line_number">1384 </span>        after 100 [string map [list %id% $id %coords% $coords2] {
-<span class="line_number">1385 </span>            $::arena_c itemconfigure %id% -outline orange -fill red
-<span class="line_number">1386 </span>            $::arena_c coords %id% %coords%
-<span class="line_number">1387 </span>        }]
-<span class="line_number">1388 </span>        after 200 [string map [list %id% $id %coords% $coords3] {
-<span class="line_number">1389 </span>            $::arena_c itemconfigure %id% -outline yellow -fill orange
-<span class="line_number">1390 </span>            $::arena_c coords %id% %coords%
-<span class="line_number">1391 </span>        }]
-<span class="line_number">1392 </span>        after 300 [string map [list %id% $id %coords% $coords4] {
-<span class="line_number">1393 </span>            $::arena_c itemconfigure %id% -outline yellow -fill yellow
-<span class="line_number">1394 </span>            $::arena_c coords %id% %coords%
-<span class="line_number">1395 </span>        }]
-<span class="line_number">1396 </span>    }
-<span class="line_number">1397 </span>    set delay [expr {$::parms(explosion,duration) + 100}]
-<span class="line_number">1398 </span>    after $delay  "$::arena_c delete e$::data($robot,num)"
-<span class="line_number">1399 </span>}
+<pre class="source"><span class="line_number">1339 </span>proc show_explode {robot} {
+<span class="line_number">1340 </span>    # Delete the missile
+<span class="line_number">1341 </span>    $::arena_c delete m$::data($robot,num)
+<span class="line_number">1342 </span>
+<span class="line_number">1343 </span>    set x [* $::data($robot,mx) $::scale]
+<span class="line_number">1344 </span>    set y [* [- 1000 $::data($robot,my)] $::scale]
+<span class="line_number">1345 </span>
+<span class="line_number">1346 </span>    if {$::data(tkp)} {
+<span class="line_number">1347 </span>        set id [$::arena_c create circle $x $y -r 0 \
+<span class="line_number">1348 </span>                -fill $::data(gradient,expl) \
+<span class="line_number">1349 </span>                -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
+<span class="line_number">1350 </span>
+<span class="line_number">1351 </span>        # Loop over all animation frames
+<span class="line_number">1352 </span>        for {set i 0} {$i &lt; $::parms(explosion,numbooms)} {incr i} {
+<span class="line_number">1353 </span>            set delay [expr {$i * $::parms(explosion,duration) / $::parms(explosion,numbooms)}]
+<span class="line_number">1354 </span>            set radius [expr {40 * $i * $::scale / $::parms(explosion,numbooms)}]
+<span class="line_number">1355 </span>            after $delay [string map [list %id% $id %val% $radius] {
+<span class="line_number">1356 </span>                $::arena_c itemconfigure %id% -r %val%
+<span class="line_number">1357 </span>            }]
+<span class="line_number">1358 </span>        }
+<span class="line_number">1359 </span>    } else {
+<span class="line_number">1360 </span>        set val  [*  6 $::scale] ; #It's easier that way
+<span class="line_number">1361 </span>        set val2 [* 10 $::scale]
+<span class="line_number">1362 </span>        set val3 [* 20 $::scale]
+<span class="line_number">1363 </span>        set val4 [* 40 $::scale]
+<span class="line_number">1364 </span>        set id [$::arena_c create oval \
+<span class="line_number">1365 </span>                [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+<span class="line_number">1366 </span>                -outline red    -fill red     -width 1  \
+<span class="line_number">1367 </span>                -tags e$::data($robot,num)]
+<span class="line_number">1368 </span>        set coords2 [list [- $x $val2] [- $y $val2] [+ $x $val2] [+ $y $val2]]
+<span class="line_number">1369 </span>        set coords3 [list [- $x $val3] [- $y $val3] [+ $x $val3] [+ $y $val3]]
+<span class="line_number">1370 </span>        set coords4 [list [- $x $val4] [- $y $val4] [+ $x $val4] [+ $y $val4]]
+<span class="line_number">1371 </span>
+<span class="line_number">1372 </span>        update
+<span class="line_number">1373 </span>        after 100 [string map [list %id% $id %coords% $coords2] {
+<span class="line_number">1374 </span>            $::arena_c itemconfigure %id% -outline orange -fill red
+<span class="line_number">1375 </span>            $::arena_c coords %id% %coords%
+<span class="line_number">1376 </span>        }]
+<span class="line_number">1377 </span>        after 200 [string map [list %id% $id %coords% $coords3] {
+<span class="line_number">1378 </span>            $::arena_c itemconfigure %id% -outline yellow -fill orange
+<span class="line_number">1379 </span>            $::arena_c coords %id% %coords%
+<span class="line_number">1380 </span>        }]
+<span class="line_number">1381 </span>        after 300 [string map [list %id% $id %coords% $coords4] {
+<span class="line_number">1382 </span>            $::arena_c itemconfigure %id% -outline yellow -fill yellow
+<span class="line_number">1383 </span>            $::arena_c coords %id% %coords%
+<span class="line_number">1384 </span>        }]
+<span class="line_number">1385 </span>    }
+<span class="line_number">1386 </span>    set delay [expr {$::parms(explosion,duration) + 100}]
+<span class="line_number">1387 </span>    after $delay  "$::arena_c delete e$::data($robot,num)"
+<span class="line_number">1388 </span>}
 </pre>
-<a name="robo34"></a>
+<a name="robo33"></a>
 <a name="gui2fshow5fdie"></a>
 <h1>6.  gui/show_die [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1328,43 +1319,43 @@
 <pre>   Show effect when robot dies. Called directly from tclrobots.tcl.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1414 </span>proc show_die {robot} {
-<span class="line_number">1415 </span>    set x [* $::data($robot,x) $::scale]
-<span class="line_number">1416 </span>    set y [* [- 1000 $::data($robot,y)] $::scale]
-<span class="line_number">1417 </span>
-<span class="line_number">1418 </span>    set val [* 20 $::scale]
-<span class="line_number">1419 </span>    set id [$::arena_c create oval \
-<span class="line_number">1420 </span>            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
-<span class="line_number">1421 </span>            -outline red    -fill ""     -width 1  \
-<span class="line_number">1422 </span>            -tags die$::data($robot,num)]
-<span class="line_number">1423 </span>    set val [* 30 $::scale]
-<span class="line_number">1424 </span>    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
-<span class="line_number">1425 </span>    set val [* 40 $::scale]
-<span class="line_number">1426 </span>    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
-<span class="line_number">1427 </span>    set val [* 50 $::scale]
-<span class="line_number">1428 </span>    set coords4 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
-<span class="line_number">1429 </span>    set val [* 60 $::scale]
-<span class="line_number">1430 </span>    set coords5 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+<pre class="source"><span class="line_number">1403 </span>proc show_die {robot} {
+<span class="line_number">1404 </span>    set x [* $::data($robot,x) $::scale]
+<span class="line_number">1405 </span>    set y [* [- 1000 $::data($robot,y)] $::scale]
+<span class="line_number">1406 </span>
+<span class="line_number">1407 </span>    set val [* 20 $::scale]
+<span class="line_number">1408 </span>    set id [$::arena_c create oval \
+<span class="line_number">1409 </span>            [- $x $val] [- $y $val] [+ $x $val] [+ $y $val] \
+<span class="line_number">1410 </span>            -outline red    -fill ""     -width 1  \
+<span class="line_number">1411 </span>            -tags die$::data($robot,num)]
+<span class="line_number">1412 </span>    set val [* 30 $::scale]
+<span class="line_number">1413 </span>    set coords2 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+<span class="line_number">1414 </span>    set val [* 40 $::scale]
+<span class="line_number">1415 </span>    set coords3 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+<span class="line_number">1416 </span>    set val [* 50 $::scale]
+<span class="line_number">1417 </span>    set coords4 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+<span class="line_number">1418 </span>    set val [* 60 $::scale]
+<span class="line_number">1419 </span>    set coords5 [list [- $x $val] [- $y $val] [+ $x $val] [+ $y $val]]
+<span class="line_number">1420 </span>
+<span class="line_number">1421 </span>    update
+<span class="line_number">1422 </span>    after 100 [string map [list %id% $id %coords% $coords2] {
+<span class="line_number">1423 </span>        $::arena_c coords %id% %coords%
+<span class="line_number">1424 </span>
+<span class="line_number">1425 </span>    }]
+<span class="line_number">1426 </span>    after 200 [string map [list %id% $id %coords% $coords3] {
+<span class="line_number">1427 </span>        $::arena_c coords %id% %coords%
+<span class="line_number">1428 </span>    }]
+<span class="line_number">1429 </span>    after 300 [string map [list %id% $id %coords% $coords4] {
+<span class="line_number">1430 </span>        $::arena_c coords %id% %coords%
 <span class="line_number">1431 </span>
-<span class="line_number">1432 </span>    update
-<span class="line_number">1433 </span>    after 100 [string map [list %id% $id %coords% $coords2] {
+<span class="line_number">1432 </span>    }]
+<span class="line_number">1433 </span>    after 400 [string map [list %id% $id %coords% $coords5] {
 <span class="line_number">1434 </span>        $::arena_c coords %id% %coords%
-<span class="line_number">1435 </span>
-<span class="line_number">1436 </span>    }]
-<span class="line_number">1437 </span>    after 200 [string map [list %id% $id %coords% $coords3] {
-<span class="line_number">1438 </span>        $::arena_c coords %id% %coords%
-<span class="line_number">1439 </span>    }]
-<span class="line_number">1440 </span>    after 300 [string map [list %id% $id %coords% $coords4] {
-<span class="line_number">1441 </span>        $::arena_c coords %id% %coords%
-<span class="line_number">1442 </span>
-<span class="line_number">1443 </span>    }]
-<span class="line_number">1444 </span>    after 400 [string map [list %id% $id %coords% $coords5] {
-<span class="line_number">1445 </span>        $::arena_c coords %id% %coords%
-<span class="line_number">1446 </span>    }]
-<span class="line_number">1447 </span>    after 500 "$::arena_c delete die$::data($robot,num)"
-<span class="line_number">1448 </span>}
+<span class="line_number">1435 </span>    }]
+<span class="line_number">1436 </span>    after 500 "$::arena_c delete die$::data($robot,num)"
+<span class="line_number">1437 </span>}
 </pre>
-<a name="robo35"></a>
+<a name="robo34"></a>
 <a name="gui2fshow5fmsg"></a>
 <h1>7.  gui/show_msg [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1375,19 +1366,19 @@
    from tclrobots.tcl.
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">1464 </span>proc show_msg {robot msg} {
-<span class="line_number">1465 </span>    lappend ::robotMsg "$robot: $msg"
-<span class="line_number">1466 </span>    $::robotMsg_lb itemconfigure end -foreground $::data($robot,color)
-<span class="line_number">1467 </span>
-<span class="line_number">1468 </span>    if {$::data($robot,brightness) &gt; 0.5} {
-<span class="line_number">1469 </span>        $::robotMsg_lb itemconfigure end -background black
-<span class="line_number">1470 </span>    }
-<span class="line_number">1471 </span>
-<span class="line_number">1472 </span>    $::robotMsg_lb see end
-<span class="line_number">1473 </span>}
+<pre class="source"><span class="line_number">1453 </span>proc show_msg {robot msg} {
+<span class="line_number">1454 </span>    lappend ::robotMsg "$robot: $msg"
+<span class="line_number">1455 </span>    $::robotMsg_lb itemconfigure end -foreground $::data($robot,color)
+<span class="line_number">1456 </span>
+<span class="line_number">1457 </span>    if {$::data($robot,brightness) &gt; 0.5} {
+<span class="line_number">1458 </span>        $::robotMsg_lb itemconfigure end -background black
+<span class="line_number">1459 </span>    }
+<span class="line_number">1460 </span>
+<span class="line_number">1461 </span>    $::robotMsg_lb see end
+<span class="line_number">1462 </span>}
 </pre>
 <div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 20:02:12
+<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 20:35:17
 </p>
 </div> <!-- footer -->
 

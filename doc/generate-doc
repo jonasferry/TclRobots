@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh
 
 set docpath "./doc"
-set srcfiles {tclrobots syscalls api gui}
+set srcfiles {tclrobots syscalls api gui simulator}
 
 source $docpath/web.tcl
 

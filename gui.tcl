@@ -15,8 +15,8 @@
 #
 # COPYRIGHT
 #
-#   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
-#   details.
+#   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+#   Simplified BSD License. See LICENSE file for details.
 #
 #******
 
@@ -91,6 +91,7 @@ proc init_gui {} {
     # Create button frame and buttons
     set ::buttons_f [ttk::frame .f1]
     set ::run_b     [ttk::button .f1.b0 -text "Run Battle" -command init_battle]
+    # init_sim is defined in simulator.tcl
     set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
                          -command {source $::thisDir/simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
@@ -977,18 +978,6 @@ proc brightness color {
     set max [lindex [winfo rgb . white] 0]
     expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
 }
-#******
-
-#****I* init_gui/init_sim
-#
-# NAME
-#
-#   init_sim
-#
-# DESCRIPTION
-#
-#   See simulator.tcl
-#
 #******
 
 #****P* init_gui/tournament

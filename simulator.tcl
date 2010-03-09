@@ -1,101 +1,37 @@
-
-
-###############################################################################
+#****F* simulator/file_header
 #
-# examine a variable
+# NAME
 #
+#   simulator.tcl
 #
-
-proc examine {} {
-    puts $::data(r0,interp)
-    set ::status_val [$::data(r0,interp) eval set $::status_var]
-    puts $::status_val
-}
-
-###############################################################################
+# DESCRIPTION
 #
-# set a variable
+#   This file contains the simulator of TclRobots.
 #
+#   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+#   on TclRobots 2.0 by Tom Poindexter.
 #
-
-proc setval {} {
-    $::data(r0,interp) eval set $::status_var $::status_val
-}
-
-proc sim_robot {} {
-    while {$::running == 1} {
-        # Reset health of target
-        set ::data(target,health) $::parms(health)
-
-        foreach robot $::activeRobots {
-            if {($::data($robot,alert) ne {}) && \
-                    ($::data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set ::data($robot,sysreturn,[- $::tick 1]) \
-                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
-
-                # Robot is notified; reset alert request
-                set ::data($robot,ping) {}
-            }
-            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-        }
-
-        set ::sim_syscall $::data(r0,syscall,$::tick)
-
-        act
-
-        if {$::data(r0,sysreturn,$::tick) ne ""} {
-            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
-        }
-
-        update_robots
-
-        # GUI
-        show_robots
-        show_scan
-        show_health
-
-        tick
-
-        if {$::step} {
-            vwait ::do_step
-            set ::do_step 0
-        }
-
-        after $::parms(tick) [info coroutine]
-        yield
-    }
-}
-
-###############################################################################
+#   See http://tclrobots.org for more information.
 #
-# verify range of an rob1 entry for simulator
+# COPYRIGHT
 #
+#   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+#   Simplified BSD License. See LICENSE file for details.
 #
+#******
 
-proc ver_range {var low high} {
-    set val $::data(r0,$var)
-    if {$val < $low} {
-        set $var $low
-    }
-    if {$val > $high} {
-        set $var $high
-    }
-    set ::data(r0,$var) $val
-}
-
-proc end_sim {} {
-    # See gui.tcl for the reset procedure
-    reset
-}
-
-###############################################################################
+#****P* simulator/init_sim
 #
-# start the simulator
+# NAME
 #
+#   init_sim
 #
-
+# DESCRIPTION
+#
+#   start the simulator
+#
+# SOURCE
+#
 proc init_sim {} {
     # Read from robot file names; only the first file is used
     if {[llength $::robotList] == 0} {
@@ -112,6 +48,8 @@ proc init_sim {} {
 #    grid forget $::robotMsg_lb
 #    grid $::robotMsg_lb -column 1 -row 0
     grid $::game_f -column 0 -row 2 -sticky nsew
+
+    # show_arena is defined in gui.tcl
     show_arena
 
     # start robots
@@ -123,6 +61,7 @@ proc init_sim {} {
     $::about_b configure -state disabled
     $::quit_b  configure -state disabled
 
+    # init is defined in tclrobots.tcl
     init
 
     set ::tick 0
@@ -137,6 +76,7 @@ proc init_sim {} {
 
     set ::activeRobots $::allRobots
 
+    # init_robots is defined in tclrobots.tcl
     init_robots
 
     # Set target signature, make it black and place it in center of the arena
@@ -144,8 +84,10 @@ proc init_sim {} {
     set ::data(target,x)     500
     set ::data(target,y)     500
 
+    # gui_init_robots is defined in gui.tcl
     gui_init_robots 1
 
+    # act and tick are defined in tclrobots.tcl
     act
     tick
 
@@ -365,3 +307,141 @@ proc init_sim {} {
 }
 
 }
+#******
+
+#****P* init_sim/end_sim
+#
+# NAME
+#
+#   end_sim
+#
+# DESCRIPTION
+#
+#   End simulation.
+#
+# SOURCE
+#
+proc end_sim {} {
+    # reset is defined in gui.tcl
+    reset
+}
+#******
+
+#****P* init_sim/ver_range
+#
+# NAME
+#
+#   ver_range
+#
+# DESCRIPTION
+#
+#   Verify range of an entry for simulated robot.
+#
+# SOURCE
+#
+proc ver_range {var low high} {
+    set val $::data(r0,$var)
+    if {$val < $low} {
+        set $var $low
+    }
+    if {$val > $high} {
+        set $var $high
+    }
+    set ::data(r0,$var) $val
+}
+#******
+
+#****P* init_sim/examine
+#
+# NAME
+#
+#   examine
+#
+# DESCRIPTION
+#
+#   Examine a variable in the simulated robot.
+#
+# SOURCE
+#
+proc examine {} {
+    puts $::data(r0,interp)
+    set ::status_val [$::data(r0,interp) eval set $::status_var]
+    puts $::status_val
+}
+#******
+
+#****P* init_sim/setval
+#
+# NAME
+#
+#   setval
+#
+# DESCRIPTION
+#
+#   Set a variable in the simulated robot.
+#
+# SOURCE
+#
+proc setval {} {
+    $::data(r0,interp) eval set $::status_var $::status_val
+}
+#******
+
+#****P* init_sim/sim_robot
+#
+# NAME
+#
+#   sim_robot
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc sim_robot {} {
+    while {$::running == 1} {
+        # Reset health of target
+        set ::data(target,health) $::parms(health)
+
+        foreach robot $::activeRobots {
+            if {($::data($robot,alert) ne {}) && \
+                    ($::data($robot,ping) ne {})} {
+                # Prepend alert data to sysreturn no notify robot it's
+                # been scanned.
+                set ::data($robot,sysreturn,[- $::tick 1]) \
+                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
+
+                # Robot is notified; reset alert request
+                set ::data($robot,ping) {}
+            }
+            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
+        }
+
+        set ::sim_syscall $::data(r0,syscall,$::tick)
+
+        act
+
+        if {$::data(r0,sysreturn,$::tick) ne ""} {
+            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
+        }
+
+        update_robots
+
+        # GUI
+        show_robots
+        show_scan
+        show_health
+
+        tick
+
+        if {$::step} {
+            vwait ::do_step
+            set ::do_step 0
+        }
+
+        after $::parms(tick) [info coroutine]
+        yield
+    }
+}
+#******
