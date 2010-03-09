@@ -21,7 +21,7 @@
 #
 #******
 
-#****p* tclrobots/main
+#****P* tclrobots/main
 #
 # NAME
 #
@@ -82,7 +82,7 @@ proc main {} {
 }
 #******
 
-#****p* main/init
+#****P* main/init
 #
 # NAME
 #
@@ -130,7 +130,7 @@ proc init {} {
 }
 #******
 
-#****p* init/init_parms
+#****P* init/init_parms
 #
 # NAME
 #
@@ -222,7 +222,7 @@ proc init_parms {} {
 }
 #******
 
-#****p* init/init_trig_tables
+#****P* init/init_trig_tables
 #
 # NAME
 #
@@ -246,7 +246,7 @@ proc init_trig_tables {} {
 }
 #******
 
-#****p* init/init_rand
+#****P* init/init_rand
 #
 # NAME
 #
@@ -268,7 +268,7 @@ proc init_rand {} {
 }
 #******
 
-#****p* init/init_robots
+#****P* init/init_robots
 #
 # NAME
 #
@@ -385,7 +385,7 @@ proc init_robots {} {
 }
 #******
 
-#****p* main/run_game
+#****P* main/run_game
 #
 # NAME
 #
@@ -407,7 +407,7 @@ proc run_game {} {
 }
 #******
 
-#****p* run_game/run_robots
+#****P* run_game/run_robots
 #
 # NAME
 #
@@ -472,7 +472,7 @@ proc run_robots {} {
 }
 #******
 
-#****p* run_robots/act
+#****P* run_robots/act
 #
 # NAME
 #
@@ -509,7 +509,7 @@ proc act {} {
 }
 #******
 
-#****p* run_robots/update_robots
+#****P* run_robots/update_robots
 #
 # NAME
 #
@@ -566,7 +566,7 @@ proc update_robots {} {
 }
 #******
 
-#****p* update_robots/check_missiles
+#****P* update_robots/check_missiles
 #
 # NAME
 #
@@ -600,7 +600,7 @@ proc check_missiles {robot} {
 }
 #******
 
-#****p* update_robots/update_missile_location
+#****P* update_robots/update_missile_location
 #
 # NAME
 #
@@ -626,7 +626,7 @@ proc update_missile_location {robot} {
 }
 #******
 
-#****p* update_robots/missile_reached_target
+#****P* update_robots/missile_reached_target
 #
 # NAME
 #
@@ -654,7 +654,7 @@ proc missile_reached_target {robot} {
 }
 #******
 
-#****p* update_robots/assign_missile_damage
+#****P* update_robots/assign_missile_damage
 #
 # NAME
 #
@@ -689,7 +689,7 @@ proc assign_missile_damage {robot target} {
 }
 #******
 
-#****p* update_robots/check_barrel
+#****P* update_robots/check_barrel
 #
 # NAME
 #
@@ -713,7 +713,7 @@ proc check_barrel {robot} {
 }
 #******
 
-#****p* update_robots/check_speed
+#****P* update_robots/check_speed
 #
 # NAME
 #
@@ -752,7 +752,7 @@ proc check_speed {robot} {
 }
 #******
 
-#****p* update_robots/update_speed
+#****P* update_robots/update_speed
 #
 # NAME
 #
@@ -783,7 +783,7 @@ proc update_speed {robot} {
 }
 #******
 
-#****p* update_robots/update_heading
+#****P* update_robots/update_heading
 #
 # NAME
 #
@@ -821,7 +821,7 @@ proc update_heading {robot} {
 }
 #******
 
-#****p* update_robots/update_distance
+#****P* update_robots/update_distance
 #
 # NAME
 #
@@ -863,7 +863,7 @@ proc update_distance {robot} {
 }
 #******
 
-#****p* update_robots/check_wall
+#****P* update_robots/check_wall
 #
 # NAME
 #
@@ -909,7 +909,7 @@ proc check_wall {robot} {
 }
 #******
 
-#****p* update_robots/check_health
+#****P* update_robots/check_health
 #
 # NAME
 #
@@ -955,7 +955,7 @@ proc check_health {} {
 }
 #******
 
-#****p* check_health/disable_robot
+#****P* check_health/disable_robot
 #
 # NAME
 #
@@ -977,7 +977,7 @@ proc disable_robot {robot} {
 }
 #******
 
-#****p* run_robots/tick
+#****P* run_robots/tick
 #
 # NAME
 #
@@ -998,7 +998,7 @@ proc tick {} {
 }
 #******
 
-#****p* run_game/find_winner
+#****P* run_game/find_winner
 #
 # NAME
 #
@@ -1081,7 +1081,7 @@ proc find_winner {} {
 }
 #******
 
-#****p* tclrobots/syscall
+#****P* tclrobots/syscall
 #
 # NAME
 #
@@ -1142,7 +1142,7 @@ proc syscall {args} {
 }
 #******
 
-#****p* syscall/sysScanner
+#****P* syscall/sysScanner
 #
 # NAME
 #
@@ -1238,7 +1238,7 @@ proc sysScanner {robot} {
 }
 #******
 
-#****p* syscall/sysDsp
+#****P* syscall/sysDsp
 #
 # NAME
 #
@@ -1256,7 +1256,7 @@ proc sysDsp {robot} {
 }
 #******
 
-#****p* syscall/sysAlert
+#****P* syscall/sysAlert
 #
 # NAME
 #
@@ -1275,7 +1275,7 @@ proc sysAlert {robot} {
 }
 #******
 
-#****p* syscall/sysCannon
+#****P* syscall/sysCannon
 #
 # NAME
 #
@@ -1331,7 +1331,7 @@ proc sysCannon {robot} {
 }
 #******
 
-#****p* syscall/sysDrive
+#****P* syscall/sysDrive
 #
 # NAME
 #
@@ -1388,7 +1388,7 @@ proc sysDrive {robot} {
 }
 #******
 
-#****p* syscall/sysData
+#****P* syscall/sysData
 #
 # NAME
 #
@@ -1415,7 +1415,7 @@ proc sysData {robot} {
 }
 #******
 
-#****p* syscall/sysTick
+#****P* syscall/sysTick
 #
 # NAME
 #
@@ -1433,7 +1433,7 @@ proc sysTick {robot} {
 }
 #******
 
-#****p* syscall/sysTeamDeclare
+#****P* syscall/sysTeamDeclare
 #
 # NAME
 #
@@ -1453,7 +1453,7 @@ proc sysTeamDeclare {robot} {
 }
 #******
 
-#****p* syscall/sysTeamSend
+#****P* syscall/sysTeamSend
 #
 # NAME
 #
@@ -1472,7 +1472,7 @@ proc sysTeamSend {robot msg} {
 }
 #******
 
-#****p* syscall/sysTeamGet
+#****P* syscall/sysTeamGet
 #
 # NAME
 #
@@ -1503,7 +1503,7 @@ proc sysTeamGet {robot} {
 }
 #******
 
-#****p* syscall/sysDputs
+#****P* syscall/sysDputs
 #
 # NAME
 #
@@ -1532,7 +1532,7 @@ proc sysDputs {robot msg} {
 }
 #******
 
-#****p* tclrobots/rand
+#****P* tclrobots/rand
 #
 # NAME
 #
@@ -1549,7 +1549,7 @@ proc mrand {max} {
 }
 #******
 
-#****p* tclrobots/debug
+#****P* tclrobots/debug
 #
 # NAME
 #

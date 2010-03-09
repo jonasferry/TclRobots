@@ -1,4 +1,5 @@
 headertypes:
-        F  "File"      tclrobots_files
-        p  "Procedure" tclrobots_procs
-        S  "Syscall"   tclrobots_syscalls
+        F  "file"      tclrobots_files
+        I  "info"      tclrobots_info
+        P  "procedure" tclrobots_procs
+        S  "syscall"   tclrobots_syscalls

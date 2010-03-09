@@ -13,18 +13,11 @@ proc header {title} {
 <!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
 </head>
 <body>
-<div id='logo'>
-<a name='robo_top_of_doc'></a>
-</div> <!-- logo -->
 "
 }
 
 proc footer {} {
     return "
-<div id='footer'>
-<p>Generated with ROBODoc V4.99.38
-</p>
-</div> <!-- footer -->
 </body>
 </html>
 "

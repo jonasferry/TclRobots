@@ -20,7 +20,7 @@
 #
 #******
 
-#****p* gui/init_gui
+#****P* gui/init_gui
 #
 # NAME
 #
@@ -205,7 +205,7 @@ proc init_gui {} {
 }
 #******
 
-#****p* init_gui/gui_settings
+#****P* init_gui/gui_settings
 #
 # NAME
 #
@@ -260,7 +260,7 @@ proc create_icon {} {
 }
 #******
 
-#****p* init_gui/ellipsepath
+#****P* init_gui/ellipsepath
 #
 # NAME
 #
@@ -281,7 +281,7 @@ proc ellipsepath {x y rx ry} {
 }
 #******
 
-#****p* init_gui/fileBox
+#****P* init_gui/fileBox
 #
 # NAME
 #
@@ -355,7 +355,7 @@ proc fileBox {win txt filt initfile startdir execproc} {
 }
 #******
 
-#****p* fileBox/fileOK
+#****P* fileBox/fileOK
 #
 # NAME
 #
@@ -388,7 +388,7 @@ proc fileOK {win execproc} {
 }
 #******
 
-#****p* fileBox/choose_file
+#****P* fileBox/choose_file
 #
 # NAME
 #
@@ -413,7 +413,7 @@ proc choose_file {win filename} {
 }
 #******
 
-#****p* fileBox/choose_all
+#****P* fileBox/choose_all
 #
 # NAME
 #
@@ -438,7 +438,7 @@ proc choose_all {} {
 }
 #******
 
-#****p* fileBox/selInsert
+#****P* fileBox/selInsert
 #
 # NAME
 #
@@ -462,7 +462,7 @@ proc selInsert {win pathname} {
 }
 #******
 
-#****p* fileBox/fillLst
+#****P* fileBox/fillLst
 #
 # NAME
 #
@@ -516,7 +516,7 @@ proc fillLst {win filt dir} {
 }
 #******
 
-#****p* init_gui/remove_file
+#****P* init_gui/remove_file
 #
 # NAME
 #
@@ -537,7 +537,7 @@ proc remove_file {} {
 }
 #******
 
-#****p* init_gui/remove_all
+#****P* init_gui/remove_all
 #
 # NAME
 #
@@ -554,7 +554,7 @@ proc remove_all {} {
 }
 #******
 
-#****p* init_gui/create_arena
+#****P* init_gui/create_arena
 #
 # NAME
 #
@@ -588,7 +588,7 @@ proc create_arena {} {
 }
 #******
 
-#****p* init_gui/highlightRobot
+#****P* init_gui/highlightRobot
 #
 # NAME
 #
@@ -613,7 +613,7 @@ proc highlightRobot {} {
 }
 #******
 
-#****p* init_gui/init_battle
+#****P* init_gui/init_battle
 #
 # NAME
 #
@@ -675,7 +675,7 @@ proc init_battle {} {
 }
 #******
 
-#****p* init_battle/show_arena
+#****P* init_battle/show_arena
 #
 # NAME
 #
@@ -713,7 +713,7 @@ proc show_arena {} {
 }
 #******
 
-#****p* init_battle/halt
+#****P* init_battle/halt
 #
 # NAME
 #
@@ -738,7 +738,7 @@ proc halt {} {
 }
 #******
 
-#****p* halt/reset
+#****P* halt/reset
 #
 # NAME
 #
@@ -772,7 +772,7 @@ proc reset {} {
 }
 #******
 
-#****p* reset/clean_up
+#****P* reset/clean_up
 #
 # NAME
 #
@@ -794,7 +794,7 @@ proc clean_up {} {
 }
 #******
 
-#****p* init_battle/gui_init_robots
+#****P* init_battle/gui_init_robots
 #
 # NAME
 #
@@ -865,7 +865,7 @@ proc gui_init_robots {{lastblack 0}} {
 }
 #******
 
-#****p* gui_init_robots/distinct_colors
+#****P* gui_init_robots/distinct_colors
 #
 # NAME
 #
@@ -900,7 +900,7 @@ proc distinct_colors {n} {
 }
 #******
 
-#****p* distinct_colors/hls2tk
+#****P* distinct_colors/hls2tk
 #
 # NAME
 #
@@ -924,7 +924,7 @@ proc hls2tk {h l s} {
 }
 #******
 
-#****p* hls2tk/hls2rgb
+#****P* hls2tk/hls2rgb
 #
 # NAME
 #
@@ -960,7 +960,7 @@ proc hls2rgb {h l s} {
 }
 #******
 
-#****p* gui_init_robots/brightness
+#****P* gui_init_robots/brightness
 #
 # NAME
 #
@@ -979,7 +979,7 @@ proc brightness color {
 }
 #******
 
-#****** init_gui/init_sim
+#****I* init_gui/init_sim
 #
 # NAME
 #
@@ -991,7 +991,7 @@ proc brightness color {
 #
 #******
 
-#****** init_gui/tournament
+#****P* init_gui/tournament
 #
 # NAME
 #
@@ -1003,7 +1003,7 @@ proc brightness color {
 #
 #******
 
-#****p* init_gui/about
+#****P* init_gui/about
 #
 # NAME
 #
@@ -1021,7 +1021,7 @@ proc about {} {
 }
 #******
 
-#****p* gui/update_gui
+#****P* gui/update_gui
 #
 # NAME
 #
@@ -1041,7 +1041,7 @@ proc update_gui {} {
 }
 #******
 
-#****p* update_gui/show_robots
+#****P* update_gui/show_robots
 #
 # NAME
 #
@@ -1104,7 +1104,7 @@ proc show_robots {} {
 }
 #******
 
-#****p* update_gui/show_scan
+#****P* update_gui/show_scan
 #
 # NAME
 #
@@ -1159,7 +1159,7 @@ proc show_scan {} {
 }
 #******
 
-#****p* show_scan/arc_path
+#****P* show_scan/arc_path
 #
 # NAME
 #
@@ -1190,7 +1190,7 @@ proc arc_path {phi extend} {
 }
 #******
 
-#****p* update_gui/show_health
+#****P* update_gui/show_health
 #
 # NAME
 #
@@ -1216,7 +1216,7 @@ proc show_health {} {
 }
 #******
 
-#****p* gui/tk_dialog2
+#****P* gui/tk_dialog2
 #
 # NAME
 #
@@ -1335,7 +1335,7 @@ proc tk_dialog2 {w title text bitmap default args} {
 }
 #******
 
-#****p* gui/show_explode
+#****P* gui/show_explode
 #
 # NAME
 #
@@ -1399,7 +1399,7 @@ proc show_explode {robot} {
 }
 #******
 
-#****p* gui/show_die
+#****P* gui/show_die
 #
 # NAME
 #
@@ -1448,7 +1448,7 @@ proc show_die {robot} {
 }
 #******
 
-#****p* gui/show_msg
+#****P* gui/show_msg
 #
 # NAME
 #
