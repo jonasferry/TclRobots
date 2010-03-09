@@ -66,6 +66,11 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <pre>   This file contains the syscalls robots can use.
+
+   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+   on TclRobots 2.0 by Tom Poindexter.
+
+   See http://tclrobots.org for more information.
 </pre>
 <p class="item_name">COPYRIGHT</p>
 <pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for
@@ -90,14 +95,14 @@
 <pre>   Check the answer from a yield for a ping alert
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">42 </span>proc _ping_check {val} {
-<span class="line_number">43 </span>    if {[lindex $val 0] eq "alert"} {
-<span class="line_number">44 </span>        #  ping_proc:        dsp:
-<span class="line_number">45 </span>        [lindex $val 1] [lindex $val 2]
-<span class="line_number">46 </span>        set val [lrange $val 3 end]
-<span class="line_number">47 </span>    }
-<span class="line_number">48 </span>    return $val
-<span class="line_number">49 </span>}
+<pre class="source"><span class="line_number">47 </span>proc _ping_check {val} {
+<span class="line_number">48 </span>    if {[lindex $val 0] eq "alert"} {
+<span class="line_number">49 </span>        #  ping_proc:        dsp:
+<span class="line_number">50 </span>        [lindex $val 1] [lindex $val 2]
+<span class="line_number">51 </span>        set val [lrange $val 3 end]
+<span class="line_number">52 </span>    }
+<span class="line_number">53 </span>    return $val
+<span class="line_number">54 </span>}
 </pre>
 <a name="robo3"></a>
 <a name="helper2f5fsyscall5fyield"></a>
@@ -109,14 +114,14 @@
 <pre>   Combine the common syscall+yield call
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">64 </span>proc _syscall_yield {args} {
-<span class="line_number">65 </span>    set result [syscall callbackcheck]
-<span class="line_number">66 </span>    if {$result ne ""} {
-<span class="line_number">67 </span>        uplevel \#0 $result
-<span class="line_number">68 </span>    }
-<span class="line_number">69 </span>    syscall {*}$args
-<span class="line_number">70 </span>    return [_ping_check [yield]]
-<span class="line_number">71 </span>}
+<pre class="source"><span class="line_number">69 </span>proc _syscall_yield {args} {
+<span class="line_number">70 </span>    set result [syscall callbackcheck]
+<span class="line_number">71 </span>    if {$result ne ""} {
+<span class="line_number">72 </span>        uplevel \#0 $result
+<span class="line_number">73 </span>    }
+<span class="line_number">74 </span>    syscall {*}$args
+<span class="line_number">75 </span>    return [_ping_check [yield]]
+<span class="line_number">76 </span>}
 </pre>
 <a name="robo4"></a>
 <a name="syscalls2fbasic5fcmds"></a>
@@ -135,10 +140,10 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">122 </span>proc scanner {degree resolution} {
-<span class="line_number">123 </span>    _syscall_yield scanner $degree $resolution
-<span class="line_number">124 </span>    _syscall_yield scanner $degree $resolution
-<span class="line_number">125 </span>}
+<pre class="source"><span class="line_number">127 </span>proc scanner {degree resolution} {
+<span class="line_number">128 </span>    _syscall_yield scanner $degree $resolution
+<span class="line_number">129 </span>    _syscall_yield scanner $degree $resolution
+<span class="line_number">130 </span>}
 </pre>
 <a name="robo6"></a>
 <a name="basic5fcmds2fdsp"></a>
@@ -148,9 +153,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">152 </span>proc dsp {} {
-<span class="line_number">153 </span>    _syscall_yield dsp
-<span class="line_number">154 </span>}
+<pre class="source"><span class="line_number">157 </span>proc dsp {} {
+<span class="line_number">158 </span>    _syscall_yield dsp
+<span class="line_number">159 </span>}
 </pre>
 <a name="robo7"></a>
 <a name="basic5fcmds2falert"></a>
@@ -160,9 +165,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">181 </span>proc alert {procname} {
-<span class="line_number">182 </span>    _syscall_yield alert $procname
-<span class="line_number">183 </span>}
+<pre class="source"><span class="line_number">186 </span>proc alert {procname} {
+<span class="line_number">187 </span>    _syscall_yield alert $procname
+<span class="line_number">188 </span>}
 </pre>
 <a name="robo8"></a>
 <a name="basic5fcmds2fcannon"></a>
@@ -172,9 +177,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">210 </span>proc cannon {degree range} {
-<span class="line_number">211 </span>    _syscall_yield cannon $degree $range
-<span class="line_number">212 </span>}
+<pre class="source"><span class="line_number">215 </span>proc cannon {degree range} {
+<span class="line_number">216 </span>    _syscall_yield cannon $degree $range
+<span class="line_number">217 </span>}
 </pre>
 <a name="robo9"></a>
 <a name="basic5fcmds2fhealth"></a>
@@ -184,9 +189,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">239 </span>proc health {} {
-<span class="line_number">240 </span>    _syscall_yield health
-<span class="line_number">241 </span>}
+<pre class="source"><span class="line_number">244 </span>proc health {} {
+<span class="line_number">245 </span>    _syscall_yield health
+<span class="line_number">246 </span>}
 </pre>
 <a name="robo10"></a>
 <a name="basic5fcmds2fdrive"></a>
@@ -196,9 +201,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">268 </span>proc drive {degree speed} {
-<span class="line_number">269 </span>    _syscall_yield drive $degree $speed
-<span class="line_number">270 </span>}
+<pre class="source"><span class="line_number">273 </span>proc drive {degree speed} {
+<span class="line_number">274 </span>    _syscall_yield drive $degree $speed
+<span class="line_number">275 </span>}
 </pre>
 <a name="robo11"></a>
 <a name="basic5fcmds2fspeed"></a>
@@ -208,9 +213,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">297 </span>proc speed {} {
-<span class="line_number">298 </span>    _syscall_yield speed
-<span class="line_number">299 </span>}
+<pre class="source"><span class="line_number">302 </span>proc speed {} {
+<span class="line_number">303 </span>    _syscall_yield speed
+<span class="line_number">304 </span>}
 </pre>
 <a name="robo12"></a>
 <a name="basic5fcmds2fheat"></a>
@@ -220,9 +225,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">326 </span>proc heat {} {
-<span class="line_number">327 </span>    _syscall_yield heat
-<span class="line_number">328 </span>}
+<pre class="source"><span class="line_number">331 </span>proc heat {} {
+<span class="line_number">332 </span>    _syscall_yield heat
+<span class="line_number">333 </span>}
 </pre>
 <a name="robo13"></a>
 <a name="basic5fcmds2floc5fx"></a>
@@ -232,9 +237,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">355 </span>proc loc_x {} {
-<span class="line_number">356 </span>    _syscall_yield loc_x
-<span class="line_number">357 </span>}
+<pre class="source"><span class="line_number">360 </span>proc loc_x {} {
+<span class="line_number">361 </span>    _syscall_yield loc_x
+<span class="line_number">362 </span>}
 </pre>
 <a name="robo14"></a>
 <a name="basic5fcmds2floc5fy"></a>
@@ -244,9 +249,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">384 </span>proc loc_y {} {
-<span class="line_number">385 </span>    _syscall_yield loc_y
-<span class="line_number">386 </span>}
+<pre class="source"><span class="line_number">389 </span>proc loc_y {} {
+<span class="line_number">390 </span>    _syscall_yield loc_y
+<span class="line_number">391 </span>}
 </pre>
 <a name="robo15"></a>
 <a name="basic5fcmds2ftick"></a>
@@ -256,9 +261,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">413 </span>proc tick {} {
-<span class="line_number">414 </span>    _syscall_yield tick
-<span class="line_number">415 </span>}
+<pre class="source"><span class="line_number">418 </span>proc tick {} {
+<span class="line_number">419 </span>    _syscall_yield tick
+<span class="line_number">420 </span>}
 </pre>
 <a name="robo16"></a>
 <a name="syscalls2fteam5fcmds"></a>
@@ -277,9 +282,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">466 </span>proc team_declare {teamname} {
-<span class="line_number">467 </span>    _syscall_yield team_declare $teamname
-<span class="line_number">468 </span>}
+<pre class="source"><span class="line_number">471 </span>proc team_declare {teamname} {
+<span class="line_number">472 </span>    _syscall_yield team_declare $teamname
+<span class="line_number">473 </span>}
 </pre>
 <a name="robo18"></a>
 <a name="team5fcmds2fteam5fsend"></a>
@@ -289,9 +294,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">495 </span>proc team_send {data} {
-<span class="line_number">496 </span>    syscall team_send $data
-<span class="line_number">497 </span>}
+<pre class="source"><span class="line_number">500 </span>proc team_send {data} {
+<span class="line_number">501 </span>    syscall team_send $data
+<span class="line_number">502 </span>}
 </pre>
 <a name="robo19"></a>
 <a name="team5fcmds2fteam5fget"></a>
@@ -301,9 +306,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">524 </span>proc team_get {} {
-<span class="line_number">525 </span>    syscall team_get
-<span class="line_number">526 </span>}
+<pre class="source"><span class="line_number">529 </span>proc team_get {} {
+<span class="line_number">530 </span>    syscall team_get
+<span class="line_number">531 </span>}
 </pre>
 <a name="robo20"></a>
 <a name="syscalls2fconvenience5fcmds"></a>
@@ -322,9 +327,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">577 </span>proc dputs {args} {
-<span class="line_number">578 </span>    syscall dputs $args
-<span class="line_number">579 </span>}
+<pre class="source"><span class="line_number">582 </span>proc dputs {args} {
+<span class="line_number">583 </span>    syscall dputs $args
+<span class="line_number">584 </span>}
 </pre>
 <a name="robo22"></a>
 <a name="convenience5fcmds2frand"></a>
@@ -334,9 +339,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">606 </span>proc rand {max} {
-<span class="line_number">607 </span>    syscall rand $max
-<span class="line_number">608 </span>}
+<pre class="source"><span class="line_number">611 </span>proc rand {max} {
+<span class="line_number">612 </span>    syscall rand $max
+<span class="line_number">613 </span>}
 </pre>
 <a name="robo23"></a>
 <a name="convenience5fcmds2fcallback"></a>
@@ -346,9 +351,9 @@
 </pre>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">635 </span>proc callback {time script} {
-<span class="line_number">636 </span>    syscall callback $time $script
-<span class="line_number">637 </span>}
+<pre class="source"><span class="line_number">640 </span>proc callback {time script} {
+<span class="line_number">641 </span>    syscall callback $time $script
+<span class="line_number">642 </span>}
 </pre>
 <a name="robo24"></a>
 <a name="syscalls2fdeprecated5fcmds"></a>
@@ -369,24 +374,24 @@
 <pre>   After does not work, emulate it using callbacks
 </pre>
 <p class="item_name">SOURCE</p>
-<pre class="source"><span class="line_number">664 </span>proc after {ms args} {
-<span class="line_number">665 </span>    set ticks [expr {$ms / 100}]
-<span class="line_number">666 </span>    if {[llength $args] == 0} {
-<span class="line_number">667 </span>        # Emulate a wait using some syscalls
-<span class="line_number">668 </span>        for {set t 0} {$t &lt; $ticks} {incr t} {
-<span class="line_number">669 </span>            syscall speed
-<span class="line_number">670 </span>            return [_ping_check [yield]]
-<span class="line_number">671 </span>        }
-<span class="line_number">672 </span>
-<span class="line_number">673 </span>    } else {
-<span class="line_number">674 </span>        set script [join $args]
-<span class="line_number">675 </span>        syscall callback $ticks $script
-<span class="line_number">676 </span>    }
-<span class="line_number">677 </span>    return
-<span class="line_number">678 </span>}
+<pre class="source"><span class="line_number">669 </span>proc after {ms args} {
+<span class="line_number">670 </span>    set ticks [expr {$ms / 100}]
+<span class="line_number">671 </span>    if {[llength $args] == 0} {
+<span class="line_number">672 </span>        # Emulate a wait using some syscalls
+<span class="line_number">673 </span>        for {set t 0} {$t &lt; $ticks} {incr t} {
+<span class="line_number">674 </span>            syscall speed
+<span class="line_number">675 </span>            return [_ping_check [yield]]
+<span class="line_number">676 </span>        }
+<span class="line_number">677 </span>
+<span class="line_number">678 </span>    } else {
+<span class="line_number">679 </span>        set script [join $args]
+<span class="line_number">680 </span>        syscall callback $ticks $script
+<span class="line_number">681 </span>    }
+<span class="line_number">682 </span>    return
+<span class="line_number">683 </span>}
 </pre>
 <div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Mon Mar 08 2010 21:52:13
+<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 13:10:10
 </p>
 </div> <!-- footer -->
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh
 
 set docpath "./doc"
-set srcfiles {tclrobots syscalls api}
+set srcfiles {tclrobots syscalls api gui}
 
 source $docpath/web.tcl
 
@@ -17,12 +17,6 @@ foreach file $srcfiles {
         # Generate doc.html
     exec robodoc --src $srcfile --doc $docpath/$docfile --singlefile --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless
     }
-
-    # MULTIDOC, if needed
-    #exec robodoc --src . --doc $docpath --multidoc --html --sections --toc --rc $docpath/robodoc.rc --source_line_numbers --nosort --headless --footless --nodesc --no_subdirectories
-
-    # Add if needed:
-    # --nodesc --no_subdirectories --css $docpath/my.css 
 
     # Remove extra css file
     file delete $docpath/$docfile.css
@@ -40,22 +34,11 @@ foreach file $srcfiles {
             set toc 1
         }
         if {$toc} {
-            if 0 {
-            if {[regexp {\[ File \]} $line]} {
-                # Table of contents done
-                set toc     0
-                set content 1
-            }
-            }
-
             if {[regexp {<a name="robo0"></a>} $line]} {
                 # Table of contents done
                 set toc     0
                 set content 1
             }
-
-
-
         }
         if {$content} {
             if {[regexp {<p>. <a href=.*>Top</a>.*} $line]} {

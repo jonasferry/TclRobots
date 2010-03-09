@@ -8,6 +8,11 @@
 #
 #   This file contains the syscalls robots can use.
 #
+#   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+#   on TclRobots 2.0 by Tom Poindexter.
+#
+#   See http://tclrobots.org for more information.
+#
 # COPYRIGHT
 #
 #   Jonas Ferry (jonas.ferry@gmail.com), 2010. See LICENSE file for

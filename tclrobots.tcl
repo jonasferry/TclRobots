@@ -9,6 +9,9 @@
 #   This is the main file of TclRobots. It sources gui.tcl if GUI is
 #   requested, but can be used stand-alone.
 #
+#   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+#   on TclRobots 2.0 by Tom Poindexter.
+#
 #   See http://tclrobots.org for more information.
 #
 # COPYRIGHT
