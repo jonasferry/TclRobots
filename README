@@ -1,3 +1,9 @@
+<html>
+<head>
+<title>README</title>
+</head>
+
+<body>
 <b>TclRobots</b>
 =========
 This is a development of Tom Poindexter's 1996 game <i>TclRobots 2.0</i>.
@@ -11,3 +17,9 @@ robot's mission is to survive a battle with other robots."
 TclRobots require Tcl 8.6 since it uses coroutines.
 
 TclRobots is licensed under a BSD license. See LICENSE for information.
+</body>
+</html>
+
+
+
+
