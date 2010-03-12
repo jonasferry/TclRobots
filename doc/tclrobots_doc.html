@@ -1,21 +1,3 @@
-
-<?xml version='1.0' encoding='ISO-8859-1'?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
-'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
-<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-<head>
-<meta http-equiv='Content-Style-Type' content='text/css' />
-<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
-<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
-<title>tclrobots_doc</title>
-<!-- Source: ./ -->
-<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
-</head>
-<body>
-
-<div id="logo">
-<a name="robo_top_of_doc"></a>
-</div> <!-- logo -->
 <h3>TABLE OF CONTENTS</h3>
 <ul>
 <li>1. <a href="#robo0">tclrobots/file_header</a></li>
@@ -76,30 +58,32 @@
 <a name="tclrobots2ffile5fheader"></a>
 <h1>1.  tclrobots/file_header [ file ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   tclrobots.tcl
-</pre>
+<p>   tclrobots.tcl
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   This is the main file of TclRobots. It sources gui.tcl if GUI is
+<p>   This is the main file of TclRobots. It sources gui.tcl if GUI is
    requested, but can be used stand-alone.
+</p>
 
-   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
    on TclRobots 2.0 by Tom Poindexter.
+</p>
 
-   See http://tclrobots.org for more information.
-</pre>
+<p>   See http://tclrobots.org for more information.
+</p>
 <p class="item_name">COPYRIGHT</p>
-<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+<p>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
    Simplified BSD License. See LICENSE file for details.
-</pre>
+</p>
 <a name="robo1"></a>
 <a name="tclrobots2fmain"></a>
 <h1>2.  tclrobots/main [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   main
-</pre>
+<p>   main
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   The main proc is run at program startup.
-</pre>
+<p>   The main proc is run at program startup.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc main {} {
     namespace import ::tcl::mathop::*
@@ -153,8 +137,8 @@
 <a name="main2finit"></a>
 <h2>2.1.  main/init [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   init
-</pre>
+<p>   init
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init {} {
@@ -196,11 +180,11 @@
 <a name="init2finit5fparms"></a>
 <h3>2.1.1.  init/init_parms [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   init_parms
-</pre>
+<p>   init_parms
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Set general TclRobots environment parameters.
-</pre>
+<p>   Set general TclRobots environment parameters.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_parms {} {
     # milliseconds per tick
@@ -285,8 +269,8 @@
 <a name="init2finit5ftrig5ftables"></a>
 <h3>2.1.2.  init/init_trig_tables [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   init_trig_tables
-</pre>
+<p>   init_trig_tables
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_trig_tables {} {
@@ -304,8 +288,8 @@
 <a name="init2finit5frand"></a>
 <h3>2.1.3.  init/init_rand [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   init_rand
-</pre>
+<p>   init_rand
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_rand {} {
@@ -321,8 +305,8 @@
 <a name="init2finit5frobots"></a>
 <h3>2.1.4.  init/init_robots [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   init_robots
-</pre>
+<p>   init_robots
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_robots {} {
@@ -433,8 +417,8 @@
 <a name="main2frun5fgame"></a>
 <h2>2.2.  main/run_game [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   run_game
-</pre>
+<p>   run_game
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_game {} {
@@ -450,8 +434,8 @@
 <a name="run5fgame2frun5frobots"></a>
 <h3>2.2.1.  run_game/run_robots [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   run_robots
-</pre>
+<p>   run_robots
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_robots {} {
@@ -510,8 +494,8 @@
 <a name="run5frobots2fact"></a>
 <h4>2.2.1.1.  run_robots/act [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   act
-</pre>
+<p>   act
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc act {} {
@@ -542,11 +526,11 @@
 <a name="run5frobots2fupdate5frobots"></a>
 <h4>2.2.1.2.  run_robots/update_robots [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   update_robots
-</pre>
+<p>   update_robots
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update position of missiles and robots, assess damage
-</pre>
+<p>   update position of missiles and robots, assess damage
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_robots {} {
     global allRobots data
@@ -596,11 +580,11 @@
 <a name="update5frobots2fcheck5fmissiles"></a>
 <h5>2.2.1.2.1.  update_robots/check_missiles [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   check_missiles
-</pre>
+<p>   check_missiles
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   check all flying missiles
-</pre>
+<p>   check all flying missiles
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc check_missiles {robot} {
     global data activeRobots
@@ -627,11 +611,11 @@
 <a name="update5frobots2fupdate5fmissile5flocation"></a>
 <h5>2.2.1.2.2.  update_robots/update_missile_location [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   update_missile_location
-</pre>
+<p>   update_missile_location
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update location of missile
-</pre>
+<p>   update location of missile
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_missile_location {robot} {
     global data parms c_tab s_tab
@@ -650,8 +634,8 @@
 <a name="update5frobots2fmissile5freached5ftarget"></a>
 <h5>2.2.1.2.3.  update_robots/missile_reached_target [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   missile_reached_target
-</pre>
+<p>   missile_reached_target
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc missile_reached_target {robot} {
@@ -673,11 +657,11 @@
 <a name="update5frobots2fassign5fmissile5fdamage"></a>
 <h5>2.2.1.2.4.  update_robots/assign_missile_damage [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   assign_missile_damage
-</pre>
+<p>   assign_missile_damage
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   assign damage to all within explosion ranges
-</pre>
+<p>   assign damage to all within explosion ranges
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc assign_missile_damage {robot target} {
     global data parms
@@ -705,11 +689,11 @@
 <a name="update5frobots2fcheck5fbarrel"></a>
 <h5>2.2.1.2.5.  update_robots/check_barrel [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   check_barrel
-</pre>
+<p>   check_barrel
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   check for barrel overheat, apply cooling
-</pre>
+<p>   check for barrel overheat, apply cooling
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc check_barrel {robot} {
     global data parms
@@ -726,11 +710,11 @@
 <a name="update5frobots2fcheck5fspeed"></a>
 <h5>2.2.1.2.6.  update_robots/check_speed [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   check_speed
-</pre>
+<p>   check_speed
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   check for excessive speed, increment heat
-</pre>
+<p>   check for excessive speed, increment heat
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc check_speed {robot} {
     global data parms
@@ -762,11 +746,11 @@
 <a name="update5frobots2fupdate5fspeed"></a>
 <h5>2.2.1.2.7.  update_robots/update_speed [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   update_speed
-</pre>
+<p>   update_speed
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update robot speed, moderated by acceleration
-</pre>
+<p>   update robot speed, moderated by acceleration
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_speed {robot} {
     global data parms
@@ -790,11 +774,11 @@
 <a name="update5frobots2fupdate5fheading"></a>
 <h5>2.2.1.2.8.  update_robots/update_heading [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   update_heading
-</pre>
+<p>   update_heading
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update robot heading, moderated by turn rates
-</pre>
+<p>   update robot heading, moderated by turn rates
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_heading {robot} {
     global data parms
@@ -825,11 +809,11 @@
 <a name="update5frobots2fupdate5fdistance"></a>
 <h5>2.2.1.2.9.  update_robots/update_distance [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   update_distance
-</pre>
+<p>   update_distance
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update distance traveled on this heading
-</pre>
+<p>   update distance traveled on this heading
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_distance {robot} {
     global data parms c_tab s_tab
@@ -864,11 +848,11 @@
 <a name="update5frobots2fcheck5fwall"></a>
 <h5>2.2.1.2.10.  update_robots/check_wall [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   check_wall
-</pre>
+<p>   check_wall
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   check for wall collision
-</pre>
+<p>   check for wall collision
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc check_wall {robot} {
     global data parms
@@ -907,11 +891,11 @@
 <a name="update5frobots2fcheck5fhealth"></a>
 <h5>2.2.1.2.11.  update_robots/check_health [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   check_health
-</pre>
+<p>   check_health
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   check for robot health
-</pre>
+<p>   check for robot health
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc check_health {} {
     global activeRobots data tick
@@ -950,8 +934,8 @@
 <a name="check5fhealth2fdisable5frobot"></a>
 <h6>2.2.1.2.11.1.  check_health/disable_robot [ procedure ]  </h6>
 <p class="item_name">NAME</p>
-<pre>   disable_robot
-</pre>
+<p>   disable_robot
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc disable_robot {robot} {
@@ -967,8 +951,8 @@
 <a name="run5frobots2ftick"></a>
 <h4>2.2.1.3.  run_robots/tick [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   tick
-</pre>
+<p>   tick
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc tick {} {
@@ -983,8 +967,8 @@
 <a name="run5fgame2ffind5fwinner"></a>
 <h3>2.2.2.  run_game/find_winner [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   find_winner
-</pre>
+<p>   find_winner
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc find_winner {} {
@@ -1061,11 +1045,11 @@
 <a name="tclrobots2fsyscall"></a>
 <h1>3.  tclrobots/syscall [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   syscall
-</pre>
+<p>   syscall
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Handle syscalls from robots
-</pre>
+<p>   Handle syscalls from robots
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc syscall {args} {
     global data tick
@@ -1119,8 +1103,8 @@
 <a name="syscall2fsysScanner"></a>
 <h2>3.1.  syscall/sysScanner [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysScanner
-</pre>
+<p>   sysScanner
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysScanner {robot} {
@@ -1210,8 +1194,8 @@
 <a name="syscall2fsysDsp"></a>
 <h2>3.2.  syscall/sysDsp [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysDsp
-</pre>
+<p>   sysDsp
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysDsp {robot} {
@@ -1223,8 +1207,8 @@
 <a name="syscall2fsysAlert"></a>
 <h2>3.3.  syscall/sysAlert [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysAlert
-</pre>
+<p>   sysAlert
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysAlert {robot} {
@@ -1237,8 +1221,8 @@
 <a name="syscall2fsysCannon"></a>
 <h2>3.4.  syscall/sysCannon [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysCannon
-</pre>
+<p>   sysCannon
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysCannon {robot} {
@@ -1288,8 +1272,8 @@
 <a name="syscall2fsysDrive"></a>
 <h2>3.5.  syscall/sysDrive [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysDrive
-</pre>
+<p>   sysDrive
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysDrive {robot} {
@@ -1340,8 +1324,8 @@
 <a name="syscall2fsysData"></a>
 <h2>3.6.  syscall/sysData [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysData
-</pre>
+<p>   sysData
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysData {robot} {
@@ -1362,8 +1346,8 @@
 <a name="syscall2fsysTick"></a>
 <h2>3.7.  syscall/sysTick [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysTick
-</pre>
+<p>   sysTick
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysTick {robot} {
@@ -1375,8 +1359,8 @@
 <a name="syscall2fsysTeamDeclare"></a>
 <h2>3.8.  syscall/sysTeamDeclare [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysTeamDeclare
-</pre>
+<p>   sysTeamDeclare
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysTeamDeclare {robot} {
@@ -1390,8 +1374,8 @@
 <a name="syscall2fsysTeamSend"></a>
 <h2>3.9.  syscall/sysTeamSend [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysTeamSend
-</pre>
+<p>   sysTeamSend
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysTeamSend {robot msg} {
@@ -1404,8 +1388,8 @@
 <a name="syscall2fsysTeamGet"></a>
 <h2>3.10.  syscall/sysTeamGet [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysTeamGet
-</pre>
+<p>   sysTeamGet
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysTeamGet {robot} {
@@ -1430,8 +1414,8 @@
 <a name="syscall2fsysDputs"></a>
 <h2>3.11.  syscall/sysDputs [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sysDputs
-</pre>
+<p>   sysDputs
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysDputs {robot msg} {
@@ -1454,11 +1438,11 @@
 <a name="tclrobots2frand"></a>
 <h1>4.  tclrobots/rand [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   mrand
-</pre>
+<p>   mrand
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Return random integer 1-max
-</pre>
+<p>   Return random integer 1-max
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc mrand {max} {
     return [int [* [rand] $max]]
@@ -1468,12 +1452,12 @@
 <a name="tclrobots2fdebug"></a>
 <h1>5.  tclrobots/debug [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   debug
-</pre>
+<p>   debug
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Prints debug message. The proc name makes it easy to search for.
+<p>   Prints debug message. The proc name makes it easy to search for.
    Precede other debug changes with the word debug in a comment.
-</pre>
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc debug {args} {
     if {[lindex $args 0] ne "exit"} {
@@ -1486,13 +1470,4 @@
     }
 }
 </pre>
-<div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 22:14:09
-</p>
-</div> <!-- footer -->
-
-
-
-</body>
-</html>
 

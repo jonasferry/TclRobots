@@ -4,18 +4,18 @@ proc main {} {
     set srcfiles  {tclrobots syscalls gui simulator}
     set ::srcdocs {}
 
-    source ./doc/src/web.tcl
-
     foreach file $srcfiles {
         # Generate documentation for source code
         gen_src_doc ${file}.tcl ${file}_doc
         clean_file  ${file}_doc
     }
-    gen_doc_overview
 
     # Generate documentation for robot API
     gen_api_doc syscalls.tcl api_doc
     clean_file  api_doc
+
+    # Generate README by stripping the HTML from help_doc.html
+    gen_readme
 }
 
 proc gen_src_doc {srcfile docfile} {
@@ -24,7 +24,7 @@ proc gen_src_doc {srcfile docfile} {
     # Generate html
     exec robodoc --src $srcfile --doc ./doc/$docfile --singlefile \
         --html --sections --toc --rc ./doc/script/robodoc.rc --nosort \
-        --headless --footless
+        --headless --footless --nopre
 
     # Remove extra css file
     file delete ./doc/$docfile.css
@@ -47,24 +47,32 @@ proc gen_api_doc {srcfile docfile} {
 proc clean_file {docfile} {
     # Clean up file
     set f [open ./doc/${docfile}.html]
-    set toc 0
-    set content 0
+    set parsing_logo    1
+    set parsing_toc     0
+    set parsing_content 0
+    set parsing_footer  0
     set out {}
 
     foreach line [split [read $f] \n] {
-        if {[regexp {TABLE OF CONTENTS} $line]} {
-            # Start read table of contents. We don't want to remove
-            # these links, as will be done with the content.
-            set toc 1
-        }
-        if {$toc} {
-            if {[regexp {<a name="robo0"></a>} $line]} {
-                # Table of contents done
-                set toc     0
-                set content 1
+        if {$parsing_logo} {
+            if {[regexp {TABLE OF CONTENTS} $line]} {
+                # Start read table of contents. We don't want to remove
+                # these links, as will be done with the content.
+                set parsing_logo 0
+                set parsing_toc  1
+            } else {
+                # Remove logo
+                continue
             }
         }
-        if {$content} {
+        if {$parsing_toc} {
+            if {[regexp {<a name="robo0"></a>} $line]} {
+                # Table of contents done
+                set parsing_toc     0
+                set parsing_content 1
+            }
+        }
+        if {$parsing_content} {
             if {[regexp {<p>. <a href=.*>Top</a>.*} $line]} {
                 #Remove navigation
                 continue
@@ -74,28 +82,39 @@ proc clean_file {docfile} {
 
             # Remove links
             set line [regsub -all {<a href=\"[^\"]+\">([^<]+)</a>} $line {\1}]
+
+            if {[regexp {<div id=\"footer\">} $line]} {
+                set parsing_footer 1
+            }
+        }
+        if {$parsing_footer} {
+            # Remove footer
+            continue
         }
         append out $line \n
     }
     close $f
 
     set f [open ./doc/${docfile}.html w]
-    puts $f [header $docfile]
     puts $f $out
-    puts $f [footer]
     close $f
 }
 
-proc gen_doc_overview {} {
-    global srcdocs
+proc gen_readme {} {
+    set   src  [open ./doc/help_doc.html]
+    set   dest [open ./README w]
 
-    # Generate documentation overview page
-    source ./doc/src/doc_overview.tcl
-    set    f  [open ./doc/doc_overview.html w]
-    puts   $f [header doc_overview]
-    puts   $f [doc_overview $srcdocs]
-    puts   $f [footer]
-    close  $f
+    set   text [read $src]
+    # Remove comments so text can be viewed in ASCII README, but hidden
+    # in HTML README
+    set   text [regsub -all -- {<!--} $text {}]
+    set   text [regsub -all -- {-->}  $text {}]
+
+    # Strip all HTML tags
+    puts  $dest [regsub -all -- {<[^>]*>} $text {}]
+
+    close $src
+    close $dest
 }
 
 # All procedures are sourced; run main

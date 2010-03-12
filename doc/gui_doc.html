@@ -1,21 +1,3 @@
-
-<?xml version='1.0' encoding='ISO-8859-1'?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
-'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
-<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-<head>
-<meta http-equiv='Content-Style-Type' content='text/css' />
-<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
-<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
-<title>gui_doc</title>
-<!-- Source: ./ -->
-<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
-</head>
-<body>
-
-<div id="logo">
-<a name="robo_top_of_doc"></a>
-</div> <!-- logo -->
 <h3>TABLE OF CONTENTS</h3>
 <ul>
 <li>1. <a href="#robo0">gui/file_header</a></li>
@@ -78,26 +60,28 @@
 <a name="gui2ffile5fheader"></a>
 <h1>1.  gui/file_header [ file ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   gui.tcl
-</pre>
+<p>   gui.tcl
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   This file contains the GUI description of TclRobots.
+<p>   This file contains the GUI description of TclRobots.
+</p>
 
-   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
    on TclRobots 2.0 by Tom Poindexter.
+</p>
 
-   See http://tclrobots.org for more information.
-</pre>
+<p>   See http://tclrobots.org for more information.
+</p>
 <p class="item_name">COPYRIGHT</p>
-<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+<p>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
    Simplified BSD License. See LICENSE file for details.
-</pre>
+</p>
 <a name="robo1"></a>
 <a name="gui2finit5fgui"></a>
 <h1>2.  gui/init_gui [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   init_gui
-</pre>
+<p>   init_gui
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_gui {} {
@@ -277,11 +261,11 @@
 <a name="init5fgui2fgui5fsettings"></a>
 <h2>2.1.  init_gui/gui_settings [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   gui_settings
-</pre>
+<p>   gui_settings
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Copy some settings from Ttk to Tk
-</pre>
+<p>   Copy some settings from Ttk to Tk
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc gui_settings {} {
     set bg [ttk::style configure . -background]
@@ -294,8 +278,8 @@
 <a name="init5fgui2fellipsepath"></a>
 <h2>2.2.  init_gui/ellipsepath [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   ellipsepath
-</pre>
+<p>   ellipsepath
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc ellipsepath {x y rx ry} {
@@ -310,18 +294,19 @@
 <a name="init5fgui2ffileBox"></a>
 <h2>2.3.  init_gui/fileBox [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   fileBox
-</pre>
+<p>   fileBox
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Put up a file selection box, from Tom Poindexter's "wosql" in Oratcl
+<p>   Put up a file selection box, from Tom Poindexter's "wosql" in Oratcl
    modified not to use a toplevel
+</p>
 
-   win      - name of toplevel to use
+<p>   win      - name of toplevel to use
    filt     - initial file selection filter
    initfile - initial file selection
    startdir - initial starting dir
    execproc - proc to exec with selected file name
-</pre>
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc fileBox {win txt filt initfile startdir execproc} {
 
@@ -381,11 +366,11 @@
 <a name="fileBox2ffileOK"></a>
 <h3>2.3.1.  fileBox/fileOK [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   fileOK
-</pre>
+<p>   fileOK
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   do the OK processing for fileBox
-</pre>
+<p>   do the OK processing for fileBox
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc fileOK {win execproc} {
 
@@ -411,8 +396,8 @@
 <a name="fileBox2fchoose5ffile"></a>
 <h3>2.3.2.  fileBox/choose_file [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   choose_file
-</pre>
+<p>   choose_file
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc choose_file {win filename} {
@@ -431,8 +416,8 @@
 <a name="fileBox2fchoose5fall"></a>
 <h3>2.3.3.  fileBox/choose_all [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   choose_all
-</pre>
+<p>   choose_all
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc choose_all {} {
@@ -451,11 +436,11 @@
 <a name="fileBox2fselInsert"></a>
 <h3>2.3.4.  fileBox/selInsert [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   selInsert
-</pre>
+<p>   selInsert
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   insert into a selection entry, scroll to root name
-</pre>
+<p>   insert into a selection entry, scroll to root name
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc selInsert {win pathname} {
 
@@ -472,11 +457,11 @@
 <a name="fileBox2ffillLst"></a>
 <h3>2.3.5.  fileBox/fillLst [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   fillLst
-</pre>
+<p>   fillLst
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   fill the fillBox listbox with selection entries
-</pre>
+<p>   fill the fillBox listbox with selection entries
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc fillLst {win filt dir} {
 
@@ -523,8 +508,8 @@
 <a name="init5fgui2fremove5ffile"></a>
 <h2>2.4.  init_gui/remove_file [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   remove_file
-</pre>
+<p>   remove_file
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc remove_file {} {
@@ -539,8 +524,8 @@
 <a name="init5fgui2fremove5fall"></a>
 <h2>2.5.  init_gui/remove_all [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   remove_all
-</pre>
+<p>   remove_all
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc remove_all {} {
@@ -551,11 +536,11 @@
 <a name="init5fgui2fcreate5farena"></a>
 <h2>2.6.  init_gui/create_arena [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   create_arena
-</pre>
+<p>   create_arena
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   The battle field canvas
-</pre>
+<p>   The battle field canvas
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc create_arena {} {
     if {[info commands ::tkp::canvas] ne ""} {
@@ -582,11 +567,11 @@
 <a name="init5fgui2fhighlightRobot"></a>
 <h2>2.7.  init_gui/highlightRobot [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   highlightRobot
-</pre>
+<p>   highlightRobot
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Highlight a robot selected in health listbox
-</pre>
+<p>   Highlight a robot selected in health listbox
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc highlightRobot {} {
     foreach robot $::allRobots {
@@ -604,11 +589,11 @@
 <a name="init5fgui2finit5fbattle"></a>
 <h2>2.8.  init_gui/init_battle [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   init_battle
-</pre>
+<p>   init_battle
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Start a match
-</pre>
+<p>   Start a match
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_battle {} {
 
@@ -663,11 +648,11 @@
 <a name="init5fbattle2fshow5farena"></a>
 <h3>2.8.1.  init_battle/show_arena [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   show_arena
-</pre>
+<p>   show_arena
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update canvas and find current width
-</pre>
+<p>   update canvas and find current width
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_arena {} {
     update
@@ -698,11 +683,11 @@
 <a name="init5fbattle2fhalt"></a>
 <h3>2.8.2.  init_battle/halt [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   halt
-</pre>
+<p>   halt
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   halt a running match
-</pre>
+<p>   halt a running match
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc halt {} {
     set ::running 0
@@ -720,11 +705,11 @@
 <a name="halt2freset"></a>
 <h4>2.8.2.1.  halt/reset [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   reset
-</pre>
+<p>   reset
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   reset to file select state
-</pre>
+<p>   reset to file select state
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc reset {} {
     clean_up
@@ -751,11 +736,11 @@
 <a name="reset2fclean5fup"></a>
 <h5>2.8.2.1.1.  reset/clean_up [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   clean_up
-</pre>
+<p>   clean_up
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   clean up all left overs
-</pre>
+<p>   clean up all left overs
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc clean_up {} {
     set ::StatusBarMsg "Standby, cleaning up any left overs...."
@@ -770,8 +755,8 @@
 <a name="init5fbattle2fgui5finit5frobots"></a>
 <h3>2.8.3.  init_battle/gui_init_robots [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   gui_init_robots
-</pre>
+<p>   gui_init_robots
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc gui_init_robots {{lastblack 0}} {
@@ -836,11 +821,11 @@
 <a name="gui5finit5frobots2fdistinct5fcolors"></a>
 <h4>2.8.3.1.  gui_init_robots/distinct_colors [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   distinct_colors
-</pre>
+<p>   distinct_colors
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Returns a list of colors. From http://wiki.tcl.tk/666
-</pre>
+<p>   Returns a list of colors. From http://wiki.tcl.tk/666
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc distinct_colors {n} {
     set nn 1
@@ -868,8 +853,8 @@
 <a name="distinct5fcolors2fhls2tk"></a>
 <h5>2.8.3.1.1.  distinct_colors/hls2tk [ procedure ]  </h5>
 <p class="item_name">NAME</p>
-<pre>   hls2tk
-</pre>
+<p>   hls2tk
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc hls2tk {h l s} {
@@ -887,14 +872,14 @@
 <a name="hls2tk2fhls2rgb"></a>
 <h6>2.8.3.1.1.1.  hls2tk/hls2rgb [ procedure ]  </h6>
 <p class="item_name">NAME</p>
-<pre>   hls2rgb
-</pre>
+<p>   hls2rgb
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   h, l and s are floats between 0.0 and 1.0, ditto for r, g and b
+<p>   h, l and s are floats between 0.0 and 1.0, ditto for r, g and b
    h = 0   =&gt; red
    h = 1/3 =&gt; green
    h = 2/3 =&gt; blue
-</pre>
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc hls2rgb {h l s} {
     set h6 [expr {($h-floor($h))*6}]
@@ -920,11 +905,11 @@
 <a name="gui5finit5frobots2fbrightness"></a>
 <h4>2.8.3.2.  gui_init_robots/brightness [ procedure ]  </h4>
 <p class="item_name">NAME</p>
-<pre>   brightness
-</pre>
+<p>   brightness
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Author: RS, after Kevin Kenny
-</pre>
+<p>   Author: RS, after Kevin Kenny
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc brightness color {
     foreach {r g b} [winfo rgb . $color] break
@@ -936,20 +921,20 @@
 <a name="init5fgui2ftournament"></a>
 <h2>2.9.  init_gui/tournament [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   tournament
-</pre>
+<p>   tournament
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   TBD
-</pre>
+<p>   TBD
+</p>
 <a name="robo25"></a>
 <a name="init5fgui2fabout"></a>
 <h2>2.10.  init_gui/about [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   about
-</pre>
+<p>   about
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   about box
-</pre>
+<p>   about box
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc about {} {
     tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
@@ -960,8 +945,8 @@
 <a name="gui2fupdate5fgui"></a>
 <h1>3.  gui/update_gui [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   update_gui
-</pre>
+<p>   update_gui
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_gui {} {
@@ -975,11 +960,11 @@
 <a name="update5fgui2fshow5frobots"></a>
 <h2>3.1.  update_gui/show_robots [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   show_robots
-</pre>
+<p>   show_robots
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   update canvas with position of missiles and robots
-</pre>
+<p>   update canvas with position of missiles and robots
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_robots {} {
     $::arena_c delete highlight
@@ -1035,11 +1020,11 @@
 <a name="update5fgui2fshow5fscan"></a>
 <h2>3.2.  update_gui/show_scan [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   show_scan
-</pre>
+<p>   show_scan
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   show scanner from a robot
-</pre>
+<p>   show scanner from a robot
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_scan {} {
     # Hide the scan arcs by default
@@ -1087,11 +1072,11 @@
 <a name="show5fscan2farc5fpath"></a>
 <h3>3.2.1.  show_scan/arc_path [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<pre>   arc_path
-</pre>
+<p>   arc_path
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Create a path for a pie-slice circular arc, center in origo, radius 1
-</pre>
+<p>   Create a path for a pie-slice circular arc, center in origo, radius 1
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc arc_path {phi extend} {
     set path [list M 0 0]
@@ -1115,8 +1100,8 @@
 <a name="update5fgui2fshow5fhealth"></a>
 <h2>3.3.  update_gui/show_health [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   show_health
-</pre>
+<p>   show_health
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_health {} {
@@ -1136,11 +1121,11 @@
 <a name="gui2ftk5fdialog2"></a>
 <h1>4.  gui/tk_dialog2 [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   tk_dialog2
-</pre>
+<p>   tk_dialog2
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   standard tk_dialog modified to use -image on label
-</pre>
+<p>   standard tk_dialog modified to use -image on label
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc tk_dialog2 {w title text bitmap default args} {
     if {!$::gui} return
@@ -1252,11 +1237,11 @@
 <a name="gui2fshow5fexplode"></a>
 <h1>5.  gui/show_explode [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   show_explode
-</pre>
+<p>   show_explode
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Show explosion of missile. Called directly from tclrobots.tcl.
-</pre>
+<p>   Show explosion of missile. Called directly from tclrobots.tcl.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_explode {robot} {
     # Delete the missile
@@ -1313,11 +1298,11 @@
 <a name="gui2fshow5fdie"></a>
 <h1>6.  gui/show_die [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   show_die
-</pre>
+<p>   show_die
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Show effect when robot dies. Called directly from tclrobots.tcl.
-</pre>
+<p>   Show effect when robot dies. Called directly from tclrobots.tcl.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_die {robot} {
     set x [* $::data($robot,x) $::scale]
@@ -1359,12 +1344,12 @@
 <a name="gui2fshow5fmsg"></a>
 <h1>7.  gui/show_msg [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   show_msg
-</pre>
+<p>   show_msg
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Show dputs message from robots in GUI message box. Called directly
+<p>   Show dputs message from robots in GUI message box. Called directly
    from tclrobots.tcl.
-</pre>
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_msg {robot msg} {
     lappend ::robotMsg "$robot: $msg"
@@ -1377,13 +1362,4 @@
     $::robotMsg_lb see end
 }
 </pre>
-<div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 22:14:09
-</p>
-</div> <!-- footer -->
-
-
-
-</body>
-</html>
 

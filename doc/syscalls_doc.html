@@ -1,21 +1,3 @@
-
-<?xml version='1.0' encoding='ISO-8859-1'?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
-'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
-<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-<head>
-<meta http-equiv='Content-Style-Type' content='text/css' />
-<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
-<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
-<title>syscalls_doc</title>
-<!-- Source: ./ -->
-<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
-</head>
-<body>
-
-<div id="logo">
-<a name="robo_top_of_doc"></a>
-</div> <!-- logo -->
 <h3>TABLE OF CONTENTS</h3>
 <ul>
 <li>1. <a href="#robo0">syscalls/file_header</a></li>
@@ -60,38 +42,40 @@
 <a name="syscalls2ffile5fheader"></a>
 <h1>1.  syscalls/file_header [ file ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   syscalls.tcl
-</pre>
+<p>   syscalls.tcl
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   This file contains the syscalls robots can use.
+<p>   This file contains the syscalls robots can use.
+</p>
 
-   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
    on TclRobots 2.0 by Tom Poindexter.
+</p>
 
-   See http://tclrobots.org for more information.
-</pre>
+<p>   See http://tclrobots.org for more information.
+</p>
 <p class="item_name">COPYRIGHT</p>
-<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+<p>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
    Simplified BSD License. See LICENSE file for details.
-</pre>
+</p>
 <a name="robo1"></a>
 <a name="syscalls2fhelper"></a>
 <h1>2.  syscalls/helper [ info ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   helper
-</pre>
+<p>   helper
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Helper procedures
-</pre>
+<p>   Helper procedures
+</p>
 <a name="robo2"></a>
 <a name="helper2f5fping5fcheck"></a>
 <h2>2.1.  helper/_ping_check [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   _ping_check
-</pre>
+<p>   _ping_check
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Check the answer from a yield for a ping alert
-</pre>
+<p>   Check the answer from a yield for a ping alert
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc _ping_check {val} {
     if {[lindex $val 0] eq "alert"} {
@@ -106,11 +90,11 @@
 <a name="helper2f5fsyscall5fyield"></a>
 <h2>2.2.  helper/_syscall_yield [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   _syscall_yield
-</pre>
+<p>   _syscall_yield
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Combine the common syscall+yield call
-</pre>
+<p>   Combine the common syscall+yield call
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc _syscall_yield {args} {
     set result [syscall callbackcheck]
@@ -125,17 +109,17 @@
 <a name="syscalls2fbasic5fcmds"></a>
 <h1>3.  syscalls/basic_cmds [ info ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   basic_cmds
-</pre>
+<p>   basic_cmds
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Basic commands
-</pre>
+<p>   Basic commands
+</p>
 <a name="robo5"></a>
 <a name="basic5fcmds2fscanner"></a>
 <h2>3.1.  basic_cmds/scanner [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   scanner
-</pre>
+<p>   scanner
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc scanner {degree resolution} {
@@ -147,8 +131,8 @@
 <a name="basic5fcmds2fdsp"></a>
 <h2>3.2.  basic_cmds/dsp [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   dsp
-</pre>
+<p>   dsp
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc dsp {} {
@@ -159,8 +143,8 @@
 <a name="basic5fcmds2falert"></a>
 <h2>3.3.  basic_cmds/alert [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   alert
-</pre>
+<p>   alert
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc alert {procname} {
@@ -171,8 +155,8 @@
 <a name="basic5fcmds2fcannon"></a>
 <h2>3.4.  basic_cmds/cannon [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   cannon
-</pre>
+<p>   cannon
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc cannon {degree range} {
@@ -183,8 +167,8 @@
 <a name="basic5fcmds2fhealth"></a>
 <h2>3.5.  basic_cmds/health [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   health
-</pre>
+<p>   health
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc health {} {
@@ -195,8 +179,8 @@
 <a name="basic5fcmds2fdrive"></a>
 <h2>3.6.  basic_cmds/drive [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   drive
-</pre>
+<p>   drive
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc drive {degree speed} {
@@ -207,8 +191,8 @@
 <a name="basic5fcmds2fspeed"></a>
 <h2>3.7.  basic_cmds/speed [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   speed
-</pre>
+<p>   speed
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc speed {} {
@@ -219,8 +203,8 @@
 <a name="basic5fcmds2fheat"></a>
 <h2>3.8.  basic_cmds/heat [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   heat
-</pre>
+<p>   heat
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc heat {} {
@@ -231,8 +215,8 @@
 <a name="basic5fcmds2floc5fx"></a>
 <h2>3.9.  basic_cmds/loc_x [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   loc_x
-</pre>
+<p>   loc_x
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc loc_x {} {
@@ -243,8 +227,8 @@
 <a name="basic5fcmds2floc5fy"></a>
 <h2>3.10.  basic_cmds/loc_y [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   loc_y
-</pre>
+<p>   loc_y
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc loc_y {} {
@@ -255,8 +239,8 @@
 <a name="basic5fcmds2ftick"></a>
 <h2>3.11.  basic_cmds/tick [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   tick
-</pre>
+<p>   tick
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc tick {} {
@@ -267,17 +251,17 @@
 <a name="syscalls2fteam5fcmds"></a>
 <h1>4.  syscalls/team_cmds [ info ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   team_cmds
-</pre>
+<p>   team_cmds
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Team commands
-</pre>
+<p>   Team commands
+</p>
 <a name="robo17"></a>
 <a name="team5fcmds2fteam5fdeclare"></a>
 <h2>4.1.  team_cmds/team_declare [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   team_declare
-</pre>
+<p>   team_declare
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc team_declare {teamname} {
@@ -288,8 +272,8 @@
 <a name="team5fcmds2fteam5fsend"></a>
 <h2>4.2.  team_cmds/team_send [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   team_send
-</pre>
+<p>   team_send
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc team_send {data} {
@@ -300,8 +284,8 @@
 <a name="team5fcmds2fteam5fget"></a>
 <h2>4.3.  team_cmds/team_get [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   team_get
-</pre>
+<p>   team_get
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc team_get {} {
@@ -312,17 +296,17 @@
 <a name="syscalls2fconvenience5fcmds"></a>
 <h1>5.  syscalls/convenience_cmds [ info ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   convenience_cmds
-</pre>
+<p>   convenience_cmds
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Convenience commands
-</pre>
+<p>   Convenience commands
+</p>
 <a name="robo21"></a>
 <a name="convenience5fcmds2fdputs"></a>
 <h2>5.1.  convenience_cmds/dputs [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   dputs
-</pre>
+<p>   dputs
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc dputs {args} {
@@ -333,8 +317,8 @@
 <a name="convenience5fcmds2frand"></a>
 <h2>5.2.  convenience_cmds/rand [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   rand
-</pre>
+<p>   rand
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc rand {max} {
@@ -345,8 +329,8 @@
 <a name="convenience5fcmds2fcallback"></a>
 <h2>5.3.  convenience_cmds/callback [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   callback
-</pre>
+<p>   callback
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc callback {time script} {
@@ -357,20 +341,20 @@
 <a name="syscalls2fdeprecated5fcmds"></a>
 <h1>6.  syscalls/deprecated_cmds [ info ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   deprecated_cmds
-</pre>
+<p>   deprecated_cmds
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Deprecated commands kept for backwards compatibility.
-</pre>
+<p>   Deprecated commands kept for backwards compatibility.
+</p>
 <a name="robo25"></a>
 <a name="deprecated5fcmds2fafter"></a>
 <h2>6.1.  deprecated_cmds/after [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   after
-</pre>
+<p>   after
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   After does not work, emulate it using callbacks
-</pre>
+<p>   After does not work, emulate it using callbacks
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc after {ms args} {
     set ticks [expr {$ms / 100}]
@@ -392,23 +376,15 @@
 <a name="deprecated5fcmds2fdamage"></a>
 <h2>6.2.  deprecated_cmds/damage [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   damage
-</pre>
+<p>   damage
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   damage
+<p>   damage
+</p>
 
-   The damage command reports the current percent of damage suffered by
+<p>   The damage command reports the current percent of damage suffered by
    the robot, 0-99. At 100% damage, the robot is "dead", and as such,
    the control program is no longer running.
-</pre>
-<p class="item_name">SOURCE</p>
-<div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 22:14:09
 </p>
-</div> <!-- footer -->
-
-
-
-</body>
-</html>
+<p class="item_name">SOURCE</p>
 

@@ -1,21 +1,3 @@
-
-<?xml version='1.0' encoding='ISO-8859-1'?>
-<!DOCTYPE html PUBLIC '-//W3C//DTD XHTML 1.0 Strict//EN'
-'http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd'>
-<html  xmlns='http://www.w3.org/1999/xhtml' xml:lang='en' lang='en'>
-<head>
-<meta http-equiv='Content-Style-Type' content='text/css' />
-<meta http-equiv='Content-type' content='text/html; charset=ISO-8859-1' />
-<link rel='stylesheet' href='./tclrobots.css' type='text/css' />
-<title>simulator_doc</title>
-<!-- Source: ./ -->
-<!-- Generated with ROBODoc Version 4.99.38 (May  2 2009) -->
-</head>
-<body>
-
-<div id="logo">
-<a name="robo_top_of_doc"></a>
-</div> <!-- logo -->
 <h3>TABLE OF CONTENTS</h3>
 <ul>
 <li>1. <a href="#robo0">simulator/file_header</a></li>
@@ -32,29 +14,31 @@
 <a name="simulator2ffile5fheader"></a>
 <h1>1.  simulator/file_header [ file ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   simulator.tcl
-</pre>
+<p>   simulator.tcl
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   This file contains the simulator of TclRobots.
+<p>   This file contains the simulator of TclRobots.
+</p>
 
-   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
    on TclRobots 2.0 by Tom Poindexter.
+</p>
 
-   See http://tclrobots.org for more information.
-</pre>
+<p>   See http://tclrobots.org for more information.
+</p>
 <p class="item_name">COPYRIGHT</p>
-<pre>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+<p>   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
    Simplified BSD License. See LICENSE file for details.
-</pre>
+</p>
 <a name="robo1"></a>
 <a name="simulator2finit5fsim"></a>
 <h1>2.  simulator/init_sim [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<pre>   init_sim
-</pre>
+<p>   init_sim
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   start the simulator
-</pre>
+<p>   start the simulator
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_sim {} {
     # Read from robot file names; only the first file is used
@@ -336,11 +320,11 @@
 <a name="init5fsim2fend5fsim"></a>
 <h2>2.1.  init_sim/end_sim [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   end_sim
-</pre>
+<p>   end_sim
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   End simulation.
-</pre>
+<p>   End simulation.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc end_sim {} {
     # reset is defined in gui.tcl
@@ -351,11 +335,11 @@
 <a name="init5fsim2fver5frange"></a>
 <h2>2.2.  init_sim/ver_range [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   ver_range
-</pre>
+<p>   ver_range
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Verify range of an entry for simulated robot.
-</pre>
+<p>   Verify range of an entry for simulated robot.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc ver_range {var low high} {
     set val $::data(r0,$var)
@@ -372,11 +356,11 @@
 <a name="init5fsim2fexamine"></a>
 <h2>2.3.  init_sim/examine [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   examine
-</pre>
+<p>   examine
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Examine a variable in the simulated robot.
-</pre>
+<p>   Examine a variable in the simulated robot.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc examine {} {
     puts $::data(r0,interp)
@@ -388,11 +372,11 @@
 <a name="init5fsim2fsetval"></a>
 <h2>2.4.  init_sim/setval [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   setval
-</pre>
+<p>   setval
+</p>
 <p class="item_name">DESCRIPTION</p>
-<pre>   Set a variable in the simulated robot.
-</pre>
+<p>   Set a variable in the simulated robot.
+</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc setval {} {
     $::data(r0,interp) eval set $::status_var $::status_val
@@ -402,8 +386,8 @@
 <a name="init5fsim2fsim5frobot"></a>
 <h2>2.5.  init_sim/sim_robot [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<pre>   sim_robot
-</pre>
+<p>   sim_robot
+</p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sim_robot {} {
@@ -452,13 +436,4 @@
     }
 }
 </pre>
-<div id="footer">
-<p>Generated from ./ with ROBODoc V4.99.38 on Tue Mar 09 2010 22:14:10
-</p>
-</div> <!-- footer -->
-
-
-
-</body>
-</html>
 

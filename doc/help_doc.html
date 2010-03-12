@@ -1,29 +1,29 @@
-TCLROBOTS
-=========
-This is a development of Tom Poindexter's 1996 game TclRobots 2.0.
+<h1>TCLROBOTS</h1>
+<!--=========-->
+<p>This is a development of Tom Poindexter's 1996 game TclRobots 2.0.</p>
 
-From TclRobots 2.0:
+<p>From TclRobots 2.0:</p>
 
-"TclRobots is a programming game, similar to 'Core War'. To play TclRobots, you must write a Tcl program that controls a robot. The robot's mission is to survive a battle with other robots."
+<blockquote>"TclRobots is a programming game, similar to 'Core War'. To play TclRobots, you must write a Tcl program that controls a robot. The robot's mission is to survive a battle with other robots."</blockquote>
 
-TclRobots require Tcl 8.6 since it uses coroutines.
+<p>TclRobots require Tcl 8.6 since it uses coroutines.</p>
 
-TclRobots is licensed under the Simplified BSD license. See LICENSE
-for information.
+<p>TclRobots is licensed under the Simplified BSD license. See LICENSE
+for information.</p>
 
 
-THE ROBOT
-=========
-NOTE: Most of this text refers to TclRobots 2.0.
+<h1>THE ROBOT</h1>
+<!--=========-->
+<p>NOTE: Most of this text refers to TclRobots 2.0.</p>
 
-All robots in TclRobots are constructed equally. What differentiates
+<p>All robots in TclRobots are constructed equally. What differentiates
 the robots' behavior is the control program that you write. The robot
-has the ability to move, look for, and shoot at, other robots.
+has the ability to move, look for, and shoot at, other robots.</p>
 
-Robots use a compass system based on 0 to 359 degrees, with 0
-pointing due east, 90 due north, 180 due west, and 270 due south.
+<p>Robots use a compass system based on 0 to 359 degrees, with 0
+pointing due east, 90 due north, 180 due west, and 270 due south.</p>
 
-The robot's drive mechanism can be controlled to move the robot in a
+<p>The robot's drive mechanism can be controlled to move the robot in a
 particular direction, at some speed. Direction is expressed as an
 integer degree heading 0 - 359, and speed is 0 to 100 percent. The motor
 is inefficient above 35% speed, and begins to overheat. When a
@@ -31,11 +31,11 @@ temperature heat index of 200 is reached, the motor cannot be operated
 over 35% until cooling allows the heat index to drop back to 0. While
 the robot is very agile and stable, safeguards are built into the
 interface to prevent the robot from tipping over while trying to turn at
-too fast a rate for any given speed.
+too fast a rate for any given speed.</p>
 
-The following table represents maximum speeds at which a delta course
-change can be made:
-
+<p>The following table represents maximum speeds at which a delta course
+change can be made:</p>
+<pre>
 Degrees of     Maximum Speed
 course change
 ____________________________
@@ -43,24 +43,24 @@ ____________________________
 25 - 50             50%
 50 - 75             30%
 75 or greater       20%
-
-If a course change is attempted at a speed above the maximum for the
+</pre>
+<p>If a course change is attempted at a speed above the maximum for the
 change, the drive is disengaged (speed set to 0) on the present
 course. The drive mechanism also allows the robot to turn faster at
-slower speeds.
-
+slower speeds.</p>
+<pre>
 Speed         Rate of turn
 ____________________________
 25% or less       90
 25 - 50%          60
 50 - 75%          40
 75% or greater    30
-
-At 100% speed, the robot travels at 20 meters per second. Robots are
+</pre>
+<p>At 100% speed, the robot travels at 20 meters per second. Robots are
 also subject to acceleration and deaccelearation, a linear constant of
-20% of the maximun speed per second.
+20% of the maximun speed per second.</p>
 
-Each robot is equipped with a scanning device, which can be pointed
+<p>Each robot is equipped with a scanning device, which can be pointed
 independently of the current drive heading of the robot. A scan can be
 initiated in any direction, 0-359 degrees. The scanner has a variable
 resolution capability, detecting other robots within a maximum of +/- 10
@@ -71,21 +71,21 @@ case, the distance reported may be off by as much as 10 meters for each
 degree of resolution (up to 100 meters in error for a +/- 10 degree
 resolution scan.) A high resolution scan (0 specified for resolution)
 will return accurate results, subject to cannon barrel heat distortion
-(see below).
+(see below).</p>
 
-If two or more robots are in the scan's resolution, the closest
+<p>If two or more robots are in the scan's resolution, the closest
 opponent is reported. It's also possible to distinguish various opposing
 robots, as the scanner has a rudimentary digital signal processor, and
 each robot has a arbitrary signature. A robot program can also be
 alerted when it is the subject of a scan by another robot. The signature
 of the scanning robot can be determined, but not it's heading or
-distance.
+distance.</p>
 
-A cannon is the robot's offensive weapon, firing a shell at opposing
+<p>A cannon is the robot's offensive weapon, firing a shell at opposing
 robots. The cannon has a maximum range of 700 meters, and can be aimed
 independently of the robot heading. Damage to all surrounding robots
-from an exploding shell is assessed as follows:
-
+from an exploding shell is assessed as follows:</p>
+<pre>
 Meters from   % Damage
  explosion    incurred
 ______________________
@@ -93,8 +93,8 @@ ______________________
     10          12%
     20           7%
     40           3%
-
-While the robot has an large (unlimited) cache of shells available,
+</pre>
+<p>While the robot has an large (unlimited) cache of shells available,
 it can only reload fast enough to have one shell in the air at maximum
 range at any one time (approximately 4 seconds). Cannon shells are
 grouped four to a clip; after a clip is exhausted, it is ejected and a
@@ -102,9 +102,9 @@ new clip loaded in place. The effect is that on every fourth shell, the
 reload time is tripled (12 seconds.) The cannon fires its shells in a
 high arc; a shell will not impact into another robot that might be in
 the line of flight. Shells travel at 200 meters per second toward the
-target.
+target.</p>
 
-Each shell fired causes the cannon barrel to heat up. The heat rising
+<p>Each shell fired causes the cannon barrel to heat up. The heat rising
 off the barrel distorts the view of the scanner. If the temperature of
 the barrel becomes too great, the scanner is rendered useless. At lesser
 temperatures, the heat distortion will cause the scanner to return
@@ -115,14 +115,13 @@ normal cooling rate is 2 units per second. The scanner always reports 0
 for range while the barrel temperature is above 35 units. The scanning
 beam, however, still registers upon other robots in the path of the
 scan, triggering a scanned robot's alert procedure. The cannon barrel
-does not have temperature sensor.
+does not have temperature sensor.</p>
 
-Various feedback registers in the robot can be accessed by the
+<p>Various feedback registers in the robot can be accessed by the
 control program, reporting the current amount of damage, x and y axis
-battlefield location, current speed, and an internal clock tick.
+battlefield location, current speed, and an internal clock tick.</p>
 
-Robots incur damage expressed as a percent value. When 100% damage is
+<p>Robots incur damage expressed as a percent value. When 100% damage is
 reached, the robot is "dead", and ceases to function. However, damage
 has no effect on operational ability. A robot with 99% damage operates
-as well as one with no damage.
-
+as well as one with no damage.</p>
