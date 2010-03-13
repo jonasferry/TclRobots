@@ -10,10 +10,6 @@ proc main {} {
         clean_file  ${file}_doc
     }
 
-    # Generate documentation for robot API
-    gen_api_doc syscalls.tcl api_doc
-    clean_file  api_doc
-
     # Generate README by stripping the HTML from help_doc.html
     gen_readme
 }
@@ -31,17 +27,6 @@ proc gen_src_doc {srcfile docfile} {
 
     # Append file name for documentation overview page
     append srcdocs "<a href='${docfile}.html'>$docfile</a>\n"
-}
-
-proc gen_api_doc {srcfile docfile} {
-    # Generate html
-    exec robodoc --src $srcfile --doc ./doc/$docfile --singlefile \
-        --html --sections --toc --rc ./doc/script/robodoc.rc --nosort \
-        --headless --footless \
-        --internalonly
-
-    # Remove extra css file
-    file delete ./doc/$docfile.css
 }
 
 proc clean_file {docfile} {

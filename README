@@ -1,27 +1,116 @@
-TCLROBOTS
-=========
+
+NOTE: Most of this text still refers to TclRobots 2.0.
+
+
+TABLE OF CONTENTS
+
+  1. WHAT IS TCLROBOTS?
+  2. INSTALLATION AND DEMO
+  3. SYNOPSIS
+  4. THE ROBOT
+  5. THE BATTLEFIELD
+  6. THE ROBOT TCL LANGUAGE
+  7. THE ROBOT HARDWARE INTERFACES
+    7.1. Basic syscalls
+      7.1.1 scanner
+      7.1.2 dsp
+      7.1.3 alert
+      7.1.4 cannon
+      7.1.5 health
+      7.1.6 drive
+      7.1.7 speed
+      7.1.8 heat
+      7.1.9 loc_x
+      7.1.10 loc_y
+      7.1.11 tick
+    7.2. Team syscalls
+      7.2.1 team_declare
+      7.2.2 team_send
+      7.2.3 team_get
+    7.3. Convenience syscalls
+      7.3.1 dputs
+      7.3.2 rand
+      7.3.2 callback
+
+
+1. WHAT IS TCLROBOTS?
+
 This is a development of Tom Poindexter's 1996 game TclRobots 2.0.
 
 From TclRobots 2.0:
 
-"TclRobots is a programming game, similar to 'Core War'. To play TclRobots, you must write a Tcl program that controls a robot. The robot's mission is to survive a battle with other robots."
+"TclRobots is a programming game, similar to 'Core War'. To play
+TclRobots, you must write a Tcl program that controls a robot. The
+robot's mission is to survive a battle with other robots."
 
 TclRobots require Tcl 8.6 since it uses coroutines.
 
-TclRobots is licensed under the Simplified BSD license. See LICENSE
-for information.
+TclRobots is licensed under the Simplified BSD license. See LICENSE for
+information.
 
 
-THE ROBOT
-=========
-NOTE: Most of this text refers to TclRobots 2.0.
+2. INSTALLATION AND DEMO
 
-All robots in TclRobots are constructed equally. What differentiates
-the robots' behavior is the control program that you write. The robot
-has the ability to move, look for, and shoot at, other robots.
+Edit the Makefile. All that is needed it the path of your wish
+executable, and the directory where you would like TclRobots
+installed. See the comments at the top of the Makefile. `make' to
+install.
 
-Robots use a compass system based on 0 to 359 degrees, with 0
-pointing due east, 90 due north, 180 due west, and 270 due south.
+run "tclrobots" from the directory where you unpacked the
+distribution.
+
+In the Files listbox, Double-Click on the "samples" directory
+for sample individual robot programs or the "teams" directory for 2-on-2
+team robot programs.
+
+Click on "Select All"
+
+Click on "Run Battle"
+
+
+3. SYNOPSIS
+
+tclrobots [[-t timelimit] [-o results-file] [-nowin] files... ]
+
+Tclrobots without any command line arguments starts TclRobots in
+interactive mode. The user interface (described below) is used to
+select files, start battles, tournaments, or the simulator.
+
+If command line arguments are specified, tclrobots starts in
+tournament or single battle mode using the specified files.
+
+Options:
+
+-t timelimit
+
+sets the number of minutes to run each match in a one-on-one
+tournament. Timelimit should be specified as an integer number of
+minutes. If -t is not specified, a single battle will run with the first
+four files until a single winner remains.
+
+-o results-file
+
+specifies the file name in which to record tournament results. If -o is
+omitted, the file name "results.out" is used.
+
+-nowin
+
+specifies that the tournament or battles will not be displayed. In
+addition, matches are run five times faster (wall clock time). The
+apparent clock time to robot programs will still be determined by the -t
+timelimit values. -nowin can be specified without -t, resulting in a
+regular 2-4 way battle without a time limit and run without display.
+Results will be saved in "results.out" or the file specified with -o.
+
+
+4. THE ROBOT
+
+All robots in TclRobots are constructed equally. What differentiates the
+robots' behavior is the control program that you write. The robot has
+the ability to move, look for, and shoot at, other robots.
+
+Robots use a compass system based on 0 to 359 degrees, with 0 pointing
+due east, 90 due north, 180 due west, and 270 due south.
 
 The robot's drive mechanism can be controlled to move the robot in a
 particular direction, at some speed. Direction is expressed as an
@@ -36,25 +125,25 @@ too fast a rate for any given speed.
 The following table represents maximum speeds at which a delta course
 change can be made:
 
-Degrees of     Maximum Speed
-course change
-____________________________
-25 or less         100%
-25 - 50             50%
-50 - 75             30%
-75 or greater       20%
+   Degrees of     Maximum Speed
+   course change
+   ____________________________
+   25 or less         100%
+   25 - 50             50%
+   50 - 75             30%
+   75 or greater       20%
 
 If a course change is attempted at a speed above the maximum for the
 change, the drive is disengaged (speed set to 0) on the present
 course. The drive mechanism also allows the robot to turn faster at
 slower speeds.
 
-Speed         Rate of turn
-____________________________
-25% or less       90
-25 - 50%          60
-50 - 75%          40
-75% or greater    30
+   Speed         Rate of turn
+   ____________________________
+   25% or less       90
+   25 - 50%          60
+   50 - 75%          40
+   75% or greater    30
 
 At 100% speed, the robot travels at 20 meters per second. Robots are
 also subject to acceleration and deaccelearation, a linear constant of
@@ -73,29 +162,28 @@ resolution scan.) A high resolution scan (0 specified for resolution)
 will return accurate results, subject to cannon barrel heat distortion
 (see below).
 
-If two or more robots are in the scan's resolution, the closest
-opponent is reported. It's also possible to distinguish various opposing
-robots, as the scanner has a rudimentary digital signal processor, and
-each robot has a arbitrary signature. A robot program can also be
-alerted when it is the subject of a scan by another robot. The signature
-of the scanning robot can be determined, but not it's heading or
-distance.
+If two or more robots are in the scan's resolution, the closest opponent
+is reported. It's also possible to distinguish various opposing robots,
+as the scanner has a rudimentary digital signal processor, and each
+robot has a arbitrary signature. A robot program can also be alerted
+when it is the subject of a scan by another robot. The signature of the
+scanning robot can be determined, but not it's heading or distance.
 
 A cannon is the robot's offensive weapon, firing a shell at opposing
 robots. The cannon has a maximum range of 700 meters, and can be aimed
 independently of the robot heading. Damage to all surrounding robots
 from an exploding shell is assessed as follows:
 
-Meters from   % Damage
- explosion    incurred
-______________________
-     6          25%
-    10          12%
-    20           7%
-    40           3%
+   Meters from   % Damage
+    explosion    incurred
+   ______________________
+        6          25%
+       10          12%
+       20           7%
+       40           3%
 
-While the robot has an large (unlimited) cache of shells available,
-it can only reload fast enough to have one shell in the air at maximum
+While the robot has an large (unlimited) cache of shells available, it
+can only reload fast enough to have one shell in the air at maximum
 range at any one time (approximately 4 seconds). Cannon shells are
 grouped four to a clip; after a clip is exhausted, it is ejected and a
 new clip loaded in place. The effect is that on every fourth shell, the
@@ -117,12 +205,403 @@ beam, however, still registers upon other robots in the path of the
 scan, triggering a scanned robot's alert procedure. The cannon barrel
 does not have temperature sensor.
 
-Various feedback registers in the robot can be accessed by the
-control program, reporting the current amount of damage, x and y axis
+Various feedback registers in the robot can be accessed by the control
+program, reporting the current amount of damage, x and y axis
 battlefield location, current speed, and an internal clock tick.
 
 Robots incur damage expressed as a percent value. When 100% damage is
 reached, the robot is "dead", and ceases to function. However, damage
 has no effect on operational ability. A robot with 99% damage operates
 as well as one with no damage.
+
+
+5. THE BATTLEFIELD
+
+The battlefield in TclRobots is a 1,000 by 1,000 meter square area.
+Walls surround the battlefield, and robots running into a wall will
+suffer 5% damage. The coordinate system is based on increasing x and y
+axis values from the southwest corner (bottom left is 0,0). 999,999 is
+the extreme northeast (upper right).
+
+Upon start up, robots are placed in random quadrants.
+
+
+6. THE ROBOT TCL LANGUAGE
+
+Robot control programs are written in the Tcl language. The following
+Tcl commands are available:
+
+     after      if         rename
+     append     incr       return
+     array      join       scan
+     break      lappend    set
+     case       lindex     source
+     catch      linsert    split
+     concat     list       string
+     continue   llength    subst
+     error      lrange     switch
+     eval       lreplace   time
+     exit       lsearch    trace
+     expr       lsort      unset
+     file       pid        update
+     for        proc       uplevel
+     foreach    rand       upvar
+     format     regexp     while
+     global     regsub
+
+
+7. THE ROBOT HARDWARE INTERFACES
+
+The following Tcl commands are the interface to the robot's hardware
+(syscalls.) Each interface command takes a minimum of 100 milliseconds
+to complete, except: the scanner com- mand, which requires 200
+milliseconds per execution; team communications commands team_get and
+team_send execute without delay. Commands that take arguments will
+return -1 if any argument is out of valid ranges. For degrees, valid
+values are 0-359; for speed, 0-100, for resolution, 0-10, for cannon
+range, 0-700.
+
+
+7.1 Basic syscalls
+
+7.1.1 scanner
+
+NAME
+
+scanner - Find other robots by scanning the battlefield
+
+SYNOPSIS
+
+scanner degree resolution
+
+DESCRIPTION
+
+The scanner command invokes the robot's scanner. Degree must be in the
+range 0-359. Scanner returns 0 if nothing found, or an integer greater
+than zero indicating the distance to an opponent. Resolution controls
+how wide in degrees the scan can detect opponents from the absolute
+scanning direction, and must be in the range 0-10. A robot that has been
+destroyed is not reported by the scanner.
+
+Cost: 2 ticks.
+
+
+7.1.2 dsp
+
+NAME
+
+dsp - Get information on last scanned robot
+
+SYNOPSIS
+
+dsp
+
+DESCRIPTION
+
+The dsp command returns a list of two integers, the first element is the
+digital signature of the last robot found using the scanner. The second
+element is the percent of damage the scanned robot has accumulated, 0-99
+percent. Each robot in a battle has a distinct signature. If nothing was
+found during the last scan (scanner command returned 0), then the dsp
+command will return "0 0".
+
+Cost: 1 tick.
+
+
+7.1.3 alert
+
+NAME
+
+alert - React on being scanned
+
+SYNOPSIS
+
+alert proc-name
+
+DESCRIPTION
+
+The alert command names a procedure to be called when the robot is being
+scanned by another robot. When the robot detects it has been scanned,
+the proc-name procedure is called with one argument, the dsp signature
+of the robot that performed the scan. If proc-name is null (""), then
+the alert feature is disabled.
+
+Cost: 1 tick.
+
+
+7.1.4 cannon
+
+NAME
+
+cannon - Fire the offensive weapon
+
+SYNOPSIS
+
+cannon degree range
+
+DESCRIPTION
+
+The cannon commands fires a shell in the direction specified by degree,
+for the distance range. Cannon returns 1 if a shell was fired; if the
+cannon is reloading, 0 is returned.
+
+Cost: 1 tick.
+
+
+7.1.5 health
+
+NAME
+
+health - Get information on current health
+
+SYNOPSIS
+
+health
+
+DESCRIPTION
+
+Cost: 1 tick.
+
+
+7.1.6 drive
+
+NAME
+
+drive - Move the robot on the battlefield
+
+SYNOPSIS
+
+
+drive degree speed
+
+DESCRIPTION
+
+The drive command starts the robot's drive mechanism. Degree must be in
+the range 0-359. Speed must be in the range 0-100. Any change in course
+that falls outside the "Degrees of course change" table (see "The
+Robot", above) will cause the robot's speed to be set to 0 along the
+current course. A speed of 0 causes the robot to coast to a stop. The
+drive command returns the speed set. If the drive is currently
+overheated, the maximum speed during overheating (35%) will be set.
+
+Cost: 1 tick.
+
+
+7.1.7 speed
+
+NAME
+
+speed - Get information the the current speed
+
+SYNOPSIS
+
+speed
+
+DESCRIPTION
+
+The speed command reports the current speed of the robot, 0-100. Speed
+may return more or less than what was last set with the drive command
+because of acceleration/deaccelearation, drive overheating, or collision
+into a wall.
+
+Cost: 1 tick.
+
+
+7.1.8 heat
+
+NAME
+
+heat - Get information on current motor heat
+
+SYNOPSIS
+
+heat
+
+DESCRIPTION
+
+The heat command returns a list of two integers, the first element is
+the overheating flag, 1 if the maximum motor heat value was attained,
+otherwise 0. The second element is the current motor heat index,
+0-200.
+
+Cost: 1 tick.
+
+
+7.1.9 loc_x
+
+NAME
+
+loc_x - Get information on current position on X axis
+
+SYNOPSIS
+
+loc_x
+
+DESCRIPTION
+
+The loc_x command returns the current x axis location of the robot,
+0-999 meters.
+
+Cost: 1 tick.
+
+
+7.1.10 loc_y
+
+NAME
+
+loc_y - Get information on current position on Y axis
+
+SYNOPSIS
+
+loc_y
+
+DESCRIPTION
+
+The loc_y command returns the current y axis location of the robot,
+0-999 meters.
+
+Cost: 1 tick.
+
+
+7.1.11 tick
+
+NAME
+
+tick - Get information on the current clock tick
+
+SYNOPSIS
+
+tick
+
+DESCRIPTION
+
+The tick command returns the current clock tick. The clock tick is set
+to 0 at game startup.
+
+Cost: 1 tick.
+
+
+7.2 Team syscalls
+
+7.2.1 team_declare
+
+NAME
+
+team_declare - Join a team of robots
+
+SYNOPSIS
+
+team_declare teamname
+
+DESCRIPTION
+
+The team_declare command sets the team alliance to the teamname
+argument. team_declare is only effective the first time it is executed
+in a robot control program. team_declare returns the teamname value.
+
+Cost: 1 tick.
+
+
+7.2.2 team_send
+
+NAME
+
+team_send - Send a message to all team mates
+
+SYNOPSIS
+
+team_send data
+
+DESCRIPTION
+
+The team_send command makes the argument available to all other robots
+with the same teamname. Data is a single string argument, and can be any
+value or list. If a team has not been declared with the team_declare
+command, the team_send command has no effect.
+
+Cost: 0 ticks.
+
+
+7.2.3 team_get
+
+NAME
+
+team_get - Get messages from all team mates
+
+SYNOPSIS
+
+
+team_get
+
+DESCRIPTION
+
+The team_get command returns a list of team members and their current
+data values. Each element of the list returned is a list of the digital
+signature of a team member and that robot's last team_send data
+value. If a team has not been declared with team_declare or all of the
+other members of the team have not declared a team or are dead, the
+return value is an null list. The robot executing the team_get command
+is also excluded from the return list.
+
+Cost: 0 ticks.
+
+
+7.3 Convenience syscalls
+
+7.3.1 dputs
+
+NAME
+
+
+dputs - Print a message
+
+SYNOPSIS
+
+
+dputs args
+
+DESCRIPTION
+
+The dputs command prints a message in the GUI message window. Dputs
+accepts any number of arguments.
+
+Cost: 0 ticks.
+
+
+7.3.2 rand
+
+NAME
+
+rand - Generate a random number
+
+SYNOPSIS
+
+rand max
+
+DESCRIPTION
+
+The rand command is a simple random number generator, based on Knuth's
+algorithm. The rand command returns an integer between 0 and ( max - 1),
+where max is in the range 1 to 65535. The seed value is randomly set; if
+a particular seed value is desired, the global variable _lastvalue
+should be set to some starting value.
+
+Cost: 0 ticks.
+
+
+7.3.3 callback
+
+NAME
+
+callback - Schedule actions for later ticks
+
+SYNOPSIS
+
+callback time script
+
+DESCRIPTION
+
+
+Cost: 0 ticks.
+
 
