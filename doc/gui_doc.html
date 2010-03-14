@@ -41,20 +41,23 @@
 </ul>
 <li>2.9. <a href="#robo24">init_gui/tournament</a></li>
 <li>2.10. <a href="#robo25">init_gui/help</a></li>
-</ul>
-<li>3. <a href="#robo26">gui/update_gui</a></li>
 <ul>
-<li>3.1. <a href="#robo27">update_gui/show_robots</a></li>
-<li>3.2. <a href="#robo28">update_gui/show_scan</a></li>
+<li>2.10.1. <a href="#robo26">help/handle_click</a></li>
+</ul>
+</ul>
+<li>3. <a href="#robo27">gui/update_gui</a></li>
 <ul>
-<li>3.2.1. <a href="#robo29">show_scan/arc_path</a></li>
+<li>3.1. <a href="#robo28">update_gui/show_robots</a></li>
+<li>3.2. <a href="#robo29">update_gui/show_scan</a></li>
+<ul>
+<li>3.2.1. <a href="#robo30">show_scan/arc_path</a></li>
 </ul>
-<li>3.3. <a href="#robo30">update_gui/show_health</a></li>
+<li>3.3. <a href="#robo31">update_gui/show_health</a></li>
 </ul>
-<li>4. <a href="#robo31">gui/tk_dialog2</a></li>
-<li>5. <a href="#robo32">gui/show_explode</a></li>
-<li>6. <a href="#robo33">gui/show_die</a></li>
-<li>7. <a href="#robo34">gui/show_msg</a></li>
+<li>4. <a href="#robo32">gui/tk_dialog2</a></li>
+<li>5. <a href="#robo33">gui/show_explode</a></li>
+<li>6. <a href="#robo34">gui/show_die</a></li>
+<li>7. <a href="#robo35">gui/show_msg</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="gui2ffile5fheader"></a>
@@ -941,26 +944,80 @@
     toplevel .help
     grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
 
-    # Create the text box and the scrollbar
-    set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
-                    -yscrollcommand ".help.s set"]
+    set html_help 0
+
+    # Load the extension
+    switch $::tcl_platform(platform) {
+        windows {
+            load $::thisDir/include/tkhtml/tkhtml.dll
+            set html_help 1
+        }
+        unix {
+            load $::thisDir/include/tkhtml/tkhtml.so
+            set html_help 1
+        }
+    }
+    if {$html_help} {
+        # HTML is enabled, create HTML widget
+        set ::help_t [html .help.t -hyperlinkcommand handle_link \
+                          -base $::thisDir/doc/help_doc.html \
+                          -yscrollcommand ".help.s set"]
+
+        # Bind mouse clicks
+        bind .help &lt;ButtonRelease-1&gt; "handle_click %x %y"
+
+        # Read the HTML help doc
+        set f    [open $::thisDir/doc/help_doc.html]
+        set text [read $f]
+        close $f
+
+        # Insert text into HTML widget
+        $::help_t parse $text
+    } else {
+        # HTML is disabled, create text widget
+        set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
+                        -yscrollcommand ".help.s set"]
+
+        # Read the ASCII help doc
+        set f    [open $::thisDir/README]
+        set text [read $f]
+        close $f
+
+        # Insert text into text box
+        $help_t insert 1.0 $text
+    }
     set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
                     -orient vertical]
 
     # Grid the text box and scrollbar
-    grid $help_t -column 0 -row 0 -sticky nsew
+    grid $::help_t -column 0 -row 0 -sticky nsew
     grid $help_s -column 1 -row 0 -sticky ns
-
-    # Read README file
-    set f    [open $::thisDir/README]
-    set text [read $f]
-    close $f
-
-    # Insert text into text box
-    $help_t insert 1.0 $text
 }
 </pre>
 <a name="robo26"></a>
+<a name="help2fhandle5fclick"></a>
+<h3>2.10.1.  help/handle_click [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   handle_click
+</p>
+<p class="item_name">SYNOPSIS</p>
+<p>   handle_click x y
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Handle clicks on and off links in HTML widget. Called with the x and
+   y coordinates of the click. Uses href widget command to figure out
+   if a link was clicked.
+</p>
+
+<p>   Currently only handles anchor links.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc handle_click {x y} {
+    set link [$::help_t href $x $y]
+    $::help_t yview [lindex [split $link #] 1]
+}
+</pre>
+<a name="robo27"></a>
 <a name="gui2fupdate5fgui"></a>
 <h1>3.  gui/update_gui [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -975,7 +1032,7 @@
     update
 }
 </pre>
-<a name="robo27"></a>
+<a name="robo28"></a>
 <a name="update5fgui2fshow5frobots"></a>
 <h2>3.1.  update_gui/show_robots [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -1035,7 +1092,7 @@
     }
 }
 </pre>
-<a name="robo28"></a>
+<a name="robo29"></a>
 <a name="update5fgui2fshow5fscan"></a>
 <h2>3.2.  update_gui/show_scan [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -1087,7 +1144,7 @@
     }
 }
 </pre>
-<a name="robo29"></a>
+<a name="robo30"></a>
 <a name="show5fscan2farc5fpath"></a>
 <h3>3.2.1.  show_scan/arc_path [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -1115,7 +1172,7 @@
     return $path
 }
 </pre>
-<a name="robo30"></a>
+<a name="robo31"></a>
 <a name="update5fgui2fshow5fhealth"></a>
 <h2>3.3.  update_gui/show_health [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -1136,7 +1193,7 @@
     }
 }
 </pre>
-<a name="robo31"></a>
+<a name="robo32"></a>
 <a name="gui2ftk5fdialog2"></a>
 <h1>4.  gui/tk_dialog2 [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1252,7 +1309,7 @@
     return $::tkPriv(button)
 }
 </pre>
-<a name="robo32"></a>
+<a name="robo33"></a>
 <a name="gui2fshow5fexplode"></a>
 <h1>5.  gui/show_explode [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1313,7 +1370,7 @@
     after $delay  "$::arena_c delete e$::data($robot,num)"
 }
 </pre>
-<a name="robo33"></a>
+<a name="robo34"></a>
 <a name="gui2fshow5fdie"></a>
 <h1>6.  gui/show_die [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -1359,7 +1416,7 @@
     after 500 "$::arena_c delete die$::data($robot,num)"
 }
 </pre>
-<a name="robo34"></a>
+<a name="robo35"></a>
 <a name="gui2fshow5fmsg"></a>
 <h1>7.  gui/show_msg [ procedure ]  </h1>
 <p class="item_name">NAME</p>

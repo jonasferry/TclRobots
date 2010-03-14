@@ -1009,23 +1009,80 @@ proc help {} {
     toplevel .help
     grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
 
-    # Create the text box and the scrollbar
-    set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
-                    -yscrollcommand ".help.s set"]
+    set html_help 0
+
+    # Load the extension
+    switch $::tcl_platform(platform) {
+        windows {
+            load $::thisDir/include/tkhtml/tkhtml.dll
+            set html_help 1
+        }
+        unix {
+            load $::thisDir/include/tkhtml/tkhtml.so
+            set html_help 1
+        }
+    }
+    if {$html_help} {
+        # HTML is enabled, create HTML widget
+        set ::help_t [html .help.t -hyperlinkcommand handle_link \
+                          -base $::thisDir/doc/help_doc.html \
+                          -yscrollcommand ".help.s set"]
+
+        # Bind mouse clicks
+        bind .help <ButtonRelease-1> "handle_click %x %y"
+
+        # Read the HTML help doc
+        set f    [open $::thisDir/doc/help_doc.html]
+        set text [read $f]
+        close $f
+
+        # Insert text into HTML widget
+        $::help_t parse $text
+    } else {
+        # HTML is disabled, create text widget
+        set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
+                        -yscrollcommand ".help.s set"]
+
+        # Read the ASCII help doc
+        set f    [open $::thisDir/README]
+        set text [read $f]
+        close $f
+
+        # Insert text into text box
+        $help_t insert 1.0 $text
+    }
     set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
                     -orient vertical]
 
     # Grid the text box and scrollbar
-    grid $help_t -column 0 -row 0 -sticky nsew
+    grid $::help_t -column 0 -row 0 -sticky nsew
     grid $help_s -column 1 -row 0 -sticky ns
+}
+#******
 
-    # Read README file
-    set f    [open $::thisDir/README]
-    set text [read $f]
-    close $f
-
-    # Insert text into text box
-    $help_t insert 1.0 $text
+#****P* help/handle_click
+#
+# NAME
+#
+#   handle_click
+#
+# SYNOPSIS
+#
+#   handle_click x y
+#
+# DESCRIPTION
+#
+#   Handle clicks on and off links in HTML widget. Called with the x and
+#   y coordinates of the click. Uses href widget command to figure out
+#   if a link was clicked.
+#
+#   Currently only handles anchor links.
+#
+# SOURCE
+#
+proc handle_click {x y} {
+    set link [$::help_t href $x $y]
+    $::help_t yview [lindex [split $link #] 1]
 }
 #******
 
