@@ -1,6 +1,4 @@
-<p>
-<strong>NOTE: Most of this text still refers to TclRobots 2.0.</strong>
-</p>
+<p><strong>NOTE: Some of this text still refers to TclRobots 2.0.</strong></p>
 
 <h3>TABLE OF CONTENTS</h3>
 <ul>
@@ -35,14 +33,21 @@
 <a name="anchor1"></a>
 <h1>1. WHAT IS TCLROBOTS?</h1>
 <p>
-This is a development of Tom Poindexter's 1996 game TclRobots 2.0.
+TclRobots is a programming game where you must write a Tcl program that
+controls a robot. The robot's mission is to survive a battle with other
+robots. At least two robots compete during a battle, each running
+different programs (or possibly the same program in different robots.)
+Each robot is equipped with a scanner, cannon, drive mechanism. A single
+match con- tinues until one robot is left running. Robots may compete
+individually, or combine in a team oriented battle. A tour- nament can
+be run with any number of robot programs, each robot playing every other
+in a round-robin fashion, one-on- one. A battle simulator is available
+to help debug robot programs.
 </p><p>
-From TclRobots 2.0:
-</p><p><blockquote>
-"TclRobots is a programming game, similar to 'Core War'. To play
-TclRobots, you must write a Tcl program that controls a robot. The
-robot's mission is to survive a battle with other robots."
-</blockquote></p><p>
+The TclRobots program provides a physical environment, imposing certain
+game parameters to which all robots must adhere. TclRobots also provides
+a view on a battle, and a controlling user interface.
+</p><p>
 TclRobots require Tcl 8.6 since it uses coroutines.
 </p><p>
 TclRobots is licensed under the Simplified BSD license. See <a href="http://github.com/jonasferry/TclRobots/blob/master/LICENSE">LICENSE</a> for
@@ -50,11 +55,8 @@ information.
 </p>
 <a name="anchor2"></a>
 <h1>2. INSTALLATION AND DEMO</h1>
-<p><ul><li>
-Edit the Makefile. All that is needed it the path of your wish
-executable, and the directory where you would like TclRobots
-installed. See the comments at the top of the Makefile. `make' to
-install.
+<p><ul class="dots"><li>
+Download the source from the GitHub repository.
 </li><li>
 run "tclrobots" from the directory where you unpacked the
 distribution.
@@ -70,7 +72,7 @@ Click on "Run Battle"
 <a name="anchor3"></a>
 <h1>3. SYNOPSIS</h1>
 <p>
-tclrobots [[-t timelimit] [-o results-file] [-nowin] files... ]
+tclrobots
 </p><p>
 Tclrobots without any command line arguments starts TclRobots in
 interactive mode. The user interface (described below) is used to
@@ -78,29 +80,6 @@ select files, start battles, tournaments, or the simulator.
 </p><p>
 If command line arguments are specified, tclrobots starts in
 tournament or single battle mode using the specified files.
-</p><p>
-Options:
-</p><p>
--t timelimit
-</p><p>
-sets the number of minutes to run each match in a one-on-one
-tournament. Timelimit should be specified as an integer number of
-minutes. If -t is not specified, a single battle will run with the first
-four files until a single winner remains.
-</p><p>
--o results-file
-</p><p>
-specifies the file name in which to record tournament results. If -o is
-omitted, the file name "results.out" is used.
-</p><p>
--nowin
-</p><p>
-specifies that the tournament or battles will not be displayed. In
-addition, matches are run five times faster (wall clock time). The
-apparent clock time to robot programs will still be determined by the -t
-timelimit values. -nowin can be specified without -t, resulting in a
-regular 2-4 way battle without a time limit and run without display.
-Results will be saved in "results.out" or the file specified with -o.
 </p>
 <a name="anchor4"></a>
 <h1>4. THE ROBOT</h1>
@@ -209,10 +188,11 @@ Various feedback registers in the robot can be accessed by the control
 program, reporting the current amount of damage, x and y axis
 battlefield location, current speed, and an internal clock tick.
 </p><p>
-Robots incur damage expressed as a percent value. When 100% damage is
-reached, the robot is "dead", and ceases to function. However, damage
-has no effect on operational ability. A robot with 99% damage operates
-as well as one with no damage.
+Robots have health expressed as a percent value. Health starts at 100%
+and decreases with damage. When 0% health is reached, the robot is
+"dead", and ceases to function. However, damage has no effect on
+operational ability. A robot with 1% health operates as well as one with
+no damage.
 </p>
 <a name="anchor5"></a>
 <h1>5. THE BATTLEFIELD</h1>
@@ -228,38 +208,48 @@ Upon start up, robots are placed in random quadrants.
 <a name="anchor6"></a>
 <h1>6. THE ROBOT TCL LANGUAGE</h1>
 <p>
-Robot control programs are written in the Tcl language. The following
-Tcl commands are available:
-</p><pre>
-     after      if         rename
-     append     incr       return
-     array      join       scan
-     break      lappend    set
-     case       lindex     source
-     catch      linsert    split
-     concat     list       string
-     continue   llength    subst
-     error      lrange     switch
-     eval       lreplace   time
-     exit       lsearch    trace
-     expr       lsort      unset
-     file       pid        update
-     for        proc       uplevel
-     foreach    rand       upvar
-     format     regexp     while
-     global     regsub
+Robot control programs are written in the Tcl language. The robot
+programs are run in separate safe interpreters.
+</p><p>
+The following Tcl commands are available:
+</p><p><pre>
+   after    append    apply    array
+   binary   break     catch    chan
+   clock    close     concat   continue
+   dict     eof       error    eval
+   expr     fblocked  fcopy    fileevent
+   flush    for       foreach  format
+   gets     global    if       incr
+   info     interp    join     lappend
+   lassign  lindex    linsert  list
+   llength  lrange    lrepeat  lreplace
+   lsearch  lset      lsort    namespace
+   package  pid       proc     puts
+   read     regexp    regsub   rename
+   return   scan      seek     set
+   split    string    subst    switch
+   tell     time      trace    unset
+   update   uplevel   upvar    variable
+   vwait    while
+</pre></p><p>
+The following Tcl commands are not available:
+</p><p><pre>
+   cd          encoding  exec    exit
+   fconfigure  file      glob    load
+   open        pwd       socket  source
+   unload
 </pre></p>
+
 <a name="anchor7"></a>
 <h1>7. THE ROBOT HARDWARE INTERFACES</h1>
 <p>
-The following Tcl commands are the interface to the robot's hardware
-(syscalls.) Each interface command takes a minimum of 100 milliseconds
-to complete, except: the scanner com- mand, which requires 200
-milliseconds per execution; team communications commands team_get and
-team_send execute without delay. Commands that take arguments will
-return -1 if any argument is out of valid ranges. For degrees, valid
-values are 0-359; for speed, 0-100, for resolution, 0-10, for cannon
-range, 0-700.
+The following Tcl commands are the interface to the robot's hardware;
+the syscalls. Each interface command takes 1 clock tick to complete,
+except: the scanner command, which requires 2 clock ticks per execution;
+team communications commands team_get and team_send execute without
+delay. Commands that take arguments will return -1 if any argument is
+out of valid ranges. For degrees, valid values are 0-359; for speed,
+0-100, for resolution, 0-10, for cannon range, 0-700.
 </p>
 <a name="anchor7.1"></a>
 <h2>7.1 Basic syscalls</h2>
@@ -300,7 +290,7 @@ DESCRIPTION
 </p><p>
 The dsp command returns a list of two integers, the first element is the
 digital signature of the last robot found using the scanner. The second
-element is the percent of damage the scanned robot has accumulated, 0-99
+element is the percent of health the scanned robot has remaining, 1-100
 percent. Each robot in a battle has a distinct signature. If nothing was
 found during the last scan (scanner command returned 0), then the dsp
 command will return "0 0".
@@ -359,6 +349,8 @@ SYNOPSIS
 <strong>health</strong>
 </p><p class="item_name">
 DESCRIPTION
+</p><p>
+The health command returns the current health, 1-100 percent.
 </p><p>
 Cost: 1 tick.
 </p>
@@ -475,8 +467,8 @@ SYNOPSIS
 </p><p class="item_name">
 DESCRIPTION
 </p><p>
-The tick command returns the current clock tick. The clock tick is set
-to 0 at game startup.
+The tick command returns the current clock tick of the battle. The clock
+tick is set to 0 at game startup.
 </p><p>
 Cost: 1 tick.
 </p>
@@ -580,11 +572,13 @@ SYNOPSIS
 </p><p class="item_name">
 DESCRIPTION
 </p><p>
-The rand command is a simple random number generator, based on Knuth's
-algorithm. The rand command returns an integer between 0 and ( max - 1),
-where max is in the range 1 to 65535. The seed value is randomly set; if
-a particular seed value is desired, the global variable _lastvalue
-should be set to some starting value.
+The rand command uses the Tcl mathfunc rand to generate a random integer
+between 0 and (max - 1). The seed value is randomly set at game
+startup. The seed value is reported at battle end to enable the
+possibility to re-run battles.
+</p><p>
+Note that since Tcl mathfunc rand is not cryptographically secure you
+should not let your TclRobot select your passwords.
 </p><p>
 Cost: 0 ticks.
 </p>
