@@ -35,14 +35,17 @@ TABLE OF CONTENTS
 
 TclRobots is a programming game where you must write a Tcl program that
 controls a robot. The robot's mission is to survive a battle with other
-robots. At least two robots compete during a battle, each running
-different programs (or possibly the same program in different robots.)
-Each robot is equipped with a scanner, cannon, drive mechanism. A single
-match con- tinues until one robot is left running. Robots may compete
-individually, or combine in a team oriented battle. A tour- nament can
-be run with any number of robot programs, each robot playing every other
-in a round-robin fashion, one-on- one. A battle simulator is available
-to help debug robot programs.
+robots.
+
+At least two robots compete during a battle, each running different
+programs (or possibly the same program in different robots). Each robot
+is equipped with a scanner, cannon, drive mechanism. A single match
+continues until one robot is left running. Robots may compete
+individually, or combine in a team oriented battle. A tournament can be
+run with any number of robot programs, each robot playing every other in
+a round-robin fashion, one-on-one.
+
+A battle simulator is available to help debug robot programs.
 
 The TclRobots program provides a physical environment, imposing certain
 game parameters to which all robots must adhere. TclRobots also provides

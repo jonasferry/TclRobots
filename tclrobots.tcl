@@ -16,7 +16,7 @@
 #
 # COPYRIGHT
 #
-#   Jonas Ferry (jonas.ferry@gmail.com), 2010. Licensed under the
+#   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
 #   Simplified BSD License. See LICENSE file for details.
 #
 #******
