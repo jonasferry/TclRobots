@@ -58,7 +58,7 @@ proc init_sim {} {
     $::run_b   configure -state disabled -command reset
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
-    $::about_b configure -state disabled
+    $::help_b  configure -state disabled
     $::quit_b  configure -state disabled
 
     # init is defined in tclrobots.tcl
