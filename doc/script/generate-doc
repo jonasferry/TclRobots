@@ -90,10 +90,6 @@ proc gen_readme {} {
     set   dest [open ./README w]
 
     set   text [read $src]
-    # Remove comments so text can be viewed in ASCII README, but hidden
-    # in HTML README
-    set   text [regsub -all -- {<!--} $text {}]
-    set   text [regsub -all -- {-->}  $text {}]
 
     # Strip all HTML tags
     puts  $dest [regsub -all -- {<[^>]*>} $text {}]
