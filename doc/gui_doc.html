@@ -40,7 +40,7 @@
 </ul>
 </ul>
 <li>2.9. <a href="#robo24">init_gui/tournament</a></li>
-<li>2.10. <a href="#robo25">init_gui/about</a></li>
+<li>2.10. <a href="#robo25">init_gui/help</a></li>
 </ul>
 <li>3. <a href="#robo26">gui/update_gui</a></li>
 <ul>
@@ -148,7 +148,7 @@
                          -command {source $::thisDir/simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                          -command tournament]
-    set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
+    set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
     set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
                          -command "destroy ."]
 
@@ -157,7 +157,7 @@
     grid $::run_b     -column 0 -row 0 -sticky nsew
     grid $::sim_b     -column 1 -row 0 -sticky nsew
     grid $::tourn_b   -column 2 -row 0 -sticky nsew
-    grid $::about_b   -column 3 -row 0 -sticky nsew
+    grid $::help_b   -column 3 -row 0 -sticky nsew
     grid $::quit_b    -column 4 -row 0 -sticky nsew
 
     grid columnconfigure $::buttons_f all -weight 1
@@ -622,7 +622,7 @@
     $::run_b   configure -state normal   -text "Halt" -command halt
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
-    $::about_b configure -state disabled
+    $::help_b  configure -state disabled
     $::quit_b  configure -state disabled
 
     # Init robots
@@ -697,7 +697,7 @@
     $::run_b   configure -state normal -text "Reset" -command reset
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
-    $::about_b configure -state disabled
+    $::help_b  configure -state disabled
     $::quit_b  configure -state disabled
 }
 </pre>
@@ -728,7 +728,7 @@
     $::run_b   configure -state normal -text "Run Battle" -command init_battle
     $::sim_b   configure -state normal
     $::tourn_b configure -state normal
-    $::about_b configure -state normal
+    $::help_b  configure -state normal
     $::quit_b  configure -state normal
 }
 </pre>
@@ -927,18 +927,37 @@
 <p>   TBD
 </p>
 <a name="robo25"></a>
-<a name="init5fgui2fabout"></a>
-<h2>2.10.  init_gui/about [ procedure ]  </h2>
+<a name="init5fgui2fhelp"></a>
+<h2>2.10.  init_gui/help [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<p>   about
+<p>   help
 </p>
 <p class="item_name">DESCRIPTION</p>
-<p>   about box
+<p>   Displays the README file in a separate text window.
 </p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc about {} {
-    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
+<pre class="source">proc help {} {
+    # Create new toplevel and apply some settings
+    toplevel .help
+    grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
 
+    # Create the text box and the scrollbar
+    set help_t [tk::text .help.t -width 80 -height 40 \
+                    -yscrollcommand ".help.s set"]
+    set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
+                    -orient vertical]
+
+    # Grid the text box and scrollbar
+    grid $help_t -column 0 -row 0 -sticky nsew
+    grid $help_s -column 1 -row 0 -sticky ns
+
+    # Read README file
+    set f    [open $::thisDir/README]
+    set text [read $f]
+    close $f
+
+    # Insert text into text box
+    $help_t insert 1.0 $text
 }
 </pre>
 <a name="robo26"></a>

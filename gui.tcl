@@ -96,7 +96,7 @@ proc init_gui {} {
                          -command {source $::thisDir/simulator.tcl; init_sim}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                          -command tournament]
-    set ::about_b   [ttk::button .f1.b3 -text "About" -command about]
+    set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
     set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
                          -command "destroy ."]
 
@@ -105,7 +105,7 @@ proc init_gui {} {
     grid $::run_b     -column 0 -row 0 -sticky nsew
     grid $::sim_b     -column 1 -row 0 -sticky nsew
     grid $::tourn_b   -column 2 -row 0 -sticky nsew
-    grid $::about_b   -column 3 -row 0 -sticky nsew
+    grid $::help_b   -column 3 -row 0 -sticky nsew
     grid $::quit_b    -column 4 -row 0 -sticky nsew
 
     grid columnconfigure $::buttons_f all -weight 1
@@ -227,7 +227,7 @@ proc gui_settings {} {
 #******
 
 proc create_icon {} {
-    # define our battle tank icon used in the About popup
+    # define our battle tank icon used in the finished battle popup
     set ::tr_icon {
         #define tr_width 48
         #define tr_height 48
@@ -653,7 +653,7 @@ proc init_battle {} {
     $::run_b   configure -state normal   -text "Halt" -command halt
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
-    $::about_b configure -state disabled
+    $::help_b  configure -state disabled
     $::quit_b  configure -state disabled
 
     # Init robots
@@ -734,7 +734,7 @@ proc halt {} {
     $::run_b   configure -state normal -text "Reset" -command reset
     $::sim_b   configure -state disabled
     $::tourn_b configure -state disabled
-    $::about_b configure -state disabled
+    $::help_b  configure -state disabled
     $::quit_b  configure -state disabled
 }
 #******
@@ -768,7 +768,7 @@ proc reset {} {
     $::run_b   configure -state normal -text "Run Battle" -command init_battle
     $::sim_b   configure -state normal
     $::tourn_b configure -state normal
-    $::about_b configure -state normal
+    $::help_b  configure -state normal
     $::quit_b  configure -state normal
 }
 #******
@@ -992,21 +992,40 @@ proc brightness color {
 #
 #******
 
-#****P* init_gui/about
+#****P* init_gui/help
 #
 # NAME
 #
-#   about
+#   help
 #
 # DESCRIPTION
 #
-#   about box
+#   Displays the README file in a separate text window.
 #
 # SOURCE
 #
-proc about {} {
-    tk_dialog2 .about "About TclRobots" "TclRobots\n\nCopyright 2010\nJonas Ferry\njonas.ferry@gmail.com\n\nDevelopment Version\nFebruary, 2010\n" "-image iconfn" 0 dismiss
+proc help {} {
+    # Create new toplevel and apply some settings
+    toplevel .help
+    grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
 
+    # Create the text box and the scrollbar
+    set help_t [tk::text .help.t -width 80 -height 40 \
+                    -yscrollcommand ".help.s set"]
+    set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
+                    -orient vertical]
+
+    # Grid the text box and scrollbar
+    grid $help_t -column 0 -row 0 -sticky nsew
+    grid $help_s -column 1 -row 0 -sticky ns
+
+    # Read README file
+    set f    [open $::thisDir/README]
+    set text [read $f]
+    close $f
+
+    # Insert text into text box
+    $help_t insert 1.0 $text
 }
 #******
 
