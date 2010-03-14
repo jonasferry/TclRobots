@@ -1010,7 +1010,7 @@ proc help {} {
     grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
 
     # Create the text box and the scrollbar
-    set help_t [tk::text .help.t -width 80 -height 40 \
+    set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
                     -yscrollcommand ".help.s set"]
     set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
                     -orient vertical]
