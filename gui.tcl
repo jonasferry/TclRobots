@@ -6,7 +6,7 @@
 #
 # DESCRIPTION
 #
-#   This file contains the GUI description of TclRobots.
+#   This file contains the GUI description of the TclRobots main window.
 #
 #   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
 #   on TclRobots 2.0 by Tom Poindexter.
@@ -82,37 +82,9 @@ proc init_gui {} {
             lappend ::parms(paths) $path
         }
     }
-    # Create and grid the outer content frame
-    # The button row
-    grid columnconfigure . 0 -weight 1
-    # The content frames sel and game
-    grid rowconfigure    . 2 -weight 1
-
-    # Create button frame and buttons
-    set ::buttons_f [ttk::frame .f1]
-    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" -command init_battle]
-    # init_sim is defined in simulator.tcl
-    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
-                         -command {source $::thisDir/simulator.tcl; init_sim}]
-    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
-                         -command tournament]
-    set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
-    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
-                         -command "destroy ."]
-
-    # Grid button frame and buttons
-    grid $::buttons_f -column 0 -row 0 -sticky nsew
-    grid $::run_b     -column 0 -row 0 -sticky nsew
-    grid $::sim_b     -column 1 -row 0 -sticky nsew
-    grid $::tourn_b   -column 2 -row 0 -sticky nsew
-    grid $::help_b    -column 3 -row 0 -sticky nsew
-    grid $::quit_b    -column 4 -row 0 -sticky nsew
-
-    grid columnconfigure $::buttons_f all -weight 1
-
     wm title . "TclRobots"
     wm iconname . TclRobots
-    wm protocol . WM_DELETE_WINDOW "catch {$::quit_b invoke}"
+    wm protocol . WM_DELETE_WINDOW "catch {.f1.b4 invoke}"
 
     # The info label
     set ::StatusBarMsg "Select robot files for battle"
@@ -179,30 +151,14 @@ proc init_gui {} {
     grid rowconfigure $sel1_f        1 -weight 1
     grid rowconfigure $robotlist_f all -weight 1
 
-    # The contents frame contains two frames
-    #set ::game_f [ttk::frame .f3 -width 520 -height 520]
-    set ::game_f [ttk::frame .f3]
+    # Create widgets common to battle, simulator and tournament
+    create_common_widgets
 
-    create_arena
-
-    # The robot health list
-    set ::robotHealth {}
-    set ::robotHealth_lb [listbox $::game_f.h -background black \
-                              -listvariable ::robotHealth]
-    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
-
-    # The robot message box
-    set ::robotMsg {}
-    set ::robotMsg_lb [listbox $::game_f.msg -background black \
-                           -listvariable ::robotMsg]
-
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
-    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
-    grid columnconfigure $::game_f 0 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-
+    # Source all relevant files to make their procedures available to
+    # each other.
+    source $::thisDir/battle.tcl
+    source $::thisDir/simulator.tcl
+    source $::thisDir/tournament.tcl
 }
 #******
 
@@ -279,6 +235,66 @@ proc ellipsepath {x y rx ry} {
             a $rx $ry 0 1 1 0 [*  2 $ry] \
             a $rx $ry 0 1 1 0 [* -2 $ry] \
             Z
+}
+#******
+
+#****P* init_gui/create_common_widgets
+#
+# NAME
+#
+#   create_common_widgets
+#
+# DESCRIPTION
+#
+#   Create widgets common to battle, simulator and tournament.
+#
+# SOURCE
+#
+proc create_common_widgets {} {
+    # Create and grid the outer content frame
+    # The button row
+    grid columnconfigure . 0 -weight 1
+    # The content frames sel and game
+    grid rowconfigure    . 2 -weight 1
+
+    # Create button frame and buttons
+    set ::buttons_f [ttk::frame .f1]
+    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
+                         -command {init_mode battle}]
+    # init_sim is defined in simulator.tcl
+    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
+                         -command {init_mode simulator}]
+    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
+                         -command {init_mode tournament}]
+    set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
+    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
+                         -command "destroy ."]
+
+    # Grid button frame and buttons
+    grid $::buttons_f -column 0 -row 0 -sticky nsew
+    grid $::run_b     -column 0 -row 0 -sticky nsew
+    grid $::sim_b     -column 1 -row 0 -sticky nsew
+    grid $::tourn_b   -column 2 -row 0 -sticky nsew
+    grid $::help_b    -column 3 -row 0 -sticky nsew
+    grid $::quit_b    -column 4 -row 0 -sticky nsew
+
+    grid columnconfigure $::buttons_f all -weight 1
+
+    # The contents frame contains two frames
+    set ::game_f [ttk::frame .f3]
+
+    create_arena
+
+    # The robot health list
+    set ::robotHealth {}
+    set ::robotHealth_lb [listbox $::game_f.h -background black \
+                              -listvariable ::robotHealth]
+    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
+
+    # The robot message box
+    set ::robotMsg {}
+    set ::robotMsg_lb [listbox $::game_f.msg -background black \
+                           -listvariable ::robotMsg]
 }
 #******
 
@@ -563,7 +579,7 @@ proc remove_all {} {
 #
 # DESCRIPTION
 #
-#   The battle field canvas
+#   The battle field canvas.
 #
 # SOURCE
 #
@@ -614,60 +630,51 @@ proc highlightRobot {} {
 }
 #******
 
-#****P* init_gui/init_battle
+#****P* init_gui/init_mode
 #
 # NAME
 #
-#   init_battle
+#   init_mode
+#
+# SYNOPSIS
+#
+#  init_mode mode
 #
 # DESCRIPTION
 #
-#   Start a match
+#   Start a single battle, the simulator or a tournament depending on the
+#   mode argument.
 #
 # SOURCE
 #
-proc init_battle {} {
-
-    if {[llength $::robotList] < 2} {
-    	tk_dialog2 .morerobots "More robots!" "Please select at least two robots" "-image iconfn" 0 dismiss
-        return
+proc init_mode {mode} {
+    # Check that the number of selected robots is correct
+    switch $mode {
+        battle {
+            if {[llength $::robotList] < 2} {
+                tk_dialog2 .morerobots "More robots!" \
+                    "Please select at least two robots" "-image iconfn" \
+                    0 dismiss
+                return
+            } else {
+                init_battle
+            }
+        }
+        simulator {
+            if {[llength $::robotList] == 0} {
+                tk_dialog2 .morerobots "More robots!" \
+                    "Please select at least one robot" "-image iconfn" \
+                    0 dismiss
+                return
+            } else {
+                init_sim
+            }
+        }
+        tournament {
+            # Should be init_tourn
+            init_sim
+        }
     }
-
-    set ::halted  0
-
-    set ::StatusBarMsg "Initializing..."
-
-    # get robot filenames from window
-    set ::robotFiles $::robotList
-
-    grid forget $::sel_f
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    show_arena
-
-    # Clear message boxes
-    set ::robotHealth {}
-    set ::robotMsg    {}
-
-    # start robots
-    set ::StatusBarMsg "Running"
-    button_state disabled "Halt" halt
-
-    # Init robots
-    init
-
-    # Init robots on GUI
-    gui_init_robots
-
-    # Start game
-    run_game
-
-    # find winnner
-    if {$::halted} {
-        set ::StatusBarMsg "Battle halted"
-    } else {
-        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
-    }
-    button_state disabled "Reset" reset
 }
 #******
 
@@ -706,79 +713,6 @@ proc show_arena {} {
 
     $::arena_c configure -scrollregion [$::arena_c bbox wall]
     $::arena_c lower wall
-}
-#******
-
-#****P* init_battle/halt
-#
-# NAME
-#
-#   halt
-#
-# DESCRIPTION
-#
-#   halt a running match
-#
-# SOURCE
-#
-proc halt {} {
-    set ::running 0
-    set ::StatusBarMsg "Stopping battle, standby"
-    set ::halted 1
-
-    button_state disabled "Reset" reset
-}
-#******
-
-#****P* halt/reset
-#
-# NAME
-#
-#   reset
-#
-# DESCRIPTION
-#
-#   reset to file select state
-#
-# SOURCE
-#
-proc reset {} {
-    clean_up
-
-    if {$::data(tkp)} {
-        $::arena_c delete {*}[$::arena_c children 0]
-    } else {
-        $::arena_c delete all
-    }
-
-    grid forget $::game_f
-    destroy $::game_f.sim
-    grid $::sel_f -column 0 -row 2 -sticky nsew
-
-    set ::StatusBarMsg "Select robot files for battle"
-    button_state normal "Run Battle" init_battle
-}
-#******
-
-#****P* reset/clean_up
-#
-# NAME
-#
-#   clean_up
-#
-# DESCRIPTION
-#
-#   clean up all left overs
-#
-# SOURCE
-#
-proc clean_up {} {
-    set ::StatusBarMsg "Standby, cleaning up any left overs...."
-    update
-
-    foreach robot $::activeRobots {
-        disable_robot $robot
-    }
 }
 #******
 

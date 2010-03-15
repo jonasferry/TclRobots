@@ -6,7 +6,8 @@
 #
 # DESCRIPTION
 #
-#   This file contains the simulator of TclRobots.
+#   This file contains the GUI description of the TclRobots simulator
+#   mode.
 #
 #   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
 #   on TclRobots 2.0 by Tom Poindexter.
@@ -34,9 +35,6 @@
 #
 proc init_sim {} {
     # Read from robot file names; only the first file is used
-    if {[llength $::robotList] == 0} {
-        return
-    }
     set ::robotFiles [lrange $::robotList 0 0]
 
     set halted  0
@@ -44,13 +42,21 @@ proc init_sim {} {
     set ::StatusBarMsg "Simulator"
 
     grid forget $::sel_f
-#    grid forget $::robotHealth_lb
-#    grid forget $::robotMsg_lb
-#    grid $::robotMsg_lb -column 1 -row 0
+
+    # The simulator shows the arena, the message box and the simulator
+    # controls. Simulator controls are defined later.
     grid $::game_f -column 0 -row 2 -sticky nsew
+    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $::robotMsg_lb    -column 1 -row 0            -sticky nsew
+    grid columnconfigure $::game_f 0 -weight 1
+    grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $::game_f 1 -weight 1
 
     # show_arena is defined in gui.tcl
     show_arena
+
+    # Clear message box
+    set ::robotMsg    {}
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
@@ -67,6 +73,7 @@ proc init_sim {} {
     set ::data(r0,code) [read $f]
     close $f
 
+    # Make target run a dummy program
     set ::data(target,code) {while {1} {set x [loc_x]}}
 
     set ::activeRobots $::allRobots
@@ -86,12 +93,53 @@ proc init_sim {} {
     act
     tick
 
-    # Make room for simulation controls
-    grid configure $::arena_c -rowspan 3
-
     # Create and grid the simulation control box
-    set  sim_f      [ttk::frame $::game_f.sim]
-    grid $sim_f     -column 1 -row 1 -sticky nsew
+    create_simctrl
+
+    # Start simulation, start in single step mode
+    set ::running 1
+    set ::step 1
+    coroutine sim_robotCo sim_robot
+    vwait ::running
+    puts "activerobots: $::activeRobots"
+
+
+    # TCLROBOTS 2.0 CODE FOLLOWS, MAYBE USEFUL
+    if 0 {
+    set step 1
+
+    # override binding for Any-Keypress, but save others
+    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
+                   .debug.fb.h .debug.fb.d} {
+        set cur_bind [bind Entry]
+        foreach c $cur_bind {
+            bind $e $c "[bind Entry $c] ; return -code break"
+        }
+        bind $e <KeyPress> {num_only %W %A}
+    }
+
+    # set initial step state
+    #do_step
+    sim
+    }
+}
+#******
+
+#****P* init_sim/create_simctrl
+#
+# NAME
+#
+#   create_simctrl
+#
+# DESCRIPTION
+#
+#   Create and grid the simulation control box.
+#
+# SOURCE
+#
+proc create_simctrl {} {
+    set  sim_f  [ttk::frame $::game_f.sim]
+    grid $sim_f -column 1 -row 1 -sticky nsew
 
     # Create and grid first row of simulation control box
     set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
@@ -168,7 +216,6 @@ proc init_sim {} {
     }
 
     # Create and grid second row of simulation status box
-    #set simctrl2_f   [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
     set speedstat_l  [ttk::label $sim_f.f1.sl   -text "Speed"]
     set speedstat_e  [ttk::entry $sim_f.f1.se   -width $e_width \
                           -textvariable ::data(r0,speed)]
@@ -179,7 +226,6 @@ proc init_sim {} {
     set healthstat_e [ttk::entry $sim_f.f1.hthe -width $e_width \
                           -textvariable ::data(r0,health)]
 
-    #grid $simctrl2_f   -column 0 -row 2 -sticky nsew
     grid $speedstat_l  -column 0 -row 1 -sticky nsew
     grid $speedstat_e  -column 1 -row 1 -sticky nw
     grid $hdgstat_l    -column 2 -row 1 -sticky nsew
@@ -214,7 +260,6 @@ proc init_sim {} {
     }
 
     # Create and grid third row of simulation status box
-    #set simctrl3_f [ttk::frame $sim_f.f3    -relief raised -borderwidth 2]
     set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
     set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
                         -textvariable ::sim_syscall -anchor w]
@@ -225,7 +270,6 @@ proc init_sim {} {
     set barrel1_l  [ttk::label $sim_f.f1.b1 -width $e_width \
                         -textvariable ::data(r0,btemp)]
 
-    #grid $simctrl3_f -column 0 -row 3 -sticky nsew
     grid $lastsys0_l -column 0 -row 2 -sticky nsew
     grid $lastsys1_l -column 1 -row 2 -sticky nwe
     grid $tick0_l    -column 2 -row 2 -sticky nsew
@@ -265,46 +309,11 @@ proc init_sim {} {
             grid columnconfigure $w $i -weight 1
         }
     }
-
-
-
-    if 0 {
-        for {set i 0} {$i < 6} {incr i} {
-            grid columnconfigure $sim_f.f2 $i -weight 1
-        }
-    }
-
     grid columnconfigure $sim_f 0 -weight 1
-
-    # Start simulation, start in single step mode
-    set ::running 1
-    set ::step 1
-    coroutine sim_robotCo sim_robot
-    vwait ::running
-    puts "activerobots: $::activeRobots"
-
-    if 0 {
-    set step 1
-
-    # override binding for Any-Keypress, but save others
-    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
-                   .debug.fb.h .debug.fb.d} {
-        set cur_bind [bind Entry]
-        foreach c $cur_bind {
-            bind $e $c "[bind Entry $c] ; return -code break"
-        }
-        bind $e <KeyPress> {num_only %W %A}
-    }
-
-    # set initial step state
-    #do_step
-    sim
-    }
-
 }
 #******
 
-#****P* init_sim/end_sim
+#****P* create_simctrl/end_sim
 #
 # NAME
 #
@@ -322,7 +331,7 @@ proc end_sim {} {
 }
 #******
 
-#****P* init_sim/ver_range
+#****P* create_simctrl/ver_range
 #
 # NAME
 #
@@ -346,7 +355,7 @@ proc ver_range {var low high} {
 }
 #******
 
-#****P* init_sim/examine
+#****P* create_simctrl/examine
 #
 # NAME
 #
@@ -365,7 +374,7 @@ proc examine {} {
 }
 #******
 
-#****P* init_sim/setval
+#****P* create_simctrl/setval
 #
 # NAME
 #
@@ -426,7 +435,7 @@ proc sim_robot {} {
         # GUI
         show_robots
         show_scan
-        show_health
+        #show_health
 
         tick
 

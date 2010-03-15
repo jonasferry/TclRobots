@@ -1,0 +1,152 @@
+<h3>TABLE OF CONTENTS</h3>
+<ul>
+<li>1. <a href="#robo0">battle/file_header</a></li>
+<li>2. <a href="#robo1">battle/init_battle</a></li>
+<ul>
+<li>2.1. <a href="#robo2">init_battle/halt</a></li>
+<li>2.2. <a href="#robo3">init_battle/reset</a></li>
+<ul>
+<li>2.2.1. <a href="#robo4">reset/clean_up</a></li>
+</ul>
+</ul>
+</ul>
+<a name="robo0"></a>
+<a name="battle2ffile5fheader"></a>
+<h1>1.  battle/file_header [ file ]  </h1>
+<p class="item_name">NAME</p>
+<p>   battle.tcl
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   This file contains the GUI description of the TclRobots single
+   battle mode.
+</p>
+
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+   on TclRobots 2.0 by Tom Poindexter.
+</p>
+
+<p>   See http://tclrobots.org for more information.
+</p>
+<p class="item_name">COPYRIGHT</p>
+<p>   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
+   Simplified BSD License. See LICENSE file for details.
+</p>
+<a name="robo1"></a>
+<a name="battle2finit5fbattle"></a>
+<h1>2.  battle/init_battle [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   init_battle
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Starts a single battle.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc init_battle {} {
+    # get robot filenames from window
+    set ::robotFiles $::robotList
+
+    grid forget $::sel_f
+
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    grid $::game_f -column 0 -row 2 -sticky nsew
+    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
+    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
+    grid columnconfigure $::game_f 0 -weight 1
+    grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $::game_f 1 -weight 1
+
+    show_arena
+
+    # Clear message boxes
+    set ::robotHealth {}
+    set ::robotMsg    {}
+
+    # start robots
+    set ::StatusBarMsg "Running"
+    set ::halted  0
+    button_state disabled "Halt" halt
+
+    # Init robots
+    init
+
+    # Init robots on GUI
+    gui_init_robots
+
+    # Start game
+    run_game
+
+    # find winnner
+    if {$::halted} {
+        set ::StatusBarMsg "Battle halted"
+    } else {
+        tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
+    }
+    button_state disabled "Reset" reset
+}
+</pre>
+<a name="robo2"></a>
+<a name="init5fbattle2fhalt"></a>
+<h2>2.1.  init_battle/halt [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   halt
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   halt a running match
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc halt {} {
+    set ::running 0
+    set ::StatusBarMsg "Stopping battle, standby"
+    set ::halted 1
+
+    button_state disabled "Reset" reset
+}
+</pre>
+<a name="robo3"></a>
+<a name="init5fbattle2freset"></a>
+<h2>2.2.  init_battle/reset [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   reset
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   reset to file select state
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc reset {} {
+    clean_up
+
+    if {$::data(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
+    grid forget $::game_f
+    destroy $::game_f.sim
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+
+    set ::StatusBarMsg "Select robot files for battle"
+    button_state normal "Run Battle" {init_mode battle}
+}
+</pre>
+<a name="robo4"></a>
+<a name="reset2fclean5fup"></a>
+<h3>2.2.1.  reset/clean_up [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   clean_up
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   clean up all left overs
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc clean_up {} {
+    set ::StatusBarMsg "Standby, cleaning up any left overs...."
+    update
+
+    foreach robot $::activeRobots {
+        disable_robot $robot
+    }
+}
+</pre>
+
