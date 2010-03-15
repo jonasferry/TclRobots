@@ -347,10 +347,10 @@ proc end_sim {} {
 proc ver_range {var low high} {
     set val $::data(r0,$var)
     if {$val < $low} {
-        set $var $low
+        set val $low
     }
     if {$val > $high} {
-        set $var $high
+        set val $high
     }
     set ::data(r0,$var) $val
 }

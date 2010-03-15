@@ -295,7 +295,7 @@
 <pre class="source">proc init_rand {} {
     # Set random seed. Note that this works on Linux and Mac, but needs
     # to be done differently on Windows.
-    if {![info exist ::seed]} {
+    if {![info exists ::seed]} {
         set ::seed [* [pid] [file atime /dev/tty]]
     }
     srand $::seed
@@ -312,9 +312,12 @@
 <pre class="source">proc init_robots {} {
     global data allRobots
 
+    set allSigs {}
     set file_index 0
     foreach robot $allRobots {
         set data($robot,interp) [interp create -safe]
+        # Stop robots from using another rand than the syscall
+        $data($robot,interp) eval {rename tcl::mathfunc::rand {}}
 
         set name [file tail [lindex $::robotFiles $file_index]]
         incr file_index
@@ -322,8 +325,12 @@
         set x [mrand 1000]
         set y [mrand 1000]
 
-        # generate a new signature  FIXA: avoid duplicates?
+        # generate a new unique signature
         set newsig [mrand 65535]
+        while {$newsig in $allSigs} {
+            set newsig [mrand 65535]
+        }
+        lappend allSigs $newsig
 
         #########
         # set robot parms
@@ -927,7 +934,7 @@
             }
         }
     }
-    return $num_rob $diffteam $num_team
+    return [list $num_rob $diffteam $num_team]
 }
 </pre>
 <a name="robo22"></a>
@@ -1237,9 +1244,9 @@
         set val 0
     } elseif {$data($robot,reload)} {
         set val 0
-    } elseif [catch {set deg [round $deg]}] {
+    } elseif {[catch {set deg [round $deg]}]} {
         set val -1
-    } elseif [catch {set rng [round $rng]}] {
+    } elseif {[catch {set rng [round $rng]}]} {
         set val -1
     } elseif {($deg &lt; 0) || ($deg &gt; 359)} {
         set val -1

@@ -330,13 +330,14 @@ proc fileBox {win txt filt initfile startdir execproc} {
     ttk::frame $win.l
     ttk::scrollbar $win.l.hor -orient horizontal -command "$win.l.lst xview"
     ttk::scrollbar $win.l.ver -orient vertical   -command "$win.l.lst yview"
-    listbox $win.l.lst -yscroll "$win.l.ver set" -xscroll "$win.l.hor set" \
+    listbox $win.l.lst -yscrollcommand "$win.l.ver set" \
+            -xscrollcommand "$win.l.hor set" \
 	    -selectmode single -relief sunken
 
     ttk::label $win.l3   -text "Selection" -anchor w
     ttk::scrollbar $win.scrl -orient horizontal \
         -command "$win.sel xview"
-    ttk::entry $win.sel -xscroll "$win.scrl set"
+    ttk::entry $win.sel -xscrollcommand "$win.scrl set"
     selInsert $win $initfile
     grid $win.l.lst $win.l.ver -sticky news
     grid $win.l.hor            -sticky we
@@ -502,9 +503,9 @@ proc fillLst {win filt dir} {
     if {[string length $filt] == 0} {
         set filt *
     }
-    set all_list [lsort -dictionary [glob -nocomplain -type d $dir/*]]
+    set all_list [lsort -dictionary [glob -nocomplain -types d $dir/*]]
     lappend all_list \
-            {*}[lsort -dictionary [glob -nocomplain -type f $dir/$filt]]
+            {*}[lsort -dictionary [glob -nocomplain -types f $dir/$filt]]
 
     set dlist [list "$dir/../"]
     set flist ""
@@ -1325,7 +1326,7 @@ proc tk_dialog2 {w title text bitmap default args} {
             [winfo vrootx [winfo parent $w]]}]
     set y [expr {[winfo screenheight $w]/2 - [winfo reqheight $w]/2  - \
             [winfo vrooty [winfo parent $w]]}]
-    wm geom $w +$x+$y
+    wm geometry $w +$x+$y
     wm deiconify $w
 
     # 5. Set a grab and claim the focus too.

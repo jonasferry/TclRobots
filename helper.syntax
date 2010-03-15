@@ -1,0 +1,28 @@
+# Helpers since Nagelfar does not understand 8.6 yet
+
+# Mathops
+##nagelfar syntax + x*
+##nagelfar syntax - x*
+##nagelfar syntax * x*
+##nagelfar syntax / x x*
+##nagelfar syntax % x x
+
+# Mathfuncs
+##nagelfar syntax round x
+##nagelfar syntax atan x
+##nagelfar syntax sin x
+##nagelfar syntax cos x
+##nagelfar syntax srand x
+##nagelfar syntax hypot x x
+##nagelfar syntax int x
+##nagelfar syntax atan2 x x
+##nagelfar syntax rand 0
+##nagelfar syntax max  x x*
+
+# Others 8.6
+##nagelfar syntax coroutine x x x*
+##nagelfar syntax yield x?
+
+# Others unknown to Nagelfar
+##nagelfar syntax tkp::canvas x p*
+##nagelfar syntax html x p*

@@ -261,7 +261,7 @@ proc init_trig_tables {} {
 proc init_rand {} {
     # Set random seed. Note that this works on Linux and Mac, but needs
     # to be done differently on Windows.
-    if {![info exist ::seed]} {
+    if {![info exists ::seed]} {
         set ::seed [* [pid] [file atime /dev/tty]]
     }
     srand $::seed
@@ -958,7 +958,7 @@ proc check_health {} {
             }
         }
     }
-    return $num_rob $diffteam $num_team
+    return [list $num_rob $diffteam $num_team]
 }
 #******
 
@@ -1306,9 +1306,9 @@ proc sysCannon {robot} {
         set val 0
     } elseif {$data($robot,reload)} {
         set val 0
-    } elseif [catch {set deg [round $deg]}] {
+    } elseif {[catch {set deg [round $deg]}]} {
         set val -1
-    } elseif [catch {set rng [round $rng]}] {
+    } elseif {[catch {set rng [round $rng]}]} {
         set val -1
     } elseif {($deg < 0) || ($deg > 359)} {
         set val -1
