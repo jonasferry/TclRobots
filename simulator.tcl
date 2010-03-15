@@ -56,7 +56,7 @@ proc init_sim {} {
     show_arena
 
     # Clear message box
-    set ::robotMsg    {}
+    set ::robotMsg {}
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
@@ -100,8 +100,9 @@ proc init_sim {} {
     set ::running 1
     set ::step 1
     coroutine sim_robotCo sim_robot
-    vwait ::running
-    puts "activerobots: $::activeRobots"
+#    vwait ::running
+#    end_sim
+#    puts "activerobots: $::activeRobots"
 
 
     # TCLROBOTS 2.0 CODE FOLLOWS, MAYBE USEFUL
@@ -326,7 +327,7 @@ proc create_simctrl {} {
 # SOURCE
 #
 proc end_sim {} {
-    # reset is defined in gui.tcl
+    # reset is defined in battle.tcl
     reset
 }
 #******
@@ -421,7 +422,6 @@ proc sim_robot {} {
             }
             ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
         }
-
         set ::sim_syscall $::data(r0,syscall,$::tick)
 
         act
@@ -429,13 +429,11 @@ proc sim_robot {} {
         if {$::data(r0,sysreturn,$::tick) ne ""} {
             lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
         }
-
         update_robots
 
         # GUI
         show_robots
         show_scan
-        #show_health
 
         tick
 
@@ -443,7 +441,6 @@ proc sim_robot {} {
             vwait ::do_step
             set ::do_step 0
         }
-
         after $::parms(tick) [info coroutine]
         yield
     }

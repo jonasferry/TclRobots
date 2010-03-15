@@ -268,7 +268,7 @@ proc create_common_widgets {} {
                          -command {init_mode tournament}]
     set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
     set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
-                         -command "destroy ."]
+                         -command {destroy .; exit}]
 
     # Grid button frame and buttons
     grid $::buttons_f -column 0 -row 0 -sticky nsew
@@ -642,8 +642,8 @@ proc highlightRobot {} {
 #
 # DESCRIPTION
 #
-#   Start a single battle, the simulator or a tournament depending on the
-#   mode argument.
+#   Start a single battle, the simulator or a tournament depending on
+#   the mode argument.
 #
 # SOURCE
 #
@@ -671,8 +671,14 @@ proc init_mode {mode} {
             }
         }
         tournament {
-            # Should be init_tourn
-            init_sim
+            if {[llength $::robotList] < 2} {
+                tk_dialog2 .morerobots "More robots!" \
+                    "Please select at least two robots" "-image iconfn" \
+                    0 dismiss
+                return
+            } else {
+                init_tourn
+            }
         }
     }
 }
@@ -744,7 +750,6 @@ proc button_state {state {button_text {}} {cmd {}}} {
     } else {
         $::run_b configure -state $state -command $cmd
     }
-
     # Set state
     $::sim_b   configure -state $state
     $::tourn_b configure -state $state
