@@ -283,9 +283,12 @@ proc init_rand {} {
 proc init_robots {} {
     global data allRobots
 
+    set allSigs {}
     set file_index 0
     foreach robot $allRobots {
         set data($robot,interp) [interp create -safe]
+        # Stop robots from using another rand than the syscall
+        $data($robot,interp) eval {rename tcl::mathfunc::rand {}}
 
         set name [file tail [lindex $::robotFiles $file_index]]
         incr file_index
@@ -293,8 +296,12 @@ proc init_robots {} {
         set x [mrand 1000]
         set y [mrand 1000]
 
-        # generate a new signature  FIXA: avoid duplicates?
+        # generate a new unique signature
         set newsig [mrand 65535]
+        while {$newsig in $allSigs} {
+            set newsig [mrand 65535]
+        }
+        lappend allSigs $newsig
 
         #########
         # set robot parms
