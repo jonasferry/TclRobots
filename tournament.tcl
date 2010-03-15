@@ -1,3 +1,54 @@
+#****F* tournament/file_header
+#
+# NAME
+#
+#   tournament.tcl
+#
+# DESCRIPTION
+#
+#   This file defines the tournament mode of TclRobots.
+#
+#   It runs round-robin one-on-one battles until all robots have battled
+#   every other robot once. Scores are awarded for a win (3p) and a tie
+#   (1p). At the end of the tournament the scores are compared to find a
+#   winner.
+#
+#   The GUI is the same as single battle mode, with the tournament score
+#   added.
+#
+#   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+#   on TclRobots 2.0 by Tom Poindexter.
+#
+#   See http://tclrobots.org for more information.
+#
+# COPYRIGHT
+#
+#   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
+#   Simplified BSD License. See LICENSE file for details.
+#
+#******
+
+#****P* tournament/init_tourn
+#
+# NAME
+#
+#   init_tourn
+#
+# DESCRIPTION
+#
+#   This procedure is run to start the tournament
+#
+# SOURCE
+#
+proc init_tourn {} {
+
+}
+#******
+
+
+#OLD TOURNAMENT CODE FOLLOWS, USED FOR PLUNDERING
+
+if 0 {
 
 ###############################################################################
 #
@@ -396,4 +447,5 @@ proc tournament {} {
 
   pack .tourn.f1 .tourn.f2  .tourn.f3 .tourn.f4 -side top -fill x
 
+}
 }

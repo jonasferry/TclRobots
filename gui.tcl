@@ -105,7 +105,7 @@ proc init_gui {} {
     grid $::run_b     -column 0 -row 0 -sticky nsew
     grid $::sim_b     -column 1 -row 0 -sticky nsew
     grid $::tourn_b   -column 2 -row 0 -sticky nsew
-    grid $::help_b   -column 3 -row 0 -sticky nsew
+    grid $::help_b    -column 3 -row 0 -sticky nsew
     grid $::quit_b    -column 4 -row 0 -sticky nsew
 
     grid columnconfigure $::buttons_f all -weight 1
@@ -650,11 +650,7 @@ proc init_battle {} {
 
     # start robots
     set ::StatusBarMsg "Running"
-    $::run_b   configure -state normal   -text "Halt" -command halt
-    $::sim_b   configure -state disabled
-    $::tourn_b configure -state disabled
-    $::help_b  configure -state disabled
-    $::quit_b  configure -state disabled
+    button_state disabled "Halt" halt
 
     # Init robots
     init
@@ -671,8 +667,7 @@ proc init_battle {} {
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-
-    $::run_b configure -state normal -text "Reset" -command reset
+    button_state disabled "Reset" reset
 }
 #******
 
@@ -731,11 +726,7 @@ proc halt {} {
     set ::StatusBarMsg "Stopping battle, standby"
     set ::halted 1
 
-    $::run_b   configure -state normal -text "Reset" -command reset
-    $::sim_b   configure -state disabled
-    $::tourn_b configure -state disabled
-    $::help_b  configure -state disabled
-    $::quit_b  configure -state disabled
+    button_state disabled "Reset" reset
 }
 #******
 
@@ -765,11 +756,7 @@ proc reset {} {
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     set ::StatusBarMsg "Select robot files for battle"
-    $::run_b   configure -state normal -text "Run Battle" -command init_battle
-    $::sim_b   configure -state normal
-    $::tourn_b configure -state normal
-    $::help_b  configure -state normal
-    $::quit_b  configure -state normal
+    button_state normal "Run Battle" init_battle
 }
 #******
 
@@ -792,6 +779,43 @@ proc clean_up {} {
     foreach robot $::activeRobots {
         disable_robot $robot
     }
+}
+#******
+
+#****P* init_battle/button_state
+#
+# NAME
+#
+#   button_state
+#
+#
+# SYNOPSIS
+#
+#   button_state button_text cmd state
+#
+# DESCRIPTION
+#
+#   Changes the row of control buttons to normal/disabled.
+#
+#   Sets different texts and commands for the run button. If no text is
+#   specified for the run button it is disabled with the old text
+#   remaining.
+#
+# SOURCE
+#
+proc button_state {state {button_text {}} {cmd {}}} {
+    # Set cmd
+    if {$button_text ne {}} {
+        $::run_b configure -state normal -text $button_text -command $cmd
+    } else {
+        $::run_b configure -state $state -command $cmd
+    }
+
+    # Set state
+    $::sim_b   configure -state $state
+    $::tourn_b configure -state $state
+    $::help_b  configure -state $state
+    $::quit_b  configure -state $state
 }
 #******
 

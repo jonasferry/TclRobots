@@ -54,12 +54,7 @@ proc init_sim {} {
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
-
-    $::run_b   configure -state disabled -command reset
-    $::sim_b   configure -state disabled
-    $::tourn_b configure -state disabled
-    $::help_b  configure -state disabled
-    $::quit_b  configure -state disabled
+    button_state disabled
 
     # init is defined in tclrobots.tcl
     init
@@ -101,7 +96,7 @@ proc init_sim {} {
     # Create and grid first row of simulation control box
     set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
     set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
-                        -variable ::step]
+                        -variable ::step -command {set ::do_step 1}]
     set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
                         -command {set ::do_step 1}]
     set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
@@ -274,16 +269,16 @@ proc init_sim {} {
 
 
     if 0 {
-    for {set i 0} {$i < 6} {incr i} {
-        grid columnconfigure $sim_f.f2 $i -weight 1
-    }
+        for {set i 0} {$i < 6} {incr i} {
+            grid columnconfigure $sim_f.f2 $i -weight 1
+        }
     }
 
     grid columnconfigure $sim_f 0 -weight 1
 
-    # Start simulation
+    # Start simulation, start in single step mode
     set ::running 1
-    set ::step 0
+    set ::step 1
     coroutine sim_robotCo sim_robot
     vwait ::running
     puts "activerobots: $::activeRobots"
@@ -304,7 +299,7 @@ proc init_sim {} {
     # set initial step state
     #do_step
     sim
-}
+    }
 
 }
 #******
