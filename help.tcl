@@ -39,17 +39,17 @@ proc init_help {} {
 
     # Create navigation
     set ::helpnav_f [ttk::frame .help.f1]
-    set ::help_b    [ttk::button $::helpnav_f.b1 -text "Show Help" \
-                         -command {show_page help}]
-    set ::license_b [ttk::button $::helpnav_f.b2 -text "Show License" \
-                         -command {show_page license}]
-    set ::close_b   [ttk::button $::helpnav_f.b3 -text "Close" \
-                         -command {end_help}]
+    set ::showhelp_b    [ttk::button $::helpnav_f.b1 -text "Show Help" \
+                             -command {show_page help}]
+    set ::showlicense_b [ttk::button $::helpnav_f.b2 -text "Show License" \
+                             -command {show_page license}]
+    set ::closehelp_b   [ttk::button $::helpnav_f.b3 -text "Close" \
+                             -command {end_help}]
 
     # Grid the buttons
-    grid $::help_b    -column 0 -row 0 -sticky w
-    grid $::license_b -column 1 -row 0 -sticky w
-    grid $::close_b   -column 2 -row 0 -sticky w
+    grid $::showhelp_b    -column 0 -row 0 -sticky w
+    grid $::showlicense_b -column 1 -row 0 -sticky w
+    grid $::closehelp_b   -column 2 -row 0 -sticky w
 
     # Load the HTML extension
     set ::html_help 0

@@ -42,69 +42,68 @@
 # SOURCE
 #
 proc init_tourn {} {
-
-
-    # Read from robot file names; only the first file is used
-    if {[llength $::robotList] == 0} {
-        return
-    }
-    set ::robotFiles [lrange $::robotList 0 0]
-
-    set halted  0
-    set ticks   0
-    set ::StatusBarMsg "Simulator"
+    # get robot filenames from window
+    set ::robotFiles $::robotList
 
     grid forget $::sel_f
-#    grid forget $::robotHealth_lb
-#    grid forget $::robotMsg_lb
-#    grid $::robotMsg_lb -column 1 -row 0
-    grid $::game_f -column 0 -row 2 -sticky nsew
 
-    # show_arena is defined in gui.tcl
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    grid $::game_f -column 0 -row 2 -sticky nsew
+    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
+    grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
+    grid columnconfigure $::game_f 0 -weight 1
+    grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $::game_f 1 -weight 1
+
     show_arena
 
-    # start robots
-    set ::StatusBarMsg "Running Simulator"
-    button_state disabled
+    # Clear message boxes
+    set ::robotHealth {}
+    set ::robotMsg    {}
 
-    # init is defined in tclrobots.tcl
+    # start robots
+    set ::StatusBarMsg "Running"
+    set ::halted  0
+    button_state disabled "Halt" halt
+
+    # Init robots
     init
 
-    set ::tick 0
+    # Init robots on GUI
+    gui_init_robots
 
-    set ::allRobots {r0 target}
+    # Create and grid the tournament control box
+    set  tourn_f [ttk::frame $::game_f.tourn]
+    grid $tourn_f -column 2 -row 0 -sticky nsew
 
-    set f [open [lindex $::robotList 0]]
-    set ::data(r0,code) [read $f]
-    close $f
+    set tournctrl_f [ttk::frame $tourn_f.f0 -relief raised -borderwidth 2]
+    set start_b     [ttk::button $tourn_f.f0.start -text "Start Tournament" \
+                         -command run_tourn]
+    set end_b       [ttk::button $tourn_f.f0.end -text "Close" \
+                         -command end_tourn]
 
-    # Make target run a dummy program
-    set ::data(target,code) {while {1} {set x [loc_x]}}
+    grid $start_b -column 0 -row 0 -sticky nsew
+    grid $end_b   -column 1 -row 0 -sticky nsew
 
-    set ::activeRobots $::allRobots
 
-    # init_robots is defined in tclrobots.tcl
-    init_robots
 
-    # Set target signature, make it black and place it in center of the arena
-    set ::data(target,num)   1
-    set ::data(target,x)     500
-    set ::data(target,y)     500
+    set ::tournScore {tournScore}
+    set tournScore_lb [listbox $::game_f.tourn.s -background black \
+                             -listvariable ::tournScore]
+    set ::tournMatches {tournMatches}
+    set tournMatches_lb [listbox $::game_f.tourn.m -background black \
+                               -listvariable ::tournMatches]
 
-    # gui_init_robots is defined in gui.tcl
-    gui_init_robots 1
+    grid $tournctrl_f       -column 0 -row 0 -sticky nsew
 
-    # act and tick are defined in tclrobots.tcl
-    act
-    tick
+    grid $tournScore_lb   -column 0 -row 0 -sticky nsew
+    grid $tournMatches_lb -column 0 -row 1 -sticky nsew
 
-    # Make room for simulation controls
-    grid configure $::arena_c -rowspan 3
 
-    # Create and grid the simulation control box
-    set  sim_f  [ttk::frame $::game_f.sim]
-    grid $sim_f -column 1 -row 1 -sticky nsew
 
+    if 0 {
     # Create and grid first row of simulation control box
     set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
     set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
@@ -276,12 +275,17 @@ proc init_tourn {} {
 
     grid columnconfigure $sim_f 0 -weight 1
 
-    # Start simulation, start in single step mode
-    set ::running 1
-    set ::step 1
-    coroutine sim_robotCo sim_robot
-    vwait ::running
-    puts "activerobots: $::activeRobots"
+
+
+
+
+
+    # Start game
+    run_tourn
+
+    # find winnner
+    button_state disabled "Reset" reset
+}
 }
 #******
 
