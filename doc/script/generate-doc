@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh
 
 proc main {} {
-    set srcfiles  {tclrobots syscalls gui battle simulator}
+    set srcfiles  {tclrobots syscalls gui battle simulator help}
     set ::srcdocs {}
 
     foreach file $srcfiles {
@@ -86,7 +86,7 @@ proc clean_file {docfile} {
 }
 
 proc gen_readme {} {
-    set   src  [open ./doc/help_doc.html]
+    set   src  [open ./doc/game_doc.html]
     set   dest [open ./README w]
 
     set   text [read $src]

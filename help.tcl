@@ -1,43 +1,38 @@
-<h3>TABLE OF CONTENTS</h3>
-<ul>
-<li>1. <a href="#robo0">help/file_header</a></li>
-<li>2. <a href="#robo1">help/init_help</a></li>
-<ul>
-<li>2.1. <a href="#robo2">init_help/handle_click</a></li>
-<li>2.2. <a href="#robo3">init_help/handle_scrollwheel</a></li>
-</ul>
-</ul>
-<a name="robo0"></a>
-<a name="help2ffile5fheader"></a>
-<h1>1.  help/file_header [ file ]  </h1>
-<p class="item_name">NAME</p>
-<p>   help.tcl
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   This file contains the GUI description of the TclRobots help window.
-</p>
+#****F* help/file_header
+#
+# NAME
+#
+#   help.tcl
+#
+# DESCRIPTION
+#
+#   This file contains the GUI description of the TclRobots help window.
+#
+#   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+#   on TclRobots 2.0 by Tom Poindexter.
+#
+#   See http://tclrobots.org for more information.
+#
+# COPYRIGHT
+#
+#   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
+#   Simplified BSD License. See LICENSE file for details.
+#
+#******
 
-<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
-   on TclRobots 2.0 by Tom Poindexter.
-</p>
-
-<p>   See http://tclrobots.org for more information.
-</p>
-<p class="item_name">COPYRIGHT</p>
-<p>   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
-   Simplified BSD License. See LICENSE file for details.
-</p>
-<a name="robo1"></a>
-<a name="help2finit5fhelp"></a>
-<h1>2.  help/init_help [ procedure ]  </h1>
-<p class="item_name">NAME</p>
-<p>   init_help
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   Displays the README file in a separate text window.
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc init_help {} {
+#****P* help/init_help
+#
+# NAME
+#
+#   init_help
+#
+# DESCRIPTION
+#
+#   Displays the README file in a separate text window.
+#
+# SOURCE
+#
+proc init_help {} {
     # Create new toplevel and apply some settings
     toplevel .help
     grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
@@ -62,14 +57,14 @@
                           -yscrollcommand ".help.s set"]
 
         # Bind mouse clicks
-        bind .help &lt;ButtonRelease-1&gt; "handle_click %x %y"
+        bind .help <ButtonRelease-1> "handle_click %x %y"
 
         # Bind mouse scroll wheel
         if {[string equal "unix" $::tcl_platform(platform)]} {
-            bind all &lt;4&gt; "+handle_scrollwheel %X %Y -1"
-            bind all &lt;5&gt; "+handle_scrollwheel %X %Y 1"
+            bind all <4> "+handle_scrollwheel %X %Y -1"
+            bind all <5> "+handle_scrollwheel %X %Y 1"
         }
-        bind all &lt;MouseWheel&gt; "+handle_scrollwheel %X %Y %D"
+        bind all <MouseWheel> "+handle_scrollwheel %X %Y %D"
 
         # Read the HTML help doc
         set f    [open $::thisDir/doc/help_doc.html]
@@ -98,47 +93,53 @@
     grid $::help_t -column 0 -row 0 -sticky nsew
     grid $help_s -column 1 -row 0 -sticky ns
 }
-</pre>
-<a name="robo2"></a>
-<a name="init5fhelp2fhandle5fclick"></a>
-<h2>2.1.  init_help/handle_click [ procedure ]  </h2>
-<p class="item_name">NAME</p>
-<p>   handle_click
-</p>
-<p class="item_name">SYNOPSIS</p>
-<p>   handle_click x y
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   Handle clicks on and off links in HTML widget. Called with the x and
-   y coordinates of the click. Uses href widget command to figure out
-   if a link was clicked.
-</p>
+#******
 
-<p>   Currently only handles anchor links.
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc handle_click {x y} {
+#****P* init_help/handle_click
+#
+# NAME
+#
+#   handle_click
+#
+# SYNOPSIS
+#
+#   handle_click x y
+#
+# DESCRIPTION
+#
+#   Handle clicks on and off links in HTML widget. Called with the x and
+#   y coordinates of the click. Uses href widget command to figure out
+#   if a link was clicked.
+#
+#   Currently only handles anchor links.
+#
+# SOURCE
+#
+proc handle_click {x y} {
     set link [$::help_t href $x $y]
     $::help_t yview [lindex [split $link #] 1]
 }
-</pre>
-<a name="robo3"></a>
-<a name="init5fhelp2fhandle5fscrollwheel"></a>
-<h2>2.2.  init_help/handle_scrollwheel [ procedure ]  </h2>
-<p class="item_name">NAME</p>
-<p>   handle_scrollwheel
-</p>
-<p class="item_name">SYNOPSIS</p>
-<p>   handle_click x y
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   Handles the mouse scrollwheel in the help browser.
-</p>
+#******
 
-<p>   From: http://code.activestate.com/recipes/68394/
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc handle_scrollwheel { x y delta } {
+#****P* init_help/handle_scrollwheel
+#
+# NAME
+#
+#   handle_scrollwheel
+#
+# SYNOPSIS
+#
+#   handle_click x y
+#
+# DESCRIPTION
+#
+#   Handles the mouse scrollwheel in the help browser.
+#
+#   From: http://code.activestate.com/recipes/68394/
+#
+# SOURCE
+#
+proc handle_scrollwheel { x y delta } {
 
     # Find out what's the widget we're on
     set act 0
@@ -169,5 +170,4 @@
         eval $cmd
     }
 }
-</pre>
-
+#******

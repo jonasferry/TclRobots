@@ -1,4 +1,4 @@
-SRC = battle.tcl gui.tcl simulator.tcl tclrobots.tcl tournament.tcl
+SRC = battle.tcl gui.tcl help.tcl simulator.tcl tclrobots.tcl tournament.tcl
 
 all: doc
 

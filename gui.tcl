@@ -159,6 +159,7 @@ proc init_gui {} {
     source $::thisDir/battle.tcl
     source $::thisDir/simulator.tcl
     source $::thisDir/tournament.tcl
+    source $::thisDir/help.tcl
 }
 #******
 
@@ -266,7 +267,8 @@ proc create_common_widgets {} {
                          -command {init_mode simulator}]
     set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
                          -command {init_mode tournament}]
-    set ::help_b    [ttk::button .f1.b3 -text "Help" -command help]
+    set ::help_b    [ttk::button .f1.b3 -text "Help" \
+                         -command {init_mode help}]
     set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
                          -command {destroy .; exit}]
 
@@ -643,8 +645,8 @@ proc highlightRobot {} {
 #
 # DESCRIPTION
 #
-#   Start a single battle, the simulator or a tournament depending on
-#   the mode argument.
+#   Start a single battle, the simulator, tournament or help browser
+#   depending on the mode argument.
 #
 # SOURCE
 #
@@ -680,6 +682,9 @@ proc init_mode {mode} {
             } else {
                 init_tourn
             }
+        }
+        help {
+            init_help
         }
     }
 }
@@ -824,7 +829,6 @@ proc gui_init_robots {{lastblack 0}} {
                     -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
                     -width 1 -tags "scan s$::data($robot,num)"]
         }
-
         incr i
     }
 }
@@ -941,112 +945,6 @@ proc brightness color {
     foreach {r g b} [winfo rgb . $color] break
     set max [lindex [winfo rgb . white] 0]
     expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
-}
-#******
-
-#****P* init_gui/tournament
-#
-# NAME
-#
-#   tournament
-#
-# DESCRIPTION
-#
-#   TBD
-#
-#******
-
-#****P* init_gui/help
-#
-# NAME
-#
-#   help
-#
-# DESCRIPTION
-#
-#   Displays the README file in a separate text window.
-#
-# SOURCE
-#
-proc help {} {
-    # Create new toplevel and apply some settings
-    toplevel .help
-    grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
-
-    set html_help 0
-
-    # Load the extension
-    switch $::tcl_platform(platform) {
-        windows {
-            load $::thisDir/include/tkhtml/tkhtml.dll
-            set html_help 1
-        }
-        unix {
-            load $::thisDir/include/tkhtml/tkhtml.so
-            set html_help 1
-        }
-    }
-    if {$html_help} {
-        # HTML is enabled, create HTML widget
-        set ::help_t [html .help.t -hyperlinkcommand handle_link \
-                          -base $::thisDir/doc/help_doc.html \
-                          -yscrollcommand ".help.s set"]
-
-        # Bind mouse clicks
-        bind .help <ButtonRelease-1> "handle_click %x %y"
-
-        # Read the HTML help doc
-        set f    [open $::thisDir/doc/help_doc.html]
-        set text [read $f]
-        close $f
-
-        # Insert text into HTML widget
-        $::help_t parse $text
-    } else {
-        # HTML is disabled, create text widget
-        set help_t [tk::text .help.t -width 80 -height 40 -wrap word \
-                        -yscrollcommand ".help.s set"]
-
-        # Read the ASCII help doc
-        set f    [open $::thisDir/README]
-        set text [read $f]
-        close $f
-
-        # Insert text into text box
-        $help_t insert 1.0 $text
-    }
-    set help_s [ttk::scrollbar .help.s -command ".help.t yview" \
-                    -orient vertical]
-
-    # Grid the text box and scrollbar
-    grid $::help_t -column 0 -row 0 -sticky nsew
-    grid $help_s -column 1 -row 0 -sticky ns
-}
-#******
-
-#****P* help/handle_click
-#
-# NAME
-#
-#   handle_click
-#
-# SYNOPSIS
-#
-#   handle_click x y
-#
-# DESCRIPTION
-#
-#   Handle clicks on and off links in HTML widget. Called with the x and
-#   y coordinates of the click. Uses href widget command to figure out
-#   if a link was clicked.
-#
-#   Currently only handles anchor links.
-#
-# SOURCE
-#
-proc handle_click {x y} {
-    set link [$::help_t href $x $y]
-    $::help_t yview [lindex [split $link #] 1]
 }
 #******
 
