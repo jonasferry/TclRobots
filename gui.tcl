@@ -56,17 +56,29 @@ proc init_gui {} {
 
     create_icon
 
-    set ::parms(explosion,numbooms) 20  ; #Number of frames in an explosion
-    set ::parms(explosion,duration) 300 ; #Duration of an explosion
+    set ::parms(explosion,numbooms) 20  ; # Number of frames in an explosion
+    set ::parms(explosion,duration) 300 ; # Duration of an explosion
     set ::parms(shapes) {{3 12 7} {8 12 5} {11 11 3} {12 8 4}}
-    # Some experimental path shapes for robots
+
+    # Some experimental path shapes for robots.
+    # Default for each path is to have the robot's color as stroke, and no fill.
+    # Use % in the option list to insert the robot's color. Some part of the
+    # robot should show its color.
     set ::parms(paths)  {}
-    set path [list "M 10 0 L -5 5 L -5 -5 Z" {-fill black -stroke ""} "M 6 0 L -1 0" {}]
+    set path [list \
+            "M 10 0 L -5 5 L -5 -5 Z" {-fill black -stroke ""} \
+            "M 6 0 L -1 0" {}]
     lappend ::parms(paths) $path
-    set path [list "M 10 0 L -5 7 L 0 0 L -5 -7 Z" {}]
+    set path [list "M 10 0 L -5 7 L 0 0 L -5 -7 Z" {-strokewidth 0.7}]
     lappend ::parms(paths) $path
-    set path [list [ellipsepath 0 0 10 5] {-fill gray} [ellipsepath -2 0 3 3] {-fill black -stroke ""}]
+    set path [list \
+            [ellipsepath 0 0 10 5] {-fill gray} \
+            [ellipsepath -2 0 3 3] {-fill black -stroke ""}]
     lappend ::parms(paths) $path
+    set path [list "M 8 0 L -2 5 L -2 2 L -5 2 L -5 -2 L -2 -2 L -2 -5 Z" \
+            {-fill % -stroke black -strokewidth 0.3}]
+    lappend ::parms(paths) $path
+
     if 0 {
         # A little experiment to use tkpath's tiger demo as a robot
         if {[file exists tiger.tcl]} {
@@ -796,7 +808,8 @@ proc gui_init_robots {{lastblack 0}} {
         set ::data($robot,brightness) [brightness $color]
         # Precreate robot on canvas
         set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,paths) [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]
+        set ::data($robot,paths) [string map [list % $color] \
+                [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]]
         if {$::data(tkp)} {
             foreach {path opts} $::data($robot,paths) {
                 $::arena_c create path $path \
@@ -822,7 +835,7 @@ proc gui_init_robots {{lastblack 0}} {
         if {$::data(tkp)} {
             set path [arc_path 0 1]
             set ::data($robot,scanid) [$::arena_c create path $path \
-                    -fill "" -fillopacity 0.2 -stroke "" \
+                    -fill "" -fillopacity 0.3 -stroke "" \
                     -tags "scan s$::data($robot,num)"]
         } else {
             set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
