@@ -51,8 +51,10 @@ proc init_tourn {} {
     # message box
     grid $::game_f -column 0 -row 2 -sticky nsew
     grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+
     grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
     grid $::robotMsg_lb    -column 1 -row 1            -sticky nsew
+
     grid columnconfigure $::game_f 0 -weight 1
     grid rowconfigure    $::game_f 0 -weight 1
     grid columnconfigure $::game_f 1 -weight 1
@@ -75,10 +77,37 @@ proc init_tourn {} {
     gui_init_robots
 
     # Create and grid the tournament control box
-    set  tourn_f [ttk::frame $::game_f.tourn]
-    grid $tourn_f -column 2 -row 0 -sticky nsew
+    create_tournctrl
 
-    set tournctrl_f [ttk::frame $tourn_f.f0 -relief raised -borderwidth 2]
+
+    if 0 {
+        # Start game
+        run_tourn
+
+        # find winnner
+        button_state disabled "Reset" reset
+    }
+
+}
+#******
+
+#****P* init_tourn/create_tournctrl
+#
+# NAME
+#
+#   create_tournctrl
+#
+# DESCRIPTION
+#
+#   Create and grid the tournament control box.
+#
+# SOURCE
+#
+proc create_tournctrl {} {
+    set  tourn_f [ttk::frame $::game_f.tourn]
+    grid $tourn_f -column 2 -row 0 -rowspan 2 -sticky nsew
+
+    set tournctrl0_f [ttk::frame $tourn_f.f0 -relief raised -borderwidth 2]
     set start_b     [ttk::button $tourn_f.f0.start -text "Start Tournament" \
                          -command run_tourn]
     set end_b       [ttk::button $tourn_f.f0.end -text "Close" \
@@ -87,21 +116,36 @@ proc init_tourn {} {
     grid $start_b -column 0 -row 0 -sticky nsew
     grid $end_b   -column 1 -row 0 -sticky nsew
 
+    set ::tournScore    {}
+    set tournScore_lb   [listbox $::game_f.tourn.s -listvariable ::tournScore]
 
+    set ::tournMatches  {}
+    set tournMatches_lb [listbox $::game_f.tourn.m -listvariable ::tournMatches]
 
-    set ::tournScore {tournScore}
-    set tournScore_lb [listbox $::game_f.tourn.s -background black \
-                             -listvariable ::tournScore]
-    set ::tournMatches {tournMatches}
-    set tournMatches_lb [listbox $::game_f.tourn.m -background black \
-                               -listvariable ::tournMatches]
+    set tournctrl1_f [ttk::frame $tourn_f.f1 -relief raised -borderwidth 2]
+    set tourntime_l  [ttk::label $tourn_f.f1.l \
+                          -text "Maximum minutes per match:"]
+    set tourntime_e  [ttk::entry $tourn_f.f1.e \
+                          -textvariable tlimit]
 
-    grid $tournctrl_f       -column 0 -row 0 -sticky nsew
+    grid $tourntime_l -column 0 -row 0 -sticky nsew
+    grid $tourntime_e -column 0 -row 1 -sticky nsew
 
-    grid $tournScore_lb   -column 0 -row 0 -sticky nsew
-    grid $tournMatches_lb -column 0 -row 1 -sticky nsew
+    set tournctrl2_f [ttk::frame $tourn_f.f2 -relief raised -borderwidth 2]
+    set tournfile_l  [ttk::label $tourn_f.f2.l \
+                          -text "Optional results filename:"]
+    set tournfile_e  [ttk::entry $tourn_f.f2.e \
+                          -textvariable outfile]
 
+    grid $tournfile_l -column 0 -row 0 -sticky nsew
+    grid $tournfile_e -column 0 -row 1 -sticky nsew
 
+    grid $tournctrl0_f     -column 0 -row 0 -sticky nsew
+    grid $tournScore_lb    -column 0 -row 1 -sticky nsew
+    grid $tournMatches_lb  -column 0 -row 2 -sticky nsew
+    grid $tournctrl1_f     -column 0 -row 3 -sticky nsew
+    grid $tournctrl2_f     -column 0 -row 4 -sticky nsew
+    
 
     if 0 {
     # Create and grid first row of simulation control box
@@ -287,8 +331,99 @@ proc init_tourn {} {
     button_state disabled "Reset" reset
 }
 }
+
+
+
+#****P* create_tournctrl/end_tourn
+#
+# NAME
+#
+#   end_tourn
+#
+# DESCRIPTION
+#
+#   End tournament.
+#
+# SOURCE
+#
+proc end_tourn {} {
+    set ::running 0
+    set ::halted 1
+    # reset is defined in battle.tcl
+    reset
+}
 #******
 
+#****P* tournament/update_tourn
+#
+# NAME
+#
+#   update_tourn
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc update_tourn {} {
+    show_score
+    show_matches
+    update
+}
+#******
+
+#****P* update_tourn/show_score
+#
+# NAME
+#
+#   show_score
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc show_score {} {
+    set ::robotHealth {}
+    set index 0
+    foreach robot $::allRobots {
+        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
+        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+        if {$::data($robot,brightness) > 0.5} {
+            $::robotHealth_lb itemconfigure $index -background black
+        }
+        incr index
+    }
+}
+#******
+
+#****P* update_tourn/show_matches
+#
+# NAME
+#
+#   show_matches
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc show_matches {} {
+    set ::robotHealth {}
+    set index 0
+    foreach robot $::allRobots {
+        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
+        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
+        if {$::data($robot,brightness) > 0.5} {
+            $::robotHealth_lb itemconfigure $index -background black
+        }
+        incr index
+    }
+}
+#******
 
 #OLD TOURNAMENT CODE FOLLOWS, USED FOR PLUNDERING
 
