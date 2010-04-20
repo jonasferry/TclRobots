@@ -36,17 +36,18 @@ proc init_gui {} {
     package require Tk
     # Try to get tkpath
     if {[catch {package require tkpath}]} {
+        # Try to get tkpath from a local lib
+        set libpath [file join $::thisDir lib]
+        if {[file isdirectory $libpath]} {
+            lappend ::auto_path $libpath
+        }
+    }
+    if {[catch {package require tkpath}]} {
+        # Try to get tkpath from a local dylib
         if {[file exists libtkpath0.3.1.dylib]} {
             catch {
                 # Try for a local copy
                 load ./libtkpath0.3.1.dylib
-                source tkpath.tcl
-                package require tkpath
-            }
-        } elseif {[file exists libtkpath0.3.1.so]} {
-            catch {
-                # Try for a local copy
-                load ./libtkpath0.3.1.so
                 source tkpath.tcl
                 package require tkpath
             }
