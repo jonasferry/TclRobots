@@ -6,8 +6,8 @@
 #
 # DESCRIPTION
 #
-#   This file defines the GUI description of the TclRobots tournament
-#   mode.
+#   This file defines the functionality and GUI description of the
+#   TclRobots tournament mode.
 #
 #   It runs round-robin one-on-one battles until all robots have battled
 #   every other robot once. Scores are awarded for a win (3p) and a tie
@@ -42,9 +42,57 @@
 # SOURCE
 #
 proc init_tourn {} {
+    get_filenames_tourn
+    init_gui_tourn
+
+    # Init robots
+    init
+
+    # Init robots on GUI
+    gui_init_robots
+
+    if 0 {
+        # Start game
+        run_tourn
+
+        # find winnner
+        button_state disabled "Reset" reset
+    }
+
+}
+#******
+
+#****P* init_tourn/get_filenames_tourn
+#
+# NAME
+#
+#   get_filenames_tourn
+#
+# DESCRIPTION
+#
+#   Gets the robot filenames from the file list window.
+#
+# SOURCE
+#
+proc get_filenames_tourn {} {
     # get robot filenames from window
     set ::robotFiles $::robotList
+}
+#******
 
+#****P* init_tourn/init_gui_tourn
+#
+# NAME
+#
+#   init_gui_tourn
+#
+# DESCRIPTION
+#
+#   Creates the tournament mode GUI.
+#
+# SOURCE
+#
+proc init_gui_tourn {} {
     grid forget $::sel_f
 
     # The single battle mode shows the arena, the health box and the
@@ -61,6 +109,9 @@ proc init_tourn {} {
 
     show_arena
 
+    # Create and grid the tournament control box
+    create_tournctrl
+
     # Clear message boxes
     set ::robotHealth {}
     set ::robotMsg    {}
@@ -69,29 +120,10 @@ proc init_tourn {} {
     set ::StatusBarMsg "Running"
     set ::halted  0
     button_state disabled "Halt" halt
-
-    # Init robots
-    init
-
-    # Init robots on GUI
-    gui_init_robots
-
-    # Create and grid the tournament control box
-    create_tournctrl
-
-
-    if 0 {
-        # Start game
-        run_tourn
-
-        # find winnner
-        button_state disabled "Reset" reset
-    }
-
 }
 #******
 
-#****P* init_tourn/create_tournctrl
+#****P* init_gui_tourn/create_tournctrl
 #
 # NAME
 #
@@ -332,8 +364,6 @@ proc create_tournctrl {} {
 }
 }
 
-
-
 #****P* create_tournctrl/end_tourn
 #
 # NAME
@@ -421,6 +451,34 @@ proc show_matches {} {
             $::robotHealth_lb itemconfigure $index -background black
         }
         incr index
+    }
+}
+#******
+
+#****P* init_tourn/run_tourn
+#
+# NAME
+#
+#   run_tourn
+#
+# DESCRIPTION
+#
+#   Runs the tournament.
+#
+# SOURCE
+#
+proc run_tourn {} {
+    foreach robot $::allRobots {
+        foreach target $allRobots {
+            if {$robot eq $target} {
+                continue
+            }
+            puts "running"
+            set ::running 1
+            coroutine run_robotsCo run_robots
+            vwait ::running
+            puts "activerobots: $::activeRobots"
+        }
     }
 }
 #******
