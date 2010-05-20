@@ -48,6 +48,7 @@ proc main {} {
     set ::tourn_type  0
     set ::numlist     0
     set ::outfile     ""
+    set ::game_mode   ""
 
     set state none
     foreach arg $::argv {
@@ -430,6 +431,10 @@ proc run_robots {} {
     global data activeRobots tick running gui parms
 
     while {$running == 1} {
+        if {$::game_mode eq "simulator"} {
+            # Reset health of target
+            set ::data(target,health) $::parms(health)
+        }
         foreach robot $activeRobots {
             if {($data($robot,alert) ne {}) && \
                     ($data($robot,ping) ne {})} {
@@ -445,14 +450,23 @@ proc run_robots {} {
         }
         act
 
+        # Print extra information in simulator GUI
+        if {[eq $::game_mode "simulator"] &&
+            [ne $::data(r0,sysreturn,$::tick) ""]} {
+            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
+        }
         update_robots
 
         if {$gui} {
             update_gui
         }
-
         tick
 
+        # Check if single step is active in simulator mode
+        if {[eq $::game_mode "simulator"] && $::step} {
+            vwait ::do_step
+            set ::do_step 0
+        }
         if {$parms(tick) < 5} {
             # Don't bother at high speed
             after $parms(tick) [info coroutine]

@@ -99,30 +99,8 @@ proc init_sim {} {
     # Start simulation, start in single step mode
     set ::running 1
     set ::step 1
-    coroutine sim_robotCo sim_robot
-#    vwait ::running
-#    end_sim
-#    puts "activerobots: $::activeRobots"
-
-
-    # TCLROBOTS 2.0 CODE FOLLOWS, MAYBE USEFUL
-    if 0 {
-    set step 1
-
-    # override binding for Any-Keypress, but save others
-    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
-                   .debug.fb.h .debug.fb.d} {
-        set cur_bind [bind Entry]
-        foreach c $cur_bind {
-            bind $e $c "[bind Entry $c] ; return -code break"
-        }
-        bind $e <KeyPress> {num_only %W %A}
-    }
-
-    # set initial step state
-    #do_step
-    sim
-    }
+    # Procedure run_robots is found in tclrobots.tcl
+    coroutine run_robotsCo run_robots
 }
 #******
 
@@ -389,60 +367,5 @@ proc examine {} {
 #
 proc setval {} {
     $::data(r0,interp) eval set $::status_var $::status_val
-}
-#******
-
-#****P* init_sim/sim_robot
-#
-# NAME
-#
-#   sim_robot
-#
-# DESCRIPTION
-#
-#   
-#
-# SOURCE
-#
-proc sim_robot {} {
-    while {$::running == 1} {
-        # Reset health of target
-        set ::data(target,health) $::parms(health)
-
-        foreach robot $::activeRobots {
-            if {($::data($robot,alert) ne {}) && \
-                    ($::data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set ::data($robot,sysreturn,[- $::tick 1]) \
-                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
-
-                # Robot is notified; reset alert request
-                set ::data($robot,ping) {}
-            }
-            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-        }
-        set ::sim_syscall $::data(r0,syscall,$::tick)
-
-        act
-
-        if {$::data(r0,sysreturn,$::tick) ne ""} {
-            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
-        }
-        update_robots
-
-        # GUI
-        show_robots
-        show_scan
-
-        tick
-
-        if {$::step} {
-            vwait ::do_step
-            set ::do_step 0
-        }
-        after $::parms(tick) [info coroutine]
-        yield
-    }
 }
 #******

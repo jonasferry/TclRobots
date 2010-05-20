@@ -664,6 +664,9 @@ proc highlightRobot {} {
 # SOURCE
 #
 proc init_mode {mode} {
+    # Set the global mode variable to selected mode
+    set ::game_mode $mode
+
     # Check that the number of selected robots is correct
     switch $mode {
         battle {
