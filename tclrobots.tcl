@@ -83,39 +83,27 @@ proc main {} {
     if {[llength $::robotFiles] >= 2 && !$::gui} {
         if {$::tourn_type == 0} {
             # Run single battle in terminal
-            puts "Single battle started\n" log
-            puts "Running time [/ [lindex [time {init_game;run_game}] 0] 1000000.0] seconds\n"
-            puts "Single battle finished" log
+            puts "\nSingle battle started\n"
+            set running_time [/ [lindex [time {init_game;run_game}] 0] \
+                                  1000000.0]
+            puts "seed: $::seed"
+            puts "time: $running_time seconds\n"
+            puts "Single battle finished\n"
         } else {
             # Run tournament in terminal
-            puts "Tournament started\n" log
+            puts "\nTournament started\n"
             source $::thisDir/tournament.tcl
-            puts "Running time [/ [lindex [time {init_tourn;run_tourn}] 0] 1000000.0] seconds\n"
-            puts "Tournament finished" log
+            set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
+                                  1000000.0]
+            puts "seed: $::seed"
+            puts "time: $running_time seconds\n"
+            puts "Tournament finished\n"
         }
     } else {
         # Run GUI
         set ::gui 1
         source $::thisDir/gui.tcl
         init_gui
-    }
-}
-#******
-
-#****P* main/puts
-#
-# NAME
-#
-#   puts
-#
-# DESCRIPTION
-#
-# SOURCE
-#
-rename puts tcl_puts
-proc puts {msg {level "note"}} {
-    if {!$::silent && [| [eq $level "log"] $::verbose]} {
-        tcl_puts $msg
     }
 }
 #******
@@ -502,9 +490,8 @@ proc run_game {} {
     set ::running 1
     coroutine run_robotsCo run_robots
     vwait ::running
-    puts "activerobots: $::activeRobots"
+    debug "activerobots: $::activeRobots"
     find_winner
-    puts "seed: $::seed"
 }
 #******
 
@@ -1174,7 +1161,7 @@ proc find_winner {} {
             }
         }
     }
-    puts "\n$::win_msg\n"
+    puts "$::win_msg\n"
     foreach robot $activeRobots {
         disable_robot $robot
     }
@@ -1228,9 +1215,7 @@ proc find_winner {} {
 #
 proc write_file {file str} {
     set fd [open $file w]
-    # Must use tcl_puts (original puts), not local version of puts which
-    # can't handle other channels than stdout
-    tcl_puts $fd $str
+    puts $fd $str
     close $fd
 }
 #******
@@ -1724,11 +1709,11 @@ proc mrand {max} {
 proc debug {args} {
     if {$::debug} {
         if {[lindex $args 0] ne "exit"} {
-            puts "[join $args]" log
+            puts "[join $args]"
         } else {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
-            puts "[join [lrange $args 1 end]]" log
+            puts "[join [lrange $args 1 end]]"
             exit
         }
     }

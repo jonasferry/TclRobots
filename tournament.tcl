@@ -313,6 +313,7 @@ proc run_tourn {} {
         }
     }
     set matchlog ""
+    puts "MATCHES:\n"
 
     foreach match $matchlist {
         set robot  [lindex $match 0]
@@ -373,7 +374,7 @@ proc run_tourn {} {
         if {$::gui} {
             update_tourn
         }
-        puts $match_msg log
+        puts $match_msg
         append matchlog "$match_msg\n"
 
         # Disable robots and clear messages
@@ -391,7 +392,7 @@ proc run_tourn {} {
     foreach robot $allRobots {
         lappend score_sorted "$robot $score($robot)"
     }
-    set ::win_msg "TOURNAMENT SCORE:\n"
+    set ::win_msg "TOURNAMENT SCORES:\n\n"
     set place 1
     foreach robotscore [lsort -integer -index 1 \
                             -decreasing $score_sorted] {
@@ -408,7 +409,7 @@ proc run_tourn {} {
         }
         button_state disabled "Reset" reset
     } else {
-        puts "\n$::win_msg" log
+        puts "\n$::win_msg"
     }
     # Set up report file message
     set outmsg ""
