@@ -56,12 +56,12 @@ proc init_help {} {
 
     switch $::tcl_platform(platform) {
         windows {
-            if {![catch {load $::thisDir/include/tkhtml/tkhtml.dll}] } {
+            if {![catch {load $::thisDir/lib/tkhtml/tkhtml.dll}] } {
                 set ::html_help 1
             }
         }
         unix {
-            if {![catch {load $::thisDir/include/tkhtml/tkhtml.so}] } {
+            if {![catch {load $::thisDir/lib/tkhtml/tkhtml.so}] } {
                 set ::html_help 1
             }
         }

@@ -42,23 +42,29 @@
 # SOURCE
 #
 proc init_tourn {} {
-    get_filenames_tourn
-    init_gui_tourn
-
-    # Init robots
-    init
-
-    # Init robots on GUI
-    gui_init_robots
-
-    if 0 {
-        # Start game
-        run_tourn
-
-        # find winnner
-        button_state disabled "Reset" reset
+    if {$::gui} {
+        get_filenames_tourn
+        init_gui_tourn
     }
 
+    # Init all robots, can't use init_game from tclrobots.tcl because
+    # interpreters should be initialised separately in tournament mode
+    init_parms
+    init_trig_tables
+    init_rand
+    init_files
+    init_robots
+
+    if {$::gui} {
+        # Give the robots colors
+        set colors [distinct_colors [llength $::allRobots]]
+
+        foreach robot $::allRobots current_color $colors {
+            # Set colors as far away as possible from each other visually
+            set ::data_tourn($robot,color)      $current_color
+            set ::data_tourn($robot,brightness) [brightness $current_color]
+        }
+    }
 }
 #******
 
@@ -88,7 +94,7 @@ proc get_filenames_tourn {} {
 #
 # DESCRIPTION
 #
-#   Creates the tournament mode GUI.
+#   Creates theemacs -r ~/Desktop/code/tcl/tclrobots/tclrobots/tclrobots.tcl tournament mode GUI.
 #
 # SOURCE
 #
@@ -149,10 +155,12 @@ proc create_tournctrl {} {
     grid $end_b   -column 1 -row 0 -sticky nsew
 
     set ::tournScore    {}
-    set tournScore_lb   [listbox $::game_f.tourn.s -listvariable ::tournScore]
+    set ::tournScore_lb   [listbox $::game_f.tourn.s \
+                               -listvariable ::tournScore]
 
     set ::tournMatches  {}
-    set tournMatches_lb [listbox $::game_f.tourn.m -listvariable ::tournMatches]
+    set ::tournMatches_lb [listbox $::game_f.tourn.m \
+                               -listvariable ::tournMatches]
 
     set tournctrl1_f [ttk::frame $tourn_f.f1 -relief raised -borderwidth 2]
     set tourntime_l  [ttk::label $tourn_f.f1.l \
@@ -172,196 +180,11 @@ proc create_tournctrl {} {
     grid $tournfile_l -column 0 -row 0 -sticky nsew
     grid $tournfile_e -column 0 -row 1 -sticky nsew
 
-    grid $tournctrl0_f     -column 0 -row 0 -sticky nsew
-    grid $tournScore_lb    -column 0 -row 1 -sticky nsew
-    grid $tournMatches_lb  -column 0 -row 2 -sticky nsew
-    grid $tournctrl1_f     -column 0 -row 3 -sticky nsew
-    grid $tournctrl2_f     -column 0 -row 4 -sticky nsew
-    
-
-    if 0 {
-    # Create and grid first row of simulation control box
-    set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
-    set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
-                        -variable ::step -command {set ::do_step 1}]
-    set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
-                        -command {set ::do_step 1}]
-    set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
-                        -command "incr ::data(r0,health) -5"]
-    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan" \
-                        -command "set ::data(r0,ping) 1"]
-    set end_b      [ttk::button $sim_f.f0.end -text "Close" \
-                        -command end_sim]
-
-    grid $simctrl0_f -column 0 -row 0 -sticky nsew
-    grid $stepsys_cb -column 0 -row 0 -sticky nsew
-    grid $step_b     -column 1 -row 0 -sticky nsew
-    grid $damage_b   -column 2 -row 0 -sticky nsew
-    grid $ping_b     -column 3 -row 0 -sticky nsew
-    grid $end_b      -column 4 -row 0 -sticky nsew
-
-    # Create and grid second row of simulation control box
-    # This frame contains three rows of status data
-    # This is the first row of simulation status box
-
-    # Limit the width of the entry fields in the status box
-    set e_width 4
-
-    set simctrl1_f  [ttk::frame $sim_f.f1     -relief raised -borderwidth 2]
-    set xstat_l     [ttk::label $sim_f.f1.xl  -text "X"]
-    set xstat_e     [ttk::entry $sim_f.f1.xe  -width $e_width \
-                         -textvariable ::data(r0,x)]
-    set ystat_l     [ttk::label $sim_f.f1.yl  -text "Y"]
-    set ystat_e     [ttk::entry $sim_f.f1.ye  -width $e_width \
-                     -textvariable ::data(r0,y)]
-    set heatstat_l  [ttk::label $sim_f.f1.htl -text "Heat"]
-    set heatstat_e  [ttk::entry $sim_f.f1.hte -width $e_width \
-                     -textvariable ::data(r0,heat)]
-
-    grid $simctrl1_f -column 0 -row 1 -sticky nsew
-    grid $xstat_l    -column 0 -row 0 -sticky nsew
-    grid $xstat_e    -column 1 -row 0 -sticky nw
-    grid $ystat_l    -column 2 -row 0 -sticky nsew
-    grid $ystat_e    -column 3 -row 0 -sticky nw
-    grid $heatstat_l -column 4 -row 0 -sticky nsew
-    grid $heatstat_e -column 5 -row 0 -sticky nw
-
-    # Create bindings for user to set X, Y and Heat values manually
-    bind  $xstat_e <Return> {
-        ver_range x 0 999
-        set ::data(r0,orgx)  $::data(r0,x)
-        set ::data(r0,range) 0
-    }
-    bind  $xstat_e <Leave>  {
-        ver_range x 0 999
-        set ::data(r0,orgx)  $::data(r0,x)
-        set ::data(r0,range) 0
-    }
-    bind  $ystat_e <Return> {
-        ver_range y 0 999
-        set ::data(r0,orgy)  $::data(r0,y)
-        set ::data(r0,range) 0
-    }
-    bind  $ystat_e <Leave>  {
-        ver_range y 0 999
-        set ::data(r0,orgy)  $::data(r0,y)
-        set ::data(r0,range) 0
-    }
-    bind  $heatstat_e <Return> {
-        ver_range heat 0 200
-    }
-    bind  $heatstat_e <Leave>  {
-        ver_range heat 0 200
-    }
-
-    # Create and grid second row of simulation status box
-    set speedstat_l  [ttk::label $sim_f.f1.sl   -text "Speed"]
-    set speedstat_e  [ttk::entry $sim_f.f1.se   -width $e_width \
-                          -textvariable ::data(r0,speed)]
-    set hdgstat_l    [ttk::label $sim_f.f1.hdl  -text "Heading"]
-    set hdgstat_e    [ttk::entry $sim_f.f1.hde  -width $e_width \
-                          -textvariable ::data(r0,hdg)]
-    set healthstat_l [ttk::label $sim_f.f1.hthl -text "Health"]
-    set healthstat_e [ttk::entry $sim_f.f1.hthe -width $e_width \
-                          -textvariable ::data(r0,health)]
-
-    grid $speedstat_l  -column 0 -row 1 -sticky nsew
-    grid $speedstat_e  -column 1 -row 1 -sticky nw
-    grid $hdgstat_l    -column 2 -row 1 -sticky nsew
-    grid $hdgstat_e    -column 3 -row 1 -sticky nw
-    grid $healthstat_l -column 4 -row 1 -sticky nsew
-    grid $healthstat_e -column 5 -row 1 -sticky nw
-
-    # Create bindings for user to set X, Y and Heat values manually
-    bind  $speedstat_e <Return> {
-        ver_range speed 0 100
-        set ::data(r0,dspeed) $::data(r0,speed)
-    }
-    bind  $speedstat_e <Leave>  {
-        ver_range speed 0 100
-        set ::data(r0,dspeed) $::data(r0,speed)
-    }
-    bind  $hdgstat_e <Return> {
-        ver_range hdg 0 359
-        set ::data(r0,dhdg)  $::data(r0,hdg)
-        set ::data(r0,range) 0
-    }
-    bind  $hdgstat_e <Leave>  {
-        ver_range hdg 0 359
-        set ::data(r0,dhdg)  $::data(r0,hdg)
-        set ::data(r0,range) 0
-    }
-    bind  $healthstat_e <Return> {
-        ver_range health 0 $::parms(health)
-    }
-    bind  $healthstat_e <Leave>  {
-        ver_range health 0 $::parms(health)
-    }
-
-    # Create and grid third row of simulation status box
-    set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
-    set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
-                        -textvariable ::sim_syscall -anchor w]
-    set tick0_l    [ttk::label $sim_f.f1.t0 -text "Tick:"]
-    set tick1_l    [ttk::label $sim_f.f1.t1 -width $e_width \
-                        -textvariable ::tick]
-    set barrel0_l  [ttk::label $sim_f.f1.b0 -text "Barrel:"]
-    set barrel1_l  [ttk::label $sim_f.f1.b1 -width $e_width \
-                        -textvariable ::data(r0,btemp)]
-
-    grid $lastsys0_l -column 0 -row 2 -sticky nsew
-    grid $lastsys1_l -column 1 -row 2 -sticky nwe
-    grid $tick0_l    -column 2 -row 2 -sticky nsew
-    grid $tick1_l    -column 3 -row 2 -sticky nw
-    grid $barrel0_l  -column 4 -row 2 -sticky nsew
-    grid $barrel1_l  -column 5 -row 2 -sticky nw
-
-    # Create and grid third row of simulation control box
-    set ::status_var {}
-    set ::status_val {}
-
-    set simctrl2_f [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
-    set var_l      [ttk::label $sim_f.f2.vrl -text "Variable:"]
-    set var_e      [ttk::entry $sim_f.f2.vre \
-                        -textvariable ::status_var]
-    set val_l      [ttk::label $sim_f.f2.vll -text "Value:"]
-    set val_e      [ttk::entry $sim_f.f2.vle -width $e_width \
-                        -textvariable ::status_val]
-    set examine_b  [ttk::button $sim_f.f2.xb -text "Examine" -command examine]
-    set set_b      [ttk::button $sim_f.f2.sb -text "Set" -command setval]
-
-    grid $simctrl2_f -column 0 -row 2 -sticky nsew
-    grid $var_l      -column 0 -row 0 -sticky nsew
-    grid $var_e      -column 1 -row 0 -sticky nsew
-    grid $val_l      -column 2 -row 0 -sticky nsew
-    grid $val_e      -column 3 -row 0 -sticky nsew
-    grid $examine_b  -column 4 -row 0 -sticky nsew
-    grid $set_b      -column 5 -row 0 -sticky nsew
-
-    bind $var_e <Key-Return> "$examine_b invoke"
-    bind $val_e <Key-Return> "$set_b     invoke"
-
-    # Make the simulation control box resizable
-    foreach w [winfo children $sim_f] {
-        grid columnconfigure $w 0 -weight 1
-        for {set i 0} {$i < 6} {incr i} {
-            grid columnconfigure $w $i -weight 1
-        }
-    }
-
-    grid columnconfigure $sim_f 0 -weight 1
-
-
-
-
-
-
-    # Start game
-    run_tourn
-
-    # find winnner
-    button_state disabled "Reset" reset
-}
+    grid $tournctrl0_f      -column 0 -row 0 -sticky nsew
+    grid $::tournScore_lb   -column 0 -row 1 -sticky nsew
+    grid $::tournMatches_lb -column 0 -row 2 -sticky nsew
+    grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
+    grid $tournctrl2_f      -column 0 -row 4 -sticky nsew
 }
 
 #****P* create_tournctrl/end_tourn
@@ -379,6 +202,7 @@ proc create_tournctrl {} {
 proc end_tourn {} {
     set ::running 0
     set ::halted 1
+    destroy $::game_f.tourn
     # reset is defined in battle.tcl
     reset
 }
@@ -416,15 +240,14 @@ proc update_tourn {} {
 # SOURCE
 #
 proc show_score {} {
-    set ::robotHealth {}
-    set index 0
-    foreach robot $::allRobots {
-        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
-        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
-        if {$::data($robot,brightness) > 0.5} {
-            $::robotHealth_lb itemconfigure $index -background black
-        }
-        incr index
+    set ::tournScore {}
+    foreach robot $::allRobots_tourn {
+        lappend ::tournScore "[format %3d $::score($robot)] $::data($robot,name)"
+#        debug "tournScore: $::tournScore"
+#        set index [lsearch -exact $::tournScore $::data($robot,name)]
+#        debug "show_score index $::data($robot: $index"
+#        lreplace $::tournScore [- $index 1] $index \
+#            "[format %3d $::score($robot)] $::data($robot,name)"
     }
 }
 #******
@@ -442,15 +265,16 @@ proc show_score {} {
 # SOURCE
 #
 proc show_matches {} {
-    set ::robotHealth {}
+    set ::tournMatches {}
     set index 0
-    foreach robot $::allRobots {
-        lappend ::robotHealth "[format %3d $::data($robot,health)] $::data($robot,name)  ($::data($robot,inflicted))"
-        $::robotHealth_lb itemconfigure $index -foreground $::data($robot,color)
-        if {$::data($robot,brightness) > 0.5} {
-            $::robotHealth_lb itemconfigure $index -background black
-        }
-        incr index
+
+    foreach match $::matchlist {
+        lappend ::tournMatches "$::data([lindex $match 0],name) vs $::data([lindex $match 1],name)"
+#        $::tournMatches_lb itemconfigure $index -foreground $::data($robot,color)
+#        if {$::data($robot,brightness) > 0.5} {
+#            $::robotHealth_lb itemconfigure $index -background black
+#        }
+#        incr index
     }
 }
 #******
@@ -468,16 +292,160 @@ proc show_matches {} {
 # SOURCE
 #
 proc run_tourn {} {
-    foreach robot $::allRobots {
+    global allRobots allRobots_tourn activeRobots activeRobots_tourn \
+        data data_tourn running matchlist score matchlog outfile
+
+    foreach robot $allRobots {
+        set score($robot) 0
+    }
+    build_matchlist
+
+    # Remember allRobots, activeRobots and data
+    set allRobots_tourn    $allRobots
+    set activeRobots_tourn $activeRobots
+    array set data_tourn   [array get data]
+
+    # Figure out the longest robot name to line up the report nicely
+    set ::long_name 0
+    foreach name [array names data *,name] {
+        if {[string length $data($name)] > $::long_name} {
+            set ::long_name [string length $data($name)]
+        }
+    }
+    set matchlog ""
+
+    foreach match $matchlist {
+        set robot  [lindex $match 0]
+        set target [lindex $match 1]
+
+        # Switch all and active robots to current tournament pair
+        set allRobots    "$robot $target"
+        set activeRobots $allRobots
+
+        # Init current two robots' interpreters
+        init_robots
+        init_interps
+
+        set running 1
+
+        if {$::gui} {
+            # Init robots on GUI
+            gui_init_robots
+
+            set data($robot,color)      $data_tourn($robot,color)
+            set data($robot,brightness) $data_tourn($robot,brightness)
+
+            # Set initial colors
+            foreach robot $allRobots {
+                set data($robot,color)      $data_tourn($robot,color)
+                set data($robot,brightness) $data_tourn($robot,brightness)
+            }
+            update_tourn
+        }
+        set ::stopped 0
+        coroutine run_robotsCo run_robots
+        vwait ::stopped
+
+        # Set match score for tournament mode
+        set match_msg ""
+        # Fix padding
+        for {set i [string length $data($robot,name)]} \
+            {$i <= $::long_name} {incr i} {
+                append match_msg " "
+            }
+        if {[llength $activeRobots] == 1} {
+            incr score([lindex $activeRobots 0]) 3
+            if {$robot eq $activeRobots} {
+                append match_msg \
+                    "$data($robot,name)(w) vs $data($target,name)"
+            } else {
+
+                append match_msg \
+                    "$data($robot,name)    vs $data($target,name)(w)"
+            }
+        } else {
+            foreach robot $activeRobots {
+                incr score($robot) 1
+            }
+            append match_msg \
+                "$data($robot,name)    vs $data($target,name) (tie)"
+        }
+        if {$::gui} {
+            update_tourn
+        }
+        puts $match_msg log
+        append matchlog "$match_msg\n"
+
+        # Disable robots and clear messages
+        foreach robot $activeRobots {
+            disable_robot $robot
+            set ::robotMsg {}
+        }
+    }
+    # Switch back all and active robots to remembered values
+    set allRobots    $allRobots_tourn
+    set activeRobots $activeRobots_tourn
+
+    # Sort the scores
+    set score_sorted {}
+    foreach robot $allRobots {
+        lappend score_sorted "$robot $score($robot)"
+    }
+    set ::win_msg "TOURNAMENT SCORE:\n"
+    set place 1
+    foreach robotscore [lsort -integer -index 1 \
+                            -decreasing $score_sorted] {
+        set robot [lindex $robotscore 0]
+        append ::win_msg "[format %3d $score($robot)] $data($robot,name)\n"
+        incr place
+    }
+    # show results
+    if {$::gui} {
+        if {$::halted} {
+            set ::StatusBarMsg "Battle halted"
+        } else {
+            tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
+        }
+        button_state disabled "Reset" reset
+    } else {
+        puts "\n$::win_msg" log
+    }
+    # Set up report file message
+    set outmsg ""
+    append outmsg "MATCHES:\n$matchlog\n"
+    append outmsg "$::win_msg"
+
+    if {$outfile ne ""} {
+        debug "$outfile :::: $outmsg"
+        catch {write_file $outfile $outmsg}
+    }
+}
+#******
+
+#****P* run_tourn/build_matchlist
+#
+# NAME
+#
+#   build_matchlist
+#
+# DESCRIPTION
+#
+#   Builds the list of matches in the tournament. Makes sure robots do
+#   not fight themselves or multiple times against the same opponent.
+#
+# SOURCE
+#
+proc build_matchlist {} {
+    global allRobots matchlist
+
+    foreach robot $allRobots {
         foreach target $allRobots {
-            if {$robot eq $target} {
+            # Make sure all matches are unique
+            if {[<= [lsearch $allRobots $target] \
+                     [lsearch $allRobots $robot]]} {
                 continue
             }
-            puts "running"
-            set ::running 1
-            coroutine run_robotsCo run_robots
-            vwait ::running
-            puts "activerobots: $::activeRobots"
+            lappend matchlist [list $robot $target]
         }
     }
 }

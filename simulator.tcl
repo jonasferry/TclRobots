@@ -63,7 +63,7 @@ proc init_sim {} {
     button_state disabled
 
     # init is defined in tclrobots.tcl
-    init
+    init_game
 
     set ::tick 0
 
@@ -305,6 +305,7 @@ proc create_simctrl {} {
 # SOURCE
 #
 proc end_sim {} {
+    destroy $::game_f.sim
     # reset is defined in battle.tcl
     reset
 }

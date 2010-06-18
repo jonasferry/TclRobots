@@ -60,8 +60,8 @@ proc init_battle {} {
     set ::halted  0
     button_state disabled "Halt" halt
 
-    # Init robots
-    init
+    # Init    puts "Starting battle" 1
+    init_game
 
     # Init robots on GUI
     gui_init_robots
@@ -121,7 +121,6 @@ proc reset {} {
         $::arena_c delete all
     }
     grid forget $::game_f
-    destroy $::game_f.sim
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     set ::StatusBarMsg "Select robot files for battle"

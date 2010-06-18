@@ -37,7 +37,7 @@ proc init_gui {} {
     # Try to get tkpath
     if {[catch {package require tkpath}]} {
         # Try to get tkpath from a local lib
-        set libpath [file join $::thisDir lib]
+        set libpath [file join $::thisDir lib/tkpath]
         if {[file isdirectory $libpath]} {
             lappend ::auto_path $libpath
         }
