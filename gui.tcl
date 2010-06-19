@@ -807,45 +807,7 @@ proc gui_init_robots {{lastblack 0}} {
 
     set i 0
     foreach robot $::allRobots color $colors {
-        # Set colors as far away as possible from each other visually
-        set ::data($robot,color) $color
-        set ::data($robot,brightness) [brightness $color]
-        # Precreate robot on canvas
-        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,paths) [string map [list % $color] \
-                [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]]
-        if {$::data(tkp)} {
-            foreach {path opts} $::data($robot,paths) {
-                $::arena_c create path $path \
-                        -fill "" -stroke $color \
-                        {*}$opts \
-                        -tags "robot r$::data($robot,num)"
-            }
-            set ::data($robot,robotid) r$::data($robot,num)
-            # Auto-adapt scale to a robot size
-            set bbox [$::arena_c bbox r$::data($robot,num)]
-            lassign $bbox x1 y1 x2 y2
-            set size [max [- $x2 $x1] [- $y2 $y1]]
-            set ::data($robot,scale) [expr {80.0 / $size}]
-        } else {
-            set ::data($robot,robotid) [$::arena_c create line \
-                    -100 -100 -100 -100 \
-                    -fill $::data($robot,color) \
-                    -arrow last -arrowshape $::data($robot,shape) \
-                    -tags "r$::data($robot,num) robot"]
-        }
-        set ::data($robot,highlight) 0
-        # Precreate scan mark on canvas
-        if {$::data(tkp)} {
-            set path [arc_path 0 1]
-            set ::data($robot,scanid) [$::arena_c create path $path \
-                    -fill "" -fillopacity 0.3 -stroke "" \
-                    -tags "scan s$::data($robot,num)"]
-        } else {
-            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-                    -width 1 -tags "scan s$::data($robot,num)"]
-        }
+        gui_create_robot $robot $color $i
         incr i
     }
 }
@@ -962,6 +924,67 @@ proc brightness color {
     foreach {r g b} [winfo rgb . $color] break
     set max [lindex [winfo rgb . white] 0]
     expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
+}
+#******
+
+#****P* gui_init_robots/gui_create_robot
+#
+# NAME
+#
+#   gui_create_robot
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc gui_create_robot {robot color shape} {
+    global data
+
+    # Set colors as far away as possible from each other visually
+    set data($robot,color) $color
+    set data($robot,brightness) [brightness $color]
+    # Precreate robot on canvas
+    set data($robot,shape) [lindex $::parms(shapes) [% $shape 4]]
+    set data($robot,paths) \
+        [string map [list % $color] \
+             [lindex $::parms(paths) [% $shape [llength $::parms(paths)]]]]
+    if {$data(tkp)} {
+        foreach {path opts} $data($robot,paths) {
+            $::arena_c create path $path \
+                -fill "" -stroke $color \
+                {*}$opts \
+                -tags "robot r$data($robot,num)"
+        }
+        set data($robot,robotid) r$data($robot,num)
+        # Auto-adapt scale to a robot size
+        set bbox [$::arena_c bbox r$data($robot,num)]
+        lassign $bbox x1 y1 x2 y2
+        set size [max [- $x2 $x1] [- $y2 $y1]]
+        set data($robot,scale) [expr {80.0 / $size}]
+    } else {
+        set data($robot,robotid) \
+            [$::arena_c create line \
+                 -100 -100 -100 -100 \
+                 -fill $data($robot,color) \
+                 -arrow last -arrowshape $data($robot,shape) \
+                 -tags "r$data($robot,num) robot"]
+    }
+    set data($robot,highlight) 0
+    # Precreate scan mark on canvas
+    if {$data(tkp)} {
+        set path [arc_path 0 1]
+        set data($robot,scanid) \
+            [$::arena_c create path $path \
+                 -fill "" -fillopacity 0.3 -stroke "" \
+                 -tags "scan s$data($robot,num)"]
+    } else {
+        set data($robot,scanid) \
+            [$::arena_c create arc -100 -100 -100 -100 \
+                 -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                 -width 1 -tags "scan s$data($robot,num)"]
+    }
 }
 #******
 
