@@ -1079,7 +1079,8 @@ proc disable_robot {robot} {
         interp delete $data($robot,interp)
         set index [lsearch -exact $activeRobots $robot]
         set activeRobots [lreplace $activeRobots $index $index]
-        set data($robot,syscall,$tick) {}
+        array unset data $robot
+        #   set data($robot,syscall,$tick) {}
         debug "disable robot $robot success"
     } else {
         debug "disable robot $robot failed; interp does not exist"
@@ -1704,17 +1705,32 @@ proc mrand {max} {
 #   that TclRobots has to be called with the -debug flag for debug
 #   messages to display.
 #
+#   If the first argument to debug is "breakpoint" execution will halt
+#   until ::broken is set to 0 e.g. by Tkinspect.
+#
+#   If the first argument is "exit", debug will print the message and
+#   exit TclRobots.
+#
+#   The name of the procedure that called debug is automatically
+#   included in the debug message.
+#
 # SOURCE
 #
 proc debug {args} {
     if {$::debug} {
-        if {[lindex $args 0] ne "exit"} {
-            puts "[join $args]"
-        } else {
+        # Display name of procedure that called debug
+        set caller [lindex [info level [- [info level] 1]] 0]
+        if {[lindex $args 0] eq "breakpoint"} {
+            set ::broken 1
+            puts "Breakpoint reached (dbg: $caller)"
+            vwait ::broken
+        } elseif {[lindex $args 0] eq "exit"} {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
-            puts "[join [lrange $args 1 end]]"
+            puts "[join [lrange $args 1 end]] (dbg: $caller)"
             exit
+        } else {
+            puts "[join $args] (dbg: $caller)"
         }
     }
 }

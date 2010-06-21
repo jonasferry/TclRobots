@@ -43,7 +43,12 @@
 #
 proc init_tourn {} {
     global allRobots allRobots_tourn activeRobots activeRobots_tourn data \
-        score
+        data_tourn score
+
+    # Clear any old data
+    array unset data
+
+    debug breakpoint
 
     if {$::gui} {
         get_filenames_tourn
@@ -57,25 +62,28 @@ proc init_tourn {} {
     init_files
     init_robots
 
-    # Init robots on GUI
-    gui_init_robots
+    if {$::gui} {
+        # Init robots on GUI
+        gui_init_robots
 
-    # Remove canvas items; these will be initialised again for each match
-    $::arena_c delete robot
-    $::arena_c delete scan
-
+        # Remove canvas items; these will be initialised again for each match
+        $::arena_c delete robot
+        $::arena_c delete scan
+    }
     foreach robot $allRobots {
         set score($robot) 0
     }
     # Remember allRobots, activeRobots and data
     set allRobots_tourn    $allRobots
     set activeRobots_tourn $activeRobots
+    array set data_tourn   [array get data]
 
     build_matchlist
-    set ::current_match [lindex $::matchlist 0]
 
-    update_tourn
-
+    if {$::gui} {
+        set ::current_match [lindex $::matchlist 0]
+        update_tourn
+    }
     # Figure out the longest robot name to line up the report nicely
     set ::long_name 0
     foreach name [array names data *,name] {
@@ -147,20 +155,17 @@ proc init_gui_tourn {} {
 # SOURCE
 #
 proc create_tournctrl {} {
+    global tourn_f
+
     # The single battle mode shows the arena, the health box and the
     # message box
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $::game_f  -column 0 -row 2 -sticky nsew
+    grid $::arena_c -column 0 -row 0 -rowspan 2 -sticky nsew
 
     set  tourn_f [ttk::frame $::game_f.tourn]
     grid $tourn_f -column 1 -row 0 -sticky nsew
 
-    set ::robotHealth_lb [listbox $tourn_f.health -background black \
-                              -listvariable ::robotHealth]
-    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
-
-    set ::robotMsg_lb [listbox $tourn_f.msg -background black \
-                           -listvariable ::robotMsg]
+    create_health_msg $tourn_f
 
     set tournctrl1_f [ttk::frame $tourn_f.time -relief raised -borderwidth 2]
     set tourntime_l  [ttk::label $tourn_f.time.l \
@@ -223,6 +228,7 @@ proc create_tournctrl {} {
 proc build_matchlist {} {
     global allRobots matchlist
 
+    set matchlist {}
     foreach robot $allRobots {
         foreach target $allRobots {
             # Make sure all matches are unique
@@ -334,7 +340,7 @@ proc show_matches {} {
 #
 proc run_tourn {} {
     global allRobots allRobots_tourn activeRobots activeRobots_tourn \
-        data running matchlist score matchlog
+        data data_tourn running matchlist score matchlog
 
     if {$::gui} {
         set ::StatusBarMsg "Running"
@@ -345,29 +351,39 @@ proc run_tourn {} {
     puts "MATCHES:\n"
 
     foreach match $matchlist {
-        # Remove old canvas items
-        $::arena_c delete robot
-        $::arena_c delete scan
-
+        if {$::gui} {
+            # Remove old canvas items
+            $::arena_c delete robot
+            $::arena_c delete scan
+            set ::current_match $match
+        }
         set robot  [lindex $match 0]
         set target [lindex $match 1]
-
-        set ::current_match $match
 
         # Switch all and active robots to current tournament pair
         set allRobots    "$robot $target"
         set activeRobots $allRobots
 
+        # Unset old data array, but retain some information
+        array unset data
+        foreach robot $allRobots {
+            set data($robot,code) $data_tourn($robot,code)
+            set data($robot,name) $data_tourn($robot,name)
+            set data($robot,num)  $data_tourn($robot,num)
+        }
         # Init current two robots' interpreters
         init_robots
         init_interps
 
-        foreach robot $allRobots {
-            gui_create_robot $robot $data($robot,color) \
-                [lsearch -exact $allRobots_tourn $robot]
+        if {$::gui} {
+            foreach robot $allRobots {
+                gui_create_robot $robot $data_tourn($robot,color) \
+                    [lsearch -exact $allRobots_tourn $robot]
+            }
         }
         set running 1
         set ::stopped 0
+        set ::halted 0
         coroutine run_robotsCo run_robots
         vwait ::stopped
 
@@ -459,12 +475,12 @@ proc reset_tourn {} {
 
     set ::running 0
     set ::halted 1
-    destroy $::game_f.tourn
+    destroy $::tourn_f
 
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all

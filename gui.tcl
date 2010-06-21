@@ -299,17 +299,30 @@ proc create_common_widgets {} {
     set ::game_f [ttk::frame .f3]
 
     create_arena
+}
+#******
 
-    # The robot health list
-    set ::robotHealth {}
-    set ::robotHealth_lb [listbox $::game_f.h -background black \
-                              -listvariable ::robotHealth]
-    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
+#****P* init_gui/fileBox
+#
+# NAME
+#
+#   fileBox
+#
+# DESCRIPTION
+#
+# SOURCE
+#
+proc create_health_msg {path} {
+        # The robot health list
+        set ::robotHealth {}
+        set ::robotHealth_lb [listbox ${path}.health -background black \
+                                  -listvariable ::robotHealth]
+        bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
 
-    # The robot message box
-    set ::robotMsg {}
-    set ::robotMsg_lb [listbox $::game_f.msg -background black \
-                           -listvariable ::robotMsg]
+        # The robot message box
+        set ::robotMsg {}
+        set ::robotMsg_lb [listbox ${path}.msg -background black \
+                               -listvariable ::robotMsg]
 }
 #******
 
@@ -600,24 +613,28 @@ proc remove_all {} {
 # SOURCE
 #
 proc create_arena {} {
+    global parms arena_c
+
     if {[info commands ::tkp::canvas] ne ""} {
         set ::tkp::depixelize 0
-        set ::arena_c [tkp::canvas $::game_f.c -background white]
-        set ::data(tkp) 1
+        set arena_c [tkp::canvas $::game_f.c -background white]
+        set parms(tkp) 1
 
         # A gradient for a ball. Used for explosion
-        set ::data(gradient,expl) [$::arena_c gradient create radial \
-                -stops "{0 red 0.8} {1 yellow 0}" \
-                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
+        set parms(gradient,expl) \
+            [$arena_c gradient create radial \
+                 -stops "{0 red 0.8} {1 yellow 0}" \
+                 -radialtransition {0.5 0.5 0.5 0.5 0.5}]
         # A gradient for a ball. Used for missile
-        set ::data(gradient,miss) [$::arena_c gradient create radial \
-                -stops "{0 darkgray} {1 black}" \
-                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+        set parms(gradient,miss) \
+            [$arena_c gradient create radial \
+                 -stops "{0 darkgray} {1 black}" \
+                 -radialtransition {0.6 0.4 0.8 0.7 0.3}]
     } else {
-        set ::arena_c [canvas $::game_f.c -background white]
-        set ::data(tkp) 0
+        set arena_c [canvas $::game_f.c -background white]
+        set parms(tkp) 0
     }
-    bind $::arena_c <Configure> {show_arena}
+    bind $arena_c <Configure> {show_arena}
 }
 #******
 
@@ -950,7 +967,7 @@ proc gui_create_robot {robot color shape} {
     set data($robot,paths) \
         [string map [list % $color] \
              [lindex $::parms(paths) [% $shape [llength $::parms(paths)]]]]
-    if {$data(tkp)} {
+    if {$::parms(tkp)} {
         foreach {path opts} $data($robot,paths) {
             $::arena_c create path $path \
                 -fill "" -stroke $color \
@@ -973,7 +990,7 @@ proc gui_create_robot {robot color shape} {
     }
     set data($robot,highlight) 0
     # Precreate scan mark on canvas
-    if {$data(tkp)} {
+    if {$::parms(tkp)} {
         set path [arc_path 0 1]
         set data($robot,scanid) \
             [$::arena_c create path $path \
@@ -1028,7 +1045,7 @@ proc show_robots {} {
             set x [* $::data($robot,x) $::scale]
             set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-            if {$::data(tkp)} {
+            if {$::parms(tkp)} {
                 set val [* $::data($robot,scale) $::scale]
                 set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
                 set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
@@ -1057,9 +1074,9 @@ proc show_robots {} {
             set x [* $::data($robot,mx) $::scale]
             set y [* [- 1000 $::data($robot,my)] $::scale]
             set val [* 6 $::scale]
-            if {$::data(tkp)} {
+            if {$::parms(tkp)} {
                 $::arena_c create circle $x $y -r $val \
-                        -fill $::data(gradient,miss) \
+                        -fill $::parms(gradient,miss) \
                         -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
             } else {
                 $::arena_c create oval \
@@ -1085,7 +1102,7 @@ proc show_robots {} {
 #
 proc show_scan {} {
     # Hide the scan arcs by default
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         $::arena_c itemconfigure scan -fill ""
     } else {
         $::arena_c itemconfigure scan -outline ""
@@ -1104,7 +1121,7 @@ proc show_scan {} {
                 set y [* [- 1000 $::data($robot,y)] $::scale]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
-                if {$::data(tkp)} {
+                if {$::parms(tkp)} {
                     set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
                     # Scale to radius and move to location
                     set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
@@ -1321,9 +1338,9 @@ proc show_explode {robot} {
     set x [* $::data($robot,mx) $::scale]
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         set id [$::arena_c create circle $x $y -r 0 \
-                -fill $::data(gradient,expl) \
+                -fill $::parms(gradient,expl) \
                 -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
 
         # Loop over all animation frames

@@ -34,10 +34,17 @@
 # SOURCE
 #
 proc init_battle {} {
+    global data
+
+    # Clear any old data
+    array unset data
+
     # get robot filenames from window
     set ::robotFiles $::robotList
 
     grid forget $::sel_f
+
+    create_health_msg $::game_f
 
     # The single battle mode shows the arena, the health box and the
     # message box
@@ -61,7 +68,7 @@ proc init_battle {} {
     set ::halted  0
     button_state disabled "Halt" halt_battle
 
-    # Init    puts "Starting battle" 1
+    # Init
     init_game
 
     # Init robots on GUI
@@ -120,12 +127,14 @@ proc reset_battle {} {
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all
     }
     grid forget $::game_f
+    destroy $::game_f.health
+    destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     set ::StatusBarMsg "Select robot files for battle"
