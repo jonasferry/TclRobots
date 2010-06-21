@@ -43,6 +43,8 @@ proc init_sim {} {
 
     grid forget $::sel_f
 
+    create_health_msg $::game_f
+
     # The simulator shows the arena, the message box and the simulator
     # controls. Simulator controls are defined later.
     grid $::game_f -column 0 -row 2 -sticky nsew
@@ -63,23 +65,39 @@ proc init_sim {} {
     button_state disabled
 
     # init is defined in tclrobots.tcl
-    init_game
+#    init_game
 
-    set ::tick 0
+    set ::finish ""
+    set ::robmsg_out ""
+#    set ::tick 0
+
+    init_parms
+    init_trig_tables
+    init_rand
+    init_files
+#    init_robots
+
+
+#    set ::tick 0
 
     set ::allRobots {r0 target}
+    set ::activeRobots $::allRobots
 
-    set f [open [lindex $::robotList 0]]
-    set ::data(r0,code) [read $f]
-    close $f
+#    set f [open [lindex $::robotList 0]]
+#    set ::data(r0,code) [read $f]
+#    close $f
 
     # Make target run a dummy program
     set ::data(target,code) {while {1} {set x [loc_x]}}
+    set ::data(target,name) target
+    set ::data(target,num)  12345
 
-    set ::activeRobots $::allRobots
 
     # init_robots is defined in tclrobots.tcl
     init_robots
+    init_interps
+
+    set ::tick 0
 
     # Set target signature, make it black and place it in center of the arena
     set ::data(target,num)   1

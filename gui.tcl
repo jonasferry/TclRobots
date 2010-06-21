@@ -313,16 +313,16 @@ proc create_common_widgets {} {
 # SOURCE
 #
 proc create_health_msg {path} {
-        # The robot health list
-        set ::robotHealth {}
-        set ::robotHealth_lb [listbox ${path}.health -background black \
-                                  -listvariable ::robotHealth]
-        bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
+    # The robot health list
+    set ::robotHealth {}
+    set ::robotHealth_lb [listbox ${path}.health -background black \
+                              -listvariable ::robotHealth]
+    bind $::robotHealth_lb <<ListboxSelect>> highlightRobot
 
-        # The robot message box
-        set ::robotMsg {}
-        set ::robotMsg_lb [listbox ${path}.msg -background black \
-                               -listvariable ::robotMsg]
+    # The robot message box
+    set ::robotMsg {}
+    set ::robotMsg_lb [listbox ${path}.msg -background black \
+                           -listvariable ::robotMsg]
 }
 #******
 
