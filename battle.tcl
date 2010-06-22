@@ -68,7 +68,6 @@ proc init_battle {} {
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
-    set ::halted 0
     button_state disabled "START" run_battle
 }
 #******
@@ -92,6 +91,7 @@ proc run_battle {} {
     set ::StatusBarMsg "Running"
     button_state disabled "Halt" halt_battle
 
+    set ::halted 0
     run_game
 
     # find winnner

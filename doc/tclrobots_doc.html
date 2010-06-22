@@ -3,56 +3,57 @@
 <li>1. <a href="#robo0">tclrobots/file_header</a></li>
 <li>2. <a href="#robo1">tclrobots/main</a></li>
 <ul>
-<li>2.1. <a href="#robo2">main/init</a></li>
+<li>2.1. <a href="#robo2">main/init_game</a></li>
+<li>2.2. <a href="#robo9">main/run_game</a></li>
 <ul>
-<li>2.1.1. <a href="#robo3">init/init_parms</a></li>
-<li>2.1.2. <a href="#robo4">init/init_trig_tables</a></li>
-<li>2.1.3. <a href="#robo5">init/init_rand</a></li>
-<li>2.1.4. <a href="#robo6">init/init_robots</a></li>
-</ul>
-<li>2.2. <a href="#robo7">main/run_game</a></li>
+<li>2.2.1. <a href="#robo10">run_game/run_robots</a></li>
 <ul>
-<li>2.2.1. <a href="#robo8">run_game/run_robots</a></li>
+<li>2.2.1.1. <a href="#robo11">run_robots/act</a></li>
+<li>2.2.1.2. <a href="#robo12">run_robots/update_robots</a></li>
 <ul>
-<li>2.2.1.1. <a href="#robo9">run_robots/act</a></li>
-<li>2.2.1.2. <a href="#robo10">run_robots/update_robots</a></li>
+<li>2.2.1.2.1. <a href="#robo13">update_robots/check_missiles</a></li>
+<li>2.2.1.2.2. <a href="#robo14">update_robots/update_missile_location</a></li>
+<li>2.2.1.2.3. <a href="#robo15">update_robots/missile_reached_target</a></li>
+<li>2.2.1.2.4. <a href="#robo16">update_robots/assign_missile_damage</a></li>
+<li>2.2.1.2.5. <a href="#robo17">update_robots/check_barrel</a></li>
+<li>2.2.1.2.6. <a href="#robo18">update_robots/check_speed</a></li>
+<li>2.2.1.2.7. <a href="#robo19">update_robots/update_speed</a></li>
+<li>2.2.1.2.8. <a href="#robo20">update_robots/update_heading</a></li>
+<li>2.2.1.2.9. <a href="#robo21">update_robots/update_distance</a></li>
+<li>2.2.1.2.10. <a href="#robo22">update_robots/check_wall</a></li>
+<li>2.2.1.2.11. <a href="#robo23">update_robots/check_health</a></li>
 <ul>
-<li>2.2.1.2.1. <a href="#robo11">update_robots/check_missiles</a></li>
-<li>2.2.1.2.2. <a href="#robo12">update_robots/update_missile_location</a></li>
-<li>2.2.1.2.3. <a href="#robo13">update_robots/missile_reached_target</a></li>
-<li>2.2.1.2.4. <a href="#robo14">update_robots/assign_missile_damage</a></li>
-<li>2.2.1.2.5. <a href="#robo15">update_robots/check_barrel</a></li>
-<li>2.2.1.2.6. <a href="#robo16">update_robots/check_speed</a></li>
-<li>2.2.1.2.7. <a href="#robo17">update_robots/update_speed</a></li>
-<li>2.2.1.2.8. <a href="#robo18">update_robots/update_heading</a></li>
-<li>2.2.1.2.9. <a href="#robo19">update_robots/update_distance</a></li>
-<li>2.2.1.2.10. <a href="#robo20">update_robots/check_wall</a></li>
-<li>2.2.1.2.11. <a href="#robo21">update_robots/check_health</a></li>
+<li>2.2.1.2.11.1. <a href="#robo24">check_health/disable_robot</a></li>
+</ul>
+</ul>
+<li>2.2.1.3. <a href="#robo25">run_robots/tick</a></li>
+</ul>
+<li>2.2.2. <a href="#robo26">run_game/find_winner</a></li>
+</ul>
+</ul>
+<li>3. <a href="#robo3">init/init_parms</a></li>
+<li>4. <a href="#robo4">init/init_trig_tables</a></li>
+<li>5. <a href="#robo5">init/init_rand</a></li>
+<li>6. <a href="#robo6">init/init_files</a></li>
+<li>7. <a href="#robo7">init/init_robots</a></li>
+<li>8. <a href="#robo8">init/init_interps</a></li>
+<li>9. <a href="#robo27">tclrobots/write_file</a></li>
+<li>10. <a href="#robo28">tclrobots/syscall</a></li>
 <ul>
-<li>2.2.1.2.11.1. <a href="#robo22">check_health/disable_robot</a></li>
+<li>10.1. <a href="#robo29">syscall/sysScanner</a></li>
+<li>10.2. <a href="#robo30">syscall/sysDsp</a></li>
+<li>10.3. <a href="#robo31">syscall/sysAlert</a></li>
+<li>10.4. <a href="#robo32">syscall/sysCannon</a></li>
+<li>10.5. <a href="#robo33">syscall/sysDrive</a></li>
+<li>10.6. <a href="#robo34">syscall/sysData</a></li>
+<li>10.7. <a href="#robo35">syscall/sysTick</a></li>
+<li>10.8. <a href="#robo36">syscall/sysTeamDeclare</a></li>
+<li>10.9. <a href="#robo37">syscall/sysTeamSend</a></li>
+<li>10.10. <a href="#robo38">syscall/sysTeamGet</a></li>
+<li>10.11. <a href="#robo39">syscall/sysDputs</a></li>
 </ul>
-</ul>
-<li>2.2.1.3. <a href="#robo23">run_robots/tick</a></li>
-</ul>
-<li>2.2.2. <a href="#robo24">run_game/find_winner</a></li>
-</ul>
-</ul>
-<li>3. <a href="#robo25">tclrobots/syscall</a></li>
-<ul>
-<li>3.1. <a href="#robo26">syscall/sysScanner</a></li>
-<li>3.2. <a href="#robo27">syscall/sysDsp</a></li>
-<li>3.3. <a href="#robo28">syscall/sysAlert</a></li>
-<li>3.4. <a href="#robo29">syscall/sysCannon</a></li>
-<li>3.5. <a href="#robo30">syscall/sysDrive</a></li>
-<li>3.6. <a href="#robo31">syscall/sysData</a></li>
-<li>3.7. <a href="#robo32">syscall/sysTick</a></li>
-<li>3.8. <a href="#robo33">syscall/sysTeamDeclare</a></li>
-<li>3.9. <a href="#robo34">syscall/sysTeamSend</a></li>
-<li>3.10. <a href="#robo35">syscall/sysTeamGet</a></li>
-<li>3.11. <a href="#robo36">syscall/sysDputs</a></li>
-</ul>
-<li>4. <a href="#robo37">tclrobots/rand</a></li>
-<li>5. <a href="#robo38">tclrobots/debug</a></li>
+<li>11. <a href="#robo40">tclrobots/rand</a></li>
+<li>12. <a href="#robo41">tclrobots/debug</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="tclrobots2ffile5fheader"></a>
@@ -93,13 +94,15 @@
     set ::thisDir [file dirname $::thisScript]
 
     set ::gui         0
+    set ::debug       0
     set ::max_ticks   6000
-    set ::arg_tlimit  10
-    set ::arg_outfile "results.out"
     set ::robotFiles  {}
     set ::tourn_type  0
     set ::numlist     0
     set ::outfile     ""
+    set ::silent      0
+    set ::verbose     0
+    set ::game_mode   ""
 
     set state none
     foreach arg $::argv {
@@ -107,11 +110,20 @@
             set ::seed $arg
             set state none
             continue
+        } elseif {$state eq "outfile"} {
+            set ::outfile $arg
+            set state none
+            continue
         }
         switch -glob -- $arg  {
-            -t*     {set ::tourn_type 1}
-            -gui    {set ::gui 1}
-            -seed   {set state seed}
+            -o       {set state outfile}
+            -silent  {set ::silent 1; set ::verbose 0}
+            -verbose {set ::verbose 1; set ::silent 0}
+            -msg     {set ::msgoff 1}
+            -t*      {set ::tourn_type 1}
+            -gui     {set ::gui 1}
+            -seed    {set state seed}
+            -debug   {set ::debug 1}
             default {
                 if {[file isfile [pwd]/$arg]} {
                     lappend ::robotFiles [pwd]/$arg
@@ -121,10 +133,25 @@
             }
         }
     }
-
     if {[llength $::robotFiles] &gt;= 2 &amp;&amp; !$::gui} {
-        # Run batch
-        puts "Running time [/ [lindex [time {init;run_game}] 0] 1000000.0] seconds"
+        if {$::tourn_type == 0} {
+            # Run single battle in terminal
+            puts "\nSingle battle started\n"
+            set running_time [/ [lindex [time {init_game;run_game}] 0] \
+                                  1000000.0]
+            puts "seed: $::seed"
+            puts "time: $running_time seconds\n"
+            puts "Single battle finished\n"
+        } else {
+            # Run tournament in terminal
+            puts "\nTournament started\n"
+            source $::thisDir/tournament.tcl
+            set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
+                                  1000000.0]
+            puts "seed: $::seed"
+            puts "time: $running_time seconds\n"
+            puts "Tournament finished\n"
+        }
     } else {
         # Run GUI
         set ::gui 1
@@ -134,51 +161,691 @@
 }
 </pre>
 <a name="robo2"></a>
-<a name="main2finit"></a>
-<h2>2.1.  main/init [ procedure ]  </h2>
+<a name="main2finit5fgame"></a>
+<h2>2.1.  main/init_game [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<p>   init
+<p>   init_game
 </p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc init {} {
-    global data allRobots activeRobots robotFiles tick
+<pre class="source">proc init_game {} {
+    global finish robmsg_out tick
+
+    set finish ""
+    set robmsg_out ""
+    set tick 0
 
     init_parms
     init_trig_tables
     init_rand
-    set ::finish ""
-
-    set tick 0
-
-    set allRobots {}
-
-    # Pick a random element from a list; use this for reading code!
-    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
-
-    for {set i 0} {$i &lt; [llength $robotFiles]} {incr i} {
-        # Give the robots names like r0, r1, etc.
-        set robot r$i
-        # Update list of robots
-        lappend allRobots $robot
-
-        # Read
-        set f [open [lindex $robotFiles $i]]
-        set data($robot,code) [read $f]
-        close $f
-    }
-
-    # At the start of the game all robots are active
-    set activeRobots $allRobots
-
+    init_files
     init_robots
-    act
-    tick
+    init_interps
+}
+</pre>
+<a name="robo9"></a>
+<a name="main2frun5fgame"></a>
+<h2>2.2.  main/run_game [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   run_game
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc run_game {} {
+    set ::running 1
+    coroutine run_robotsCo run_robots
+    vwait ::running
+    debug "activerobots: $::activeRobots"
+    find_winner
+}
+</pre>
+<a name="robo10"></a>
+<a name="run5fgame2frun5frobots"></a>
+<h3>2.2.1.  run_game/run_robots [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   run_robots
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc run_robots {} {
+    global data activeRobots tick running gui parms
+
+    while {$running == 1} {
+        if {$::game_mode eq "simulator"} {
+            # Reset health of target
+            set ::data(target,health) $::parms(health)
+        }
+        foreach robot $activeRobots {
+            if {($data($robot,alert) ne {}) &amp;&amp; \
+                    ($data($robot,ping) ne {})} {
+                # Prepend alert data to sysreturn no notify robot it's
+                # been scanned.
+                set data($robot,sysreturn,[- $tick 1]) \
+                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
+
+                # Robot is notified; reset alert request
+                set data($robot,ping) {}
+            }
+            ${robot}Run $data($robot,sysreturn,[- $tick 1])
+        }
+        act
+
+        # Print extra information in simulator GUI
+        if {[eq $::game_mode "simulator"] &amp;&amp;
+            [ne $::data(r0,sysreturn,$::tick) ""]} {
+            lappend ::sim_syscall "=&gt;" $::data(r0,sysreturn,$::tick)
+        }
+        update_robots
+
+        if {$gui} {
+            update_gui
+        }
+        tick
+
+        # Check if single step is active in simulator mode
+        if {[eq $::game_mode "simulator"] &amp;&amp; $::step} {
+            vwait ::do_step
+            set ::do_step 0
+        }
+        if {$parms(tick) &lt; 5} {
+            # Don't bother at high speed
+            after $parms(tick) [info coroutine]
+        } elseif {$tick &lt;= 5} {
+            # Let the first few ticks pass before measuring
+            after $parms(tick) [info coroutine]
+            set ::timeAt5 [clock milliseconds]
+        } else {
+            # Try to measure time, to adjust the tick delay for load
+            set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
+            set delay [expr {$target - [clock milliseconds]}]
+            # Sanity check value
+            if {$delay &gt; $parms(tick)} {
+                set delay $parms(tick)
+            } elseif {$delay &lt; 5} {
+                set delay 5
+            }
+            after $delay [info coroutine]
+            # Keep the lag visible
+            set ::StatusBarMsg "Running $delay"
+        }
+        yield
+    }
+    set ::stopped 1
+    debug "destroying coroutine [info coroutine]"
+    rename [info coroutine] ""
+    yield
+}
+</pre>
+<a name="robo11"></a>
+<a name="run5frobots2fact"></a>
+<h4>2.2.1.1.  run_robots/act [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   act
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc act {} {
+    global data activeRobots tick
+
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            set currentSyscall $data($robot,syscall,$tick)
+            switch [lindex $currentSyscall 0] {
+                scanner      {sysScanner     $robot}
+                dsp          {sysDsp         $robot}
+                alert        {sysAlert       $robot}
+                cannon       {sysCannon      $robot}
+                drive        {sysDrive       $robot}
+                health       -
+                speed        -
+                heat         -
+                loc_x        -
+                loc_y        {sysData        $robot}
+                tick         {sysTick        $robot}
+                team_declare {sysTeamDeclare $robot}
+            }
+        }
+    }
+}
+</pre>
+<a name="robo12"></a>
+<a name="run5frobots2fupdate5frobots"></a>
+<h4>2.2.1.2.  run_robots/update_robots [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   update_robots
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   update position of missiles and robots, assess damage
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_robots {} {
+    global allRobots data
+
+    foreach robot $allRobots {
+        # check all flying missiles
+        set num_miss [check_missiles $robot]
+
+        # skip rest if robot dead
+        if {!$data($robot,status)} {continue}
+
+        # update missile reloader
+        if {$data($robot,reload)} {incr data($robot,reload) -1}
+
+        # check for barrel overheat, apply cooling
+        check_barrel $robot
+
+        # check for excessive speed, increment heat
+        check_speed $robot
+
+        # update robot speed, moderated by acceleration
+        update_speed $robot
+
+        # update robot heading, moderated by turn rates
+        update_heading $robot
+
+        # update distance traveled on this heading
+        update_distance $robot
+
+        # check for wall collision
+        check_wall $robot
+    }
+    # check for robot health
+    set health_status [check_health]
+
+    set num_rob       [lindex $health_status 0]
+    set diffteam      [lindex $health_status 1]
+    set num_team      [lindex $health_status 2]
+
+    if {($num_rob&lt;=1 || $num_team==1) &amp;&amp; $num_miss==0} {
+        # Stop game
+        set ::running 0
+    }
+}
+</pre>
+<a name="robo13"></a>
+<a name="update5frobots2fcheck5fmissiles"></a>
+<h5>2.2.1.2.1.  update_robots/check_missiles [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   check_missiles
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check all flying missiles
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_missiles {robot} {
+    global data activeRobots
+    set num_miss 0
+
+    if {$data($robot,mstate)} {
+        incr num_miss
+        update_missile_location $robot
+        # check if missile reached target
+        if {$data($robot,mrange) &gt; $data($robot,mdist)} {
+            missile_reached_target $robot
+
+            # assign damage to all within explosion ranges
+            foreach target $activeRobots {
+                if {!$data($target,status)} {continue}
+                assign_missile_damage $robot $target
+            }
+        }
+    }
+    return $num_miss
+}
+</pre>
+<a name="robo14"></a>
+<a name="update5frobots2fupdate5fmissile5flocation"></a>
+<h5>2.2.1.2.2.  update_robots/update_missile_location [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   update_missile_location
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   update location of missile
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_missile_location {robot} {
+    global data parms c_tab s_tab
+
+    set data($robot,mrange) \
+        [+ $data($robot,mrange) $parms(msp)]
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgy)]
+}
+</pre>
+<a name="robo15"></a>
+<a name="update5frobots2fmissile5freached5ftarget"></a>
+<h5>2.2.1.2.3.  update_robots/missile_reached_target [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   missile_reached_target
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc missile_reached_target {robot} {
+    global data gui c_tab s_tab
+
+    set data($robot,mstate) 0
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgy)]
+    if {$gui} {
+        after 1 "show_explode $robot"
+    }
+}
+</pre>
+<a name="robo16"></a>
+<a name="update5frobots2fassign5fmissile5fdamage"></a>
+<h5>2.2.1.2.4.  update_robots/assign_missile_damage [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   assign_missile_damage
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   assign damage to all within explosion ranges
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc assign_missile_damage {robot target} {
+    global data parms
+
+    set d [hypot [- $data($robot,mx) $data($target,x)] \
+            [- $data($robot,my) $data($target,y)]]
+    if {$d &lt; $parms(dia3)} {
+        if {$d &lt; $parms(dia0)} {
+            incr data($target,health) $parms(hit0)
+            incr data($robot,inflicted) [- $parms(hit0)]
+        } elseif {$d&lt;$parms(dia1)} {
+            incr data($target,health) $parms(hit1)
+            incr data($robot,inflicted) [- $parms(hit1)]
+        } elseif {$d&lt;$parms(dia2)} {
+            incr data($target,health) $parms(hit2)
+            incr data($robot,inflicted) [- $parms(hit2)]
+        } else {
+            incr data($target,health) $parms(hit3)
+            incr data($robot,inflicted) [- $parms(hit3)]
+        }
+    }
+}
+</pre>
+<a name="robo17"></a>
+<a name="update5frobots2fcheck5fbarrel"></a>
+<h5>2.2.1.2.5.  update_robots/check_barrel [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   check_barrel
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for barrel overheat, apply cooling
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_barrel {robot} {
+    global data parms
+
+    if {$data($robot,btemp)} {
+        incr data($robot,btemp) $parms(cancool)
+        if {$data($robot,btemp) &lt; 0} {
+            set data($robot,btemp) 0
+        }
+    }
+}
+</pre>
+<a name="robo18"></a>
+<a name="update5frobots2fcheck5fspeed"></a>
+<h5>2.2.1.2.6.  update_robots/check_speed [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   check_speed
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for excessive speed, increment heat
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) &gt; $parms(heatsp)} {
+        incr data($robot,heat) \
+            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
+                           $parms(hrate)]] 1]
+        if {$data($robot,heat) &gt;= $parms(heatmax)} {
+            set data($robot,heat) $parms(heatmax)
+            set data($robot,hflag) 1
+            if {$data($robot,dspeed) &gt; $parms(heatsp)} {
+                set data($robot,dspeed) $parms(heatsp)
+            }
+        }
+    } else {
+        # if overheating, apply cooling rate
+        if {$data($robot,hflag) || $data($robot,heat) &gt; 0} {
+            incr data($robot,heat) $parms(cooling)
+            if {$data($robot,heat) &lt;= 0} {
+                set data($robot,hflag) 0
+                set data($robot,heat) 0
+            }
+        }
+    }
+}
+</pre>
+<a name="robo19"></a>
+<a name="update5frobots2fupdate5fspeed"></a>
+<h5>2.2.1.2.7.  update_robots/update_speed [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   update_speed
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   update robot speed, moderated by acceleration
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) != $data($robot,dspeed)} {
+        if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+            incr data($robot,speed) -$parms(accel)
+            if {$data($robot,speed) &lt; $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        } else {
+            incr data($robot,speed) $parms(accel)
+            if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        }
+    }
+}
+</pre>
+<a name="robo20"></a>
+<a name="update5frobots2fupdate5fheading"></a>
+<h5>2.2.1.2.8.  update_robots/update_heading [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   update_heading
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   update robot heading, moderated by turn rates
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_heading {robot} {
+    global data parms
+
+    if {$data($robot,hdg) != $data($robot,dhdg)} {
+        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
+        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
+        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
+
+        if {$d1 &lt; $d2} {
+            set d $d1
+        } else {
+            set d $d2
+        }
+        if {$d &lt;= $mrate} {
+            set data($robot,hdg) $data($robot,dhdg)
+        } else {
+            set data($robot,hdg) \
+                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
+        }
+        set data($robot,orgx)  $data($robot,x)
+        set data($robot,orgy)  $data($robot,y)
+        set data($robot,range) 0
+    }
+}
+</pre>
+<a name="robo21"></a>
+<a name="update5frobots2fupdate5fdistance"></a>
+<h5>2.2.1.2.9.  update_robots/update_distance [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   update_distance
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   update distance traveled on this heading
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_distance {robot} {
+    global data parms c_tab s_tab
+
+    if {$data($robot,speed) &gt; 0} {
+        set data($robot,range) \
+            [+ $data($robot,range) \
+                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+
+        # Modify range with random factor to avoid totally
+        # deterministic movement. Range is currently +- 1%.
+        # Playtesting will tell if this should be lower or higher.
+        set randfactor [/ [+ [mrand 100] 1.0] 10000]
+        if {[mrand 2] == 0} {
+            set randfactor [- $randfactor]
+        }
+        set data($robot,range) [+ $data($robot,range) \
+                                    [* $data($robot,range) \
+                                         $randfactor]]
+
+        set data($robot,x) \
+            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
+                         $data($robot,orgx)]]
+
+        set data($robot,y) \
+            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
+                        $data($robot,orgy)]]
+    }
+}
+</pre>
+<a name="robo22"></a>
+<a name="update5frobots2fcheck5fwall"></a>
+<h5>2.2.1.2.10.  update_robots/check_wall [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   check_wall
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for wall collision
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_wall {robot} {
+    global data parms
+
+    if {$data($robot,speed) &gt; 0} {
+        if {($data($robot,x) &lt; 0) || ($data($robot,x) &gt; 999)} {
+            if {$data($robot,x) &lt; 0} {
+                set data($robot,x) 0
+            } else {
+                set data($robot,x) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+        if {($data($robot,y) &lt; 0) || ($data($robot,y) &gt; 999)} {
+            if {$data($robot,y) &lt; 0} {
+                set data($robot,y) 0
+            } else {
+                set data($robot,y) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+    }
+}
+</pre>
+<a name="robo23"></a>
+<a name="update5frobots2fcheck5fhealth"></a>
+<h5>2.2.1.2.11.  update_robots/check_health [ procedure ]  </h5>
+<p class="item_name">NAME</p>
+<p>   check_health
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for robot health
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_health {} {
+    global activeRobots data tick
+
+    set num_rob  0
+    set diffteam ""
+    set num_team 0
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            if {$data($robot,health) &lt;= 0 } {
+                set data($robot,status) 0
+                set data($robot,health) 0
+                disable_robot $robot
+                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+                if {$::gui} {
+                    after 1 "show_die $robot"
+                }
+            } else {
+                incr num_rob
+                if {$data($robot,team) != ""} {
+                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+                        lappend diffteam $data($robot,team)
+                        incr num_team
+                    }
+                } else {
+                    lappend diffteam $data($robot,name)
+                    incr num_team
+                }
+            }
+        }
+    }
+    return [list $num_rob $diffteam $num_team]
+}
+</pre>
+<a name="robo24"></a>
+<a name="check5fhealth2fdisable5frobot"></a>
+<h6>2.2.1.2.11.1.  check_health/disable_robot [ procedure ]  </h6>
+<p class="item_name">NAME</p>
+<p>   disable_robot
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc disable_robot {robot} {
+    global data activeRobots tick
+
+    if {[interp exists $data($robot,interp)]} {
+        interp delete $data($robot,interp)
+        set index [lsearch -exact $activeRobots $robot]
+        set activeRobots [lreplace $activeRobots $index $index]
+        array unset data $robot
+        #   set data($robot,syscall,$tick) {}
+        debug "disable robot $robot success"
+    } else {
+        debug "disable robot $robot failed; interp does not exist"
+    }
+}
+</pre>
+<a name="robo25"></a>
+<a name="run5frobots2ftick"></a>
+<h4>2.2.1.3.  run_robots/tick [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   tick
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc tick {} {
+    if {$::tick &lt; $::max_ticks} {
+        incr ::tick
+    } else {
+        set ::running 0
+    }
+}
+</pre>
+<a name="robo26"></a>
+<a name="run5fgame2ffind5fwinner"></a>
+<h3>2.2.2.  run_game/find_winner [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   find_winner
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc find_winner {} {
+    global data activeRobots winner outfile robmsg_out
+
+    set winner ""
+    set num_team 0
+    set diffteam ""
+    set win_color black
+    foreach robot $activeRobots {
+        lappend winner $data($robot,name)
+
+        if {$data($robot,team) != ""} {
+            if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+                lappend diffteam $data($robot,team)
+                incr num_team
+            }
+        } else {
+            incr num_team
+        }
+    }
+    # Set winner announcement
+    switch [llength $activeRobots] {
+        0 {
+            set ::win_msg "No robots left alive"
+        }
+        1 {
+            if {[string length $diffteam] &gt; 0} {
+                set diffteam "Team $diffteam"
+                set ::win_msg "WINNER:\n$diffteam\n$winner\n"
+            } else {
+                set ::win_msg "WINNER:\n$winner"
+            }
+        }
+        default {
+            # check for teams
+            if {$num_team == 1} {
+                set ::win_msg "WINNER:\nTeam $diffteam\n$winner"
+            } else {
+                set ::win_msg "TIE:\n$winner"
+            }
+        }
+    }
+    puts "$::win_msg\n"
+    foreach robot $activeRobots {
+        disable_robot $robot
+    }
+#    set ::win_msg2 [join [split $::win_msg \n] " "]
+    set score "score: "
+    set points 1
+    foreach l [split $::finish \n] {
+        set n [lindex $l 0]
+        if {[string length $n] == 0} {continue}
+        set l [string last _ $n]
+        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
+        append score "$n = $points  "
+        incr points
+    }
+    foreach n $winner {
+        set l [string last _ $n]
+        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
+        append score "$n = $points  "
+    }
+    set players "BATTLE:\n"
+    foreach robot $::allRobots {
+        append players "$data($robot,name) "
+    }
+    # Set up report file message
+    set outmsg ""
+    append outmsg "$players\n\n"
+    append outmsg "$::win_msg\n\n"
+    if {$::finish ne ""} {
+        append outmsg "DEFEATED:\n$::finish\n"
+    }
+    append outmsg "SCORE:\n$score\n\n"
+    append outmsg "MESSAGES:\n$robmsg_out"
+
+    if {$outfile ne ""} {
+        catch {write_file $outfile $outmsg}
+    }
 }
 </pre>
 <a name="robo3"></a>
 <a name="init2finit5fparms"></a>
-<h3>2.1.1.  init/init_parms [ procedure ]  </h3>
+<h1>3.  init/init_parms [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   init_parms
 </p>
@@ -228,7 +895,13 @@
     #  "   "   "   "    "   "   "    "   &gt; 75
     set ::parms(rate,4) 20
     # robot start health
-    set ::parms(health) 100
+    if {$::debug} {
+        # Debug health for quick matches
+        set ::parms(health) 10
+    } else {
+        # Normal health
+        set ::parms(health) 100
+    }
     # diameter of direct missile damage
     set ::parms(dia0) 6
     #     "    "  maximum   "      "
@@ -267,7 +940,7 @@
 </pre>
 <a name="robo4"></a>
 <a name="init2finit5ftrig5ftables"></a>
-<h3>2.1.2.  init/init_trig_tables [ procedure ]  </h3>
+<h1>4.  init/init_trig_tables [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   init_trig_tables
 </p>
@@ -286,7 +959,7 @@
 </pre>
 <a name="robo5"></a>
 <a name="init2finit5frand"></a>
-<h3>2.1.3.  init/init_rand [ procedure ]  </h3>
+<h1>5.  init/init_rand [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   init_rand
 </p>
@@ -302,28 +975,46 @@
 }
 </pre>
 <a name="robo6"></a>
-<a name="init2finit5frobots"></a>
-<h3>2.1.4.  init/init_robots [ procedure ]  </h3>
+<a name="init2finit5ffiles"></a>
+<h1>6.  init/init_files [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<p>   init_robots
+<p>   init_files
 </p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc init_robots {} {
-    global data allRobots
+<pre class="source">proc init_files {} {
+    global data allRobots activeRobots robotFiles
 
+    set allRobots {}
+
+    # Pick a random element from a list; use this for reading code!
+    # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
+
+    for {set i 0} {$i &lt; [llength $robotFiles]} {incr i} {
+        # Give the robots names like r0, r1, etc.
+        set robot r$i
+        # Update list of robots
+        lappend allRobots $robot
+
+        # Read code
+        set f [open [lindex $robotFiles $i]]
+        set data($robot,code) [read $f]
+        close $f
+
+    }
     set allSigs {}
     set file_index 0
+
     foreach robot $allRobots {
-        set data($robot,interp) [interp create -safe]
-        # Stop robots from using another rand than the syscall
-        $data($robot,interp) eval {rename tcl::mathfunc::rand {}}
-
         set name [file tail [lindex $::robotFiles $file_index]]
-        incr file_index
+        # Search for duplicate robot names
 
-        set x [mrand 1000]
-        set y [mrand 1000]
+        foreach used_name [array names data *,name] {
+            if {$name eq $data($used_name)} {
+                set name "$data($used_name)([+ $file_index 1])"
+            }
+        }
+        incr file_index
 
         # generate a new unique signature
         set newsig [mrand 65535]
@@ -332,13 +1023,33 @@
         }
         lappend allSigs $newsig
 
-        #########
-        # set robot parms
-        #########
         # window name = source.file_randnumber
         set data($robot,name) ${name}
         # the rand number as digital signature
         set data($robot,num) $newsig
+    }
+    # At the start of the game all robots are active
+    set activeRobots $allRobots
+}
+</pre>
+<a name="robo7"></a>
+<a name="init2finit5frobots"></a>
+<h1>7.  init/init_robots [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   init_robots
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc init_robots {} {
+    global data allRobots activeRobots robotFiles
+
+    foreach robot $allRobots {
+        set x [mrand 1000]
+        set y [mrand 1000]
+
+        #########
+        # set robot parms
+        #########
         # robot status: 0=not used or dead, 1=running
         set data($robot,status) 1
         # robot current x
@@ -408,6 +1119,26 @@
         set data($robot,syscall,-1) {}
         # return value from master to slave interp
         set data($robot,sysreturn,0) {}
+    }
+}
+</pre>
+<a name="robo8"></a>
+<a name="init2finit5finterps"></a>
+<h1>8.  init/init_interps [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   init_interps
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc init_interps {} {
+    global data allRobots tick
+
+    set tick 0
+    foreach robot $allRobots {
+        set data($robot,interp) [interp create -safe]
+
+        # Stop robots from using another rand than the syscall
+        $data($robot,interp) eval {rename tcl::mathfunc::rand {}}
 
         interp alias $data($robot,interp) syscall {} syscall $robot
 
@@ -418,639 +1149,29 @@
 
         interp alias {} ${robot}Run $data($robot,interp) ${robot}Run
     }
+    act
+    tick
 }
 </pre>
-<a name="robo7"></a>
-<a name="main2frun5fgame"></a>
-<h2>2.2.  main/run_game [ procedure ]  </h2>
+<a name="robo27"></a>
+<a name="tclrobots2fwrite5ffile"></a>
+<h1>9.  tclrobots/write_file [ procedure ]  </h1>
 <p class="item_name">NAME</p>
-<p>   run_game
+<p>   write_file
 </p>
 <p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc run_game {} {
-    set ::running 1
-    coroutine run_robotsCo run_robots
-    vwait ::running
-    puts "activerobots: $::activeRobots"
-    find_winner
-    puts "seed: $::seed"
-}
-</pre>
-<a name="robo8"></a>
-<a name="run5fgame2frun5frobots"></a>
-<h3>2.2.1.  run_game/run_robots [ procedure ]  </h3>
-<p class="item_name">NAME</p>
-<p>   run_robots
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc run_robots {} {
-    global data activeRobots tick running gui parms
-
-    while {$running == 1} {
-        foreach robot $activeRobots {
-            if {($data($robot,alert) ne {}) &amp;&amp; \
-                    ($data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set data($robot,sysreturn,[- $tick 1]) \
-                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
-
-                # Robot is notified; reset alert request
-                set data($robot,ping) {}
-            }
-            ${robot}Run $data($robot,sysreturn,[- $tick 1])
-        }
-        act
-
-        update_robots
-
-        if {$gui} {
-            update_gui
-        }
-
-        tick
-
-        if {$parms(tick) &lt; 5} {
-            # Don't bother at high speed
-            after $parms(tick) [info coroutine]
-        } elseif {$tick &lt;= 5} {
-            # Let the first few ticks pass before measuring
-            after $parms(tick) [info coroutine]
-            set timeAt5 [clock milliseconds]
-        } else {
-            # Try to measure time, to adjust the tick delay for load
-            set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
-            set delay [expr {$target - [clock milliseconds]}]
-            # Sanity check value
-            if {$delay &gt; $parms(tick)} {
-                set delay $parms(tick)
-            } elseif {$delay &lt; 5} {
-                set delay 5
-            }
-            after $delay [info coroutine]
-            # Keep the lag visible
-            set ::StatusBarMsg "Running $delay"
-        }
-        yield
-    }
-}
-</pre>
-<a name="robo9"></a>
-<a name="run5frobots2fact"></a>
-<h4>2.2.1.1.  run_robots/act [ procedure ]  </h4>
-<p class="item_name">NAME</p>
-<p>   act
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc act {} {
-    global data activeRobots tick
-
-    foreach robot $activeRobots {
-        if {$data($robot,status)} {
-            set currentSyscall $data($robot,syscall,$tick)
-            switch [lindex $currentSyscall 0] {
-                scanner      {sysScanner     $robot}
-                dsp          {sysDsp         $robot}
-                alert        {sysAlert       $robot}
-                cannon       {sysCannon      $robot}
-                drive        {sysDrive       $robot}
-                health       -
-                speed        -
-                heat         -
-                loc_x        -
-                loc_y        {sysData        $robot}
-                tick         {sysTick        $robot}
-                team_declare {sysTeamDeclare $robot}
-            }
-        }
-    }
-}
-</pre>
-<a name="robo10"></a>
-<a name="run5frobots2fupdate5frobots"></a>
-<h4>2.2.1.2.  run_robots/update_robots [ procedure ]  </h4>
-<p class="item_name">NAME</p>
-<p>   update_robots
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   update position of missiles and robots, assess damage
+<p>   Writes a string to a file
 </p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc update_robots {} {
-    global allRobots data
-
-    foreach robot $allRobots {
-        # check all flying missiles
-        set num_miss [check_missiles $robot]
-
-        # skip rest if robot dead
-        if {!$data($robot,status)} {continue}
-
-        # update missile reloader
-        if {$data($robot,reload)} {incr data($robot,reload) -1}
-
-        # check for barrel overheat, apply cooling
-        check_barrel $robot
-
-        # check for excessive speed, increment heat
-        check_speed $robot
-
-        # update robot speed, moderated by acceleration
-        update_speed $robot
-
-        # update robot heading, moderated by turn rates
-        update_heading $robot
-
-        # update distance traveled on this heading
-        update_distance $robot
-
-        # check for wall collision
-        check_wall $robot
-    }
-    # check for robot health
-    set health_status [check_health]
-
-    set num_rob       [lindex $health_status 0]
-    set diffteam      [lindex $health_status 1]
-    set num_team      [lindex $health_status 2]
-
-    if {($num_rob&lt;=1 || $num_team==1) &amp;&amp; $num_miss==0} {
-        # Stop game
-        set ::running 0
-    }
+<pre class="source">proc write_file {file str} {
+    set fd [open $file w]
+    puts $fd $str
+    close $fd
 }
 </pre>
-<a name="robo11"></a>
-<a name="update5frobots2fcheck5fmissiles"></a>
-<h5>2.2.1.2.1.  update_robots/check_missiles [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   check_missiles
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   check all flying missiles
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc check_missiles {robot} {
-    global data activeRobots
-    set num_miss 0
-
-    if {$data($robot,mstate)} {
-        incr num_miss
-        update_missile_location $robot
-        # check if missile reached target
-        if {$data($robot,mrange) &gt; $data($robot,mdist)} {
-            missile_reached_target $robot
-
-            # assign damage to all within explosion ranges
-            foreach target $activeRobots {
-                if {!$data($target,status)} {continue}
-                assign_missile_damage $robot $target
-            }
-        }
-    }
-    return $num_miss
-}
-</pre>
-<a name="robo12"></a>
-<a name="update5frobots2fupdate5fmissile5flocation"></a>
-<h5>2.2.1.2.2.  update_robots/update_missile_location [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   update_missile_location
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   update location of missile
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc update_missile_location {robot} {
-    global data parms c_tab s_tab
-
-    set data($robot,mrange) \
-        [+ $data($robot,mrange) $parms(msp)]
-    set data($robot,mx) \
-        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
-             $data($robot,morgx)]
-    set data($robot,my) \
-        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
-             $data($robot,morgy)]
-}
-</pre>
-<a name="robo13"></a>
-<a name="update5frobots2fmissile5freached5ftarget"></a>
-<h5>2.2.1.2.3.  update_robots/missile_reached_target [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   missile_reached_target
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc missile_reached_target {robot} {
-    global data gui c_tab s_tab
-
-    set data($robot,mstate) 0
-    set data($robot,mx) \
-        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
-             $data($robot,morgx)]
-    set data($robot,my) \
-        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
-             $data($robot,morgy)]
-    if {$gui} {
-        after 1 "show_explode $robot"
-    }
-}
-</pre>
-<a name="robo14"></a>
-<a name="update5frobots2fassign5fmissile5fdamage"></a>
-<h5>2.2.1.2.4.  update_robots/assign_missile_damage [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   assign_missile_damage
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   assign damage to all within explosion ranges
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc assign_missile_damage {robot target} {
-    global data parms
-
-    set d [hypot [- $data($robot,mx) $data($target,x)] \
-            [- $data($robot,my) $data($target,y)]]
-    if {$d &lt; $parms(dia3)} {
-        if {$d &lt; $parms(dia0)} {
-            incr data($target,health) $parms(hit0)
-            incr data($robot,inflicted) [- $parms(hit0)]
-        } elseif {$d&lt;$parms(dia1)} {
-            incr data($target,health) $parms(hit1)
-            incr data($robot,inflicted) [- $parms(hit1)]
-        } elseif {$d&lt;$parms(dia2)} {
-            incr data($target,health) $parms(hit2)
-            incr data($robot,inflicted) [- $parms(hit2)]
-        } else {
-            incr data($target,health) $parms(hit3)
-            incr data($robot,inflicted) [- $parms(hit3)]
-        }
-    }
-}
-</pre>
-<a name="robo15"></a>
-<a name="update5frobots2fcheck5fbarrel"></a>
-<h5>2.2.1.2.5.  update_robots/check_barrel [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   check_barrel
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   check for barrel overheat, apply cooling
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc check_barrel {robot} {
-    global data parms
-
-    if {$data($robot,btemp)} {
-        incr data($robot,btemp) $parms(cancool)
-        if {$data($robot,btemp) &lt; 0} {
-            set data($robot,btemp) 0
-        }
-    }
-}
-</pre>
-<a name="robo16"></a>
-<a name="update5frobots2fcheck5fspeed"></a>
-<h5>2.2.1.2.6.  update_robots/check_speed [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   check_speed
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   check for excessive speed, increment heat
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc check_speed {robot} {
-    global data parms
-
-    if {$data($robot,speed) &gt; $parms(heatsp)} {
-        incr data($robot,heat) \
-            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
-                           $parms(hrate)]] 1]
-        if {$data($robot,heat) &gt;= $parms(heatmax)} {
-            set data($robot,heat) $parms(heatmax)
-            set data($robot,hflag) 1
-            if {$data($robot,dspeed) &gt; $parms(heatsp)} {
-                set data($robot,dspeed) $parms(heatsp)
-            }
-        }
-    } else {
-        # if overheating, apply cooling rate
-        if {$data($robot,hflag) || $data($robot,heat) &gt; 0} {
-            incr data($robot,heat) $parms(cooling)
-            if {$data($robot,heat) &lt;= 0} {
-                set data($robot,hflag) 0
-                set data($robot,heat) 0
-            }
-        }
-    }
-}
-</pre>
-<a name="robo17"></a>
-<a name="update5frobots2fupdate5fspeed"></a>
-<h5>2.2.1.2.7.  update_robots/update_speed [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   update_speed
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   update robot speed, moderated by acceleration
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc update_speed {robot} {
-    global data parms
-
-    if {$data($robot,speed) != $data($robot,dspeed)} {
-        if {$data($robot,speed) &gt; $data($robot,dspeed)} {
-            incr data($robot,speed) -$parms(accel)
-            if {$data($robot,speed) &lt; $data($robot,dspeed)} {
-                set data($robot,speed) $data($robot,dspeed)
-            }
-        } else {
-            incr data($robot,speed) $parms(accel)
-            if {$data($robot,speed) &gt; $data($robot,dspeed)} {
-                set data($robot,speed) $data($robot,dspeed)
-            }
-        }
-    }
-}
-</pre>
-<a name="robo18"></a>
-<a name="update5frobots2fupdate5fheading"></a>
-<h5>2.2.1.2.8.  update_robots/update_heading [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   update_heading
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   update robot heading, moderated by turn rates
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc update_heading {robot} {
-    global data parms
-
-    if {$data($robot,hdg) != $data($robot,dhdg)} {
-        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
-        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
-        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
-
-        if {$d1 &lt; $d2} {
-            set d $d1
-        } else {
-            set d $d2
-        }
-        if {$d &lt;= $mrate} {
-            set data($robot,hdg) $data($robot,dhdg)
-        } else {
-            set data($robot,hdg) \
-                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
-        }
-        set data($robot,orgx)  $data($robot,x)
-        set data($robot,orgy)  $data($robot,y)
-        set data($robot,range) 0
-    }
-}
-</pre>
-<a name="robo19"></a>
-<a name="update5frobots2fupdate5fdistance"></a>
-<h5>2.2.1.2.9.  update_robots/update_distance [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   update_distance
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   update distance traveled on this heading
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc update_distance {robot} {
-    global data parms c_tab s_tab
-
-    if {$data($robot,speed) &gt; 0} {
-        set data($robot,range) \
-            [+ $data($robot,range) \
-                 [/ [* $data($robot,speed) $parms(sp)] 100]]
-
-        # Modify range with random factor to avoid totally
-        # deterministic movement. Range is currently +- 1%.
-        # Playtesting will tell if this should be lower or higher.
-        set randfactor [/ [+ [mrand 100] 1.0] 10000]
-        if {[mrand 2] == 0} {
-            set randfactor [- $randfactor]
-        }
-        set data($robot,range) [+ $data($robot,range) \
-                                    [* $data($robot,range) \
-                                         $randfactor]]
-
-        set data($robot,x) \
-            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
-                         $data($robot,orgx)]]
-
-        set data($robot,y) \
-            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
-                        $data($robot,orgy)]]
-    }
-}
-</pre>
-<a name="robo20"></a>
-<a name="update5frobots2fcheck5fwall"></a>
-<h5>2.2.1.2.10.  update_robots/check_wall [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   check_wall
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   check for wall collision
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc check_wall {robot} {
-    global data parms
-
-    if {$data($robot,speed) &gt; 0} {
-        if {($data($robot,x) &lt; 0) || ($data($robot,x) &gt; 999)} {
-            if {$data($robot,x) &lt; 0} {
-                set data($robot,x) 0
-            } else {
-                set data($robot,x) 999
-            }
-            set data($robot,orgx)    $data($robot,x)
-            set data($robot,orgy)    $data($robot,y)
-            set data($robot,range)   0
-            set data($robot,speed)   0
-            set data($robot,dspeed)  0
-            incr data($robot,health) $parms(coll)
-        }
-        if {($data($robot,y) &lt; 0) || ($data($robot,y) &gt; 999)} {
-            if {$data($robot,y) &lt; 0} {
-                set data($robot,y) 0
-            } else {
-                set data($robot,y) 999
-            }
-            set data($robot,orgx)    $data($robot,x)
-            set data($robot,orgy)    $data($robot,y)
-            set data($robot,range)   0
-            set data($robot,speed)   0
-            set data($robot,dspeed)  0
-            incr data($robot,health) $parms(coll)
-        }
-    }
-}
-</pre>
-<a name="robo21"></a>
-<a name="update5frobots2fcheck5fhealth"></a>
-<h5>2.2.1.2.11.  update_robots/check_health [ procedure ]  </h5>
-<p class="item_name">NAME</p>
-<p>   check_health
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   check for robot health
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc check_health {} {
-    global activeRobots data tick
-
-    set num_rob  0
-    set diffteam ""
-    set num_team 0
-    foreach robot $activeRobots {
-        if {$data($robot,status)} {
-            if {$data($robot,health) &lt;= 0 } {
-                set data($robot,status) 0
-                set data($robot,health) 0
-                disable_robot $robot
-                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
-                if {$::gui} {
-                    after 1 "show_die $robot"
-                }
-            } else {
-                incr num_rob
-                if {$data($robot,team) != ""} {
-                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
-                        lappend diffteam $data($robot,team)
-                        incr num_team
-                    }
-                } else {
-                    lappend diffteam $data($robot,name)
-                    incr num_team
-                }
-            }
-        }
-    }
-    return [list $num_rob $diffteam $num_team]
-}
-</pre>
-<a name="robo22"></a>
-<a name="check5fhealth2fdisable5frobot"></a>
-<h6>2.2.1.2.11.1.  check_health/disable_robot [ procedure ]  </h6>
-<p class="item_name">NAME</p>
-<p>   disable_robot
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc disable_robot {robot} {
-    global data activeRobots tick
-
-    interp delete $data($robot,interp)
-    set index [lsearch -exact $activeRobots $robot]
-    set activeRobots [lreplace $activeRobots $index $index]
-    set data($robot,syscall,$tick) {}
-}
-</pre>
-<a name="robo23"></a>
-<a name="run5frobots2ftick"></a>
-<h4>2.2.1.3.  run_robots/tick [ procedure ]  </h4>
-<p class="item_name">NAME</p>
-<p>   tick
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc tick {} {
-    if {$::tick &lt; $::max_ticks} {
-        incr ::tick
-    } else {
-        set ::running 0
-    }
-}
-</pre>
-<a name="robo24"></a>
-<a name="run5fgame2ffind5fwinner"></a>
-<h3>2.2.2.  run_game/find_winner [ procedure ]  </h3>
-<p class="item_name">NAME</p>
-<p>   find_winner
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc find_winner {} {
-    global data activeRobots
-
-    set alive 0
-    set winner ""
-    set num_team 0
-    set diffteam ""
-    set win_color black
-    foreach robot $activeRobots {
-        disable_robot $robot
-        incr alive
-        lappend winner $data($robot,name)
-
-        if {$data($robot,team) != ""} {
-            if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
-                lappend diffteam $data($robot,team)
-                incr num_team
-            }
-        } else {
-            incr num_team
-        }
-    }
-
-    switch $alive {
-        0 {
-            set ::win_msg "No robots left alive"
-            puts $::win_msg
-        }
-        1 {
-            if {[string length $diffteam] &gt; 0} {
-                set diffteam "Team $diffteam"
-            }
-            set ::win_msg "\nWinner!\n\n$diffteam\n$winner\n"
-            puts $::win_msg
-        }
-        default {
-            # check for teams
-            if {$num_team == 1} {
-                set ::win_msg "Winner!\n\nTeam $diffteam\n$winner"
-                puts $::win_msg
-            } else {
-                set ::win_msg "Tie:\n\n$winner"
-                puts $::win_msg
-            }
-        }
-    }
-    set ::win_msg2 [join [split $::win_msg \n] " "]
-    set score "score: "
-    set points 1
-    foreach l [split $::finish \n] {
-        set n [lindex $l 0]
-        if {[string length $n] == 0} {continue}
-        set l [string last _ $n]
-        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
-        append score "$n = $points  "
-        incr points
-    }
-    foreach n $winner {
-        set l [string last _ $n]
-        if {$l &gt; 0} {incr l -1; set n [string range $n 0 $l]}
-        append score "$n = $points  "
-    }
-    set players "battle: "
-    foreach robot $::allRobots {
-        append players "$data($robot,name) "
-    }
-    catch {write_file $outfile \
-               "$players\n$::finish\n$::win_msg2\n\n$score\n\n\n"}
-}
-</pre>
-<a name="robo25"></a>
+<a name="robo28"></a>
 <a name="tclrobots2fsyscall"></a>
-<h1>3.  tclrobots/syscall [ procedure ]  </h1>
+<h1>10.  tclrobots/syscall [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   syscall
 </p>
@@ -1106,9 +1227,9 @@
     return $result
 }
 </pre>
-<a name="robo26"></a>
+<a name="robo29"></a>
 <a name="syscall2fsysScanner"></a>
-<h2>3.1.  syscall/sysScanner [ procedure ]  </h2>
+<h2>10.1.  syscall/sysScanner [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysScanner
 </p>
@@ -1197,9 +1318,9 @@
     }
 }
 </pre>
-<a name="robo27"></a>
+<a name="robo30"></a>
 <a name="syscall2fsysDsp"></a>
-<h2>3.2.  syscall/sysDsp [ procedure ]  </h2>
+<h2>10.2.  syscall/sysDsp [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysDsp
 </p>
@@ -1210,9 +1331,9 @@
     set data($robot,sysreturn,$tick) $data($robot,sig)
 }
 </pre>
-<a name="robo28"></a>
+<a name="robo31"></a>
 <a name="syscall2fsysAlert"></a>
-<h2>3.3.  syscall/sysAlert [ procedure ]  </h2>
+<h2>10.3.  syscall/sysAlert [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysAlert
 </p>
@@ -1224,9 +1345,9 @@
     set data($robot,sysreturn,$tick) 1
 }
 </pre>
-<a name="robo29"></a>
+<a name="robo32"></a>
 <a name="syscall2fsysCannon"></a>
-<h2>3.4.  syscall/sysCannon [ procedure ]  </h2>
+<h2>10.4.  syscall/sysCannon [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysCannon
 </p>
@@ -1275,9 +1396,9 @@
     set data($robot,sysreturn,$tick) $val
 }
 </pre>
-<a name="robo30"></a>
+<a name="robo33"></a>
 <a name="syscall2fsysDrive"></a>
-<h2>3.5.  syscall/sysDrive [ procedure ]  </h2>
+<h2>10.5.  syscall/sysDrive [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysDrive
 </p>
@@ -1327,9 +1448,9 @@
     set data($robot,sysreturn,$tick) $data($robot,dspeed)
 }
 </pre>
-<a name="robo31"></a>
+<a name="robo34"></a>
 <a name="syscall2fsysData"></a>
-<h2>3.6.  syscall/sysData [ procedure ]  </h2>
+<h2>10.6.  syscall/sysData [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysData
 </p>
@@ -1349,9 +1470,9 @@
     set data($robot,sysreturn,$tick) $val
 }
 </pre>
-<a name="robo32"></a>
+<a name="robo35"></a>
 <a name="syscall2fsysTick"></a>
-<h2>3.7.  syscall/sysTick [ procedure ]  </h2>
+<h2>10.7.  syscall/sysTick [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysTick
 </p>
@@ -1362,9 +1483,9 @@
     set data($robot,sysreturn,$tick) $tick
 }
 </pre>
-<a name="robo33"></a>
+<a name="robo36"></a>
 <a name="syscall2fsysTeamDeclare"></a>
-<h2>3.8.  syscall/sysTeamDeclare [ procedure ]  </h2>
+<h2>10.8.  syscall/sysTeamDeclare [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysTeamDeclare
 </p>
@@ -1377,9 +1498,9 @@
     set data($robot,sysreturn,$tick) $team
 }
 </pre>
-<a name="robo34"></a>
+<a name="robo37"></a>
 <a name="syscall2fsysTeamSend"></a>
-<h2>3.9.  syscall/sysTeamSend [ procedure ]  </h2>
+<h2>10.9.  syscall/sysTeamSend [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysTeamSend
 </p>
@@ -1391,9 +1512,9 @@
     set data($robot,data) $msg
 }
 </pre>
-<a name="robo35"></a>
+<a name="robo38"></a>
 <a name="syscall2fsysTeamGet"></a>
-<h2>3.10.  syscall/sysTeamGet [ procedure ]  </h2>
+<h2>10.10.  syscall/sysTeamGet [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysTeamGet
 </p>
@@ -1417,16 +1538,16 @@
     return $val
 }
 </pre>
-<a name="robo36"></a>
+<a name="robo39"></a>
 <a name="syscall2fsysDputs"></a>
-<h2>3.11.  syscall/sysDputs [ procedure ]  </h2>
+<h2>10.11.  syscall/sysDputs [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   sysDputs
 </p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysDputs {robot msg} {
-    global gui
+    global gui data outfile robmsg_out
 
     set msg [join $msg]
 
@@ -1437,13 +1558,16 @@
         debug $robot: $msg ($::tick)
     } else {
         # Output to terminal
-        puts "$robot: $msg"
+        puts "$data($robot,name): $msg"
+    }
+    if {$outfile ne ""} {
+        append robmsg_out "$data($robot,name): $msg\n"
     }
 }
 </pre>
-<a name="robo37"></a>
+<a name="robo40"></a>
 <a name="tclrobots2frand"></a>
-<h1>4.  tclrobots/rand [ procedure ]  </h1>
+<h1>11.  tclrobots/rand [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   mrand
 </p>
@@ -1455,25 +1579,47 @@
     return [int [* [rand] $max]]
 }
 </pre>
-<a name="robo38"></a>
+<a name="robo41"></a>
 <a name="tclrobots2fdebug"></a>
-<h1>5.  tclrobots/debug [ procedure ]  </h1>
+<h1>12.  tclrobots/debug [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   debug
 </p>
 <p class="item_name">DESCRIPTION</p>
 <p>   Prints debug message. The proc name makes it easy to search for.
-   Precede other debug changes with the word debug in a comment.
+   Precede other debug changes with the word debug in a comment. Note
+   that TclRobots has to be called with the -debug flag for debug
+   messages to display.
+</p>
+
+<p>   If the first argument to debug is "breakpoint" execution will halt
+   until ::broken is set to 0 e.g. by Tkinspect.
+</p>
+
+<p>   If the first argument is "exit", debug will print the message and
+   exit TclRobots.
+</p>
+
+<p>   The name of the procedure that called debug is automatically
+   included in the debug message.
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc debug {args} {
-    if {[lindex $args 0] ne "exit"} {
-        puts [join $args]
-    } else {
-        # Calling with 'debug exit "msg"' prints the message and then
-        # exits. This is useful for "checkpoint" style debugging.
-        puts [join [lrange $args 1 end]]
-        exit
+    if {$::debug} {
+        # Display name of procedure that called debug
+        set caller [lindex [info level [- [info level] 1]] 0]
+        if {[lindex $args 0] eq "breakpoint"} {
+            set ::broken 1
+            puts "Breakpoint reached (dbg: $caller)"
+            vwait ::broken
+        } elseif {[lindex $args 0] eq "exit"} {
+            # Calling with 'debug exit "msg"' prints the message and then
+            # exits. This is useful for "checkpoint" style debugging.
+            puts "[join [lrange $args 1 end]] (dbg: $caller)"
+            exit
+        } else {
+            puts "[join $args] (dbg: $caller)"
+        }
     }
 }
 </pre>

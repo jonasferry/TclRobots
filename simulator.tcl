@@ -105,76 +105,15 @@ proc init_sim {} {
     set ::data(target,x)     500
     set ::data(target,y)     500
 
-    # gui_init_robots is defined in gui.tcl
-    gui_init_robots 1
-
-    # act and tick are defined in tclrobots.tcl
-    act
-    tick
-
     # Create and grid the simulation control box
     create_simctrl
 
-    # Start simulation, start in single step mode
-    set ::running 1
-    set ::step 1
-    # Procedure run_robots is found in tclrobots.tcl
-    coroutine run_robotsCo run_robots
-}
-#******
+    # Start simulation in continous (non-step) mode
+    set ::step 0
 
-#****P* init_sim/halt_sim
-#
-# NAME
-#
-#   halt_sim
-#
-# DESCRIPTION
-#
-#   Halt a running simulation.
-#
-# SOURCE
-#
-proc halt_sim {} {
-    set ::running 0
-    set ::StatusBarMsg "Stopping simulation"
-    set ::halted 1
-
-    button_state disabled "Reset" reset_sim
-}
-#******
-
-#****P* init_sim/reset_sim
-#
-# NAME
-#
-#   reset_sim
-#
-# DESCRIPTION
-#
-#   Reset to file select state.
-#
-# SOURCE
-#
-proc reset_sim {} {
-    set ::StatusBarMsg "Cleaning up"
-    update
-
-    foreach robot $::activeRobots {
-        disable_robot $robot
-    }
-    if {$::parms(tkp)} {
-        $::arena_c delete {*}[$::arena_c children 0]
-    } else {
-        $::arena_c delete all
-    }
-    grid forget $::game_f
-    destroy $::game_f.health
-    destroy $::game_f.msg
-    grid $::sel_f -column 0 -row 2 -sticky nsew
-
-    set ::StatusBarMsg "Select robot files for battle"
-    button_state normal "Run Battle" {init_mode battle}
+    # start robots
+    set ::StatusBarMsg "Press START to start simulation"
+    button_state disabled "START" run_sim
 }
 #******
 
@@ -191,28 +130,27 @@ proc reset_sim {} {
 # SOURCE
 #
 proc create_simctrl {} {
+    global sim_f
+
     set  sim_f  [ttk::frame $::game_f.sim]
     grid $sim_f -column 1 -row 1 -sticky nsew
 
     # Create and grid first row of simulation control box
-    set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
+    set simctrl0_f [ttk::frame $::sim_f.f0 -relief raised -borderwidth 2]
     set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
                         -variable ::step -command {set ::do_step 1}]
     set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
                         -command {set ::do_step 1}]
     set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
                         -command "incr ::data(r0,health) -5"]
-    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan" \
+    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan robot" \
                         -command "set ::data(r0,ping) 1"]
-    set end_b      [ttk::button $sim_f.f0.end -text "Close" \
-                        -command end_sim]
 
     grid $simctrl0_f -column 0 -row 0 -sticky nsew
     grid $stepsys_cb -column 0 -row 0 -sticky nsew
     grid $step_b     -column 1 -row 0 -sticky nsew
     grid $damage_b   -column 2 -row 0 -sticky nsew
     grid $ping_b     -column 3 -row 0 -sticky nsew
-    grid $end_b      -column 4 -row 0 -sticky nsew
 
     # Create and grid second row of simulation control box
     # This frame contains three rows of status data
@@ -366,27 +304,6 @@ proc create_simctrl {} {
 }
 #******
 
-if 0 {
-#****P* create_simctrl/end_sim
-#
-# NAME
-#
-#   end_sim
-#
-# DESCRIPTION
-#
-#   End simulation.
-#
-# SOURCE
-#
-proc end_sim {} {
-    destroy $::game_f.sim
-    # reset is defined in battle.tcl
-    reset
-}
-#******
-}
-
 #****P* create_simctrl/ver_range
 #
 # NAME
@@ -444,5 +361,95 @@ proc examine {} {
 #
 proc setval {} {
     $::data(r0,interp) eval set $::status_var $::status_val
+}
+#******
+
+#****P* init_sim/run_sim
+#
+# NAME
+#
+#   run_sim
+#
+# DESCRIPTION
+#
+#   Run simulation.
+#
+# SOURCE
+#
+proc run_sim {} {
+    set ::StatusBarMsg "Running"
+    button_state disabled "Halt" halt_sim
+
+    # Start simulation
+    set ::running 1
+
+    # gui_init_robots is defined in gui.tcl. Make target black.
+    gui_init_robots 1
+
+    # act and tick are defined in tclrobots.tcl
+    act
+    tick
+
+    # Procedure run_robots is found in tclrobots.tcl
+    coroutine run_robotsCo run_robots
+}
+#******
+
+#****P* run_sim/halt_sim
+#
+# NAME
+#
+#   halt_sim
+#
+# DESCRIPTION
+#
+#   Halt a running simulation.
+#
+# SOURCE
+#
+proc halt_sim {} {
+    set ::running 0
+    set ::StatusBarMsg "Stopping simulation"
+    set ::halted 1
+
+    button_state disabled "Reset" reset_sim
+}
+#******
+
+#****P* halt_sim/reset_sim
+#
+# NAME
+#
+#   reset_sim
+#
+# DESCRIPTION
+#
+#   Reset to file select state.
+#
+# SOURCE
+#
+proc reset_sim {} {
+    set ::StatusBarMsg "Cleaning up"
+    update
+
+    set ::running 0
+    set ::halted 1
+    destroy $::sim_f
+
+    foreach robot $::activeRobots {
+        disable_robot $robot
+    }
+    if {$::parms(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
+    grid forget $::game_f
+    destroy $::game_f.health
+    destroy $::game_f.msg
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+
+    set ::StatusBarMsg "Select robot files for battle"
+    button_state normal "Run Battle" {init_mode battle}
 }
 #******

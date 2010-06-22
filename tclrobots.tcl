@@ -342,6 +342,7 @@ proc init_files {} {
     # At the start of the game all robots are active
     set activeRobots $allRobots
 }
+#******
 
 #****P* init/init_robots
 #

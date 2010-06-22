@@ -302,11 +302,11 @@ proc create_common_widgets {} {
 }
 #******
 
-#****P* init_gui/fileBox
+#****P* gui/create_health_msg
 #
 # NAME
 #
-#   fileBox
+#   create_health_msg
 #
 # DESCRIPTION
 #

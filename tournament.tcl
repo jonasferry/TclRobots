@@ -211,6 +211,7 @@ proc create_tournctrl {} {
     grid $::robotMsg_lb     -column 1 -row 0 -sticky nsew -rowspan 3
     grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
 }
+#******
 
 #****P* init_tourn/build_matchlist
 #

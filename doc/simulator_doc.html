@@ -5,12 +5,17 @@
 <ul>
 <li>2.1. <a href="#robo2">init_sim/create_simctrl</a></li>
 <ul>
-<li>2.1.1. <a href="#robo3">create_simctrl/end_sim</a></li>
-<li>2.1.2. <a href="#robo4">create_simctrl/ver_range</a></li>
-<li>2.1.3. <a href="#robo5">create_simctrl/examine</a></li>
-<li>2.1.4. <a href="#robo6">create_simctrl/setval</a></li>
+<li>2.1.1. <a href="#robo3">create_simctrl/ver_range</a></li>
+<li>2.1.2. <a href="#robo4">create_simctrl/examine</a></li>
+<li>2.1.3. <a href="#robo5">create_simctrl/setval</a></li>
 </ul>
-<li>2.2. <a href="#robo7">init_sim/sim_robot</a></li>
+<li>2.2. <a href="#robo6">init_sim/run_sim</a></li>
+<ul>
+<li>2.2.1. <a href="#robo7">run_sim/halt_sim</a></li>
+<ul>
+<li>2.2.1.1. <a href="#robo8">halt_sim/reset_sim</a></li>
+</ul>
+</ul>
 </ul>
 </ul>
 <a name="robo0"></a>
@@ -54,6 +59,8 @@
 
     grid forget $::sel_f
 
+    create_health_msg $::game_f
+
     # The simulator shows the arena, the message box and the simulator
     # controls. Simulator controls are defined later.
     grid $::game_f -column 0 -row 2 -sticky nsew
@@ -71,69 +78,58 @@
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
-    button_state disabled
+    set ::halted  0
+    button_state disabled "Halt" halt_sim
 
     # init is defined in tclrobots.tcl
-    init
+#    init_game
 
-    set ::tick 0
+    set ::finish ""
+    set ::robmsg_out ""
+#    set ::tick 0
+
+    init_parms
+    init_trig_tables
+    init_rand
+    init_files
+#    init_robots
+
+
+#    set ::tick 0
 
     set ::allRobots {r0 target}
+    set ::activeRobots $::allRobots
 
-    set f [open [lindex $::robotList 0]]
-    set ::data(r0,code) [read $f]
-    close $f
+#    set f [open [lindex $::robotList 0]]
+#    set ::data(r0,code) [read $f]
+#    close $f
 
     # Make target run a dummy program
     set ::data(target,code) {while {1} {set x [loc_x]}}
+    set ::data(target,name) target
+    set ::data(target,num)  12345
 
-    set ::activeRobots $::allRobots
 
     # init_robots is defined in tclrobots.tcl
     init_robots
+    init_interps
+
+    set ::tick 0
 
     # Set target signature, make it black and place it in center of the arena
     set ::data(target,num)   1
     set ::data(target,x)     500
     set ::data(target,y)     500
 
-    # gui_init_robots is defined in gui.tcl
-    gui_init_robots 1
-
-    # act and tick are defined in tclrobots.tcl
-    act
-    tick
-
     # Create and grid the simulation control box
     create_simctrl
 
-    # Start simulation, start in single step mode
-    set ::running 1
-    set ::step 1
-    coroutine sim_robotCo sim_robot
-#    vwait ::running
-#    end_sim
-#    puts "activerobots: $::activeRobots"
+    # Start simulation in continous (non-step) mode
+    set ::step 0
 
-
-    # TCLROBOTS 2.0 CODE FOLLOWS, MAYBE USEFUL
-    if 0 {
-    set step 1
-
-    # override binding for Any-Keypress, but save others
-    foreach e {.debug.f2.x .debug.f2.y .debug.f2.h .debug.fb.s \
-                   .debug.fb.h .debug.fb.d} {
-        set cur_bind [bind Entry]
-        foreach c $cur_bind {
-            bind $e $c "[bind Entry $c] ; return -code break"
-        }
-        bind $e &lt;KeyPress&gt; {num_only %W %A}
-    }
-
-    # set initial step state
-    #do_step
-    sim
-    }
+    # start robots
+    set ::StatusBarMsg "Press START to start simulation"
+    button_state disabled "START" run_sim
 }
 </pre>
 <a name="robo2"></a>
@@ -147,28 +143,27 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc create_simctrl {} {
+    global sim_f
+
     set  sim_f  [ttk::frame $::game_f.sim]
     grid $sim_f -column 1 -row 1 -sticky nsew
 
     # Create and grid first row of simulation control box
-    set simctrl0_f [ttk::frame $sim_f.f0 -relief raised -borderwidth 2]
+    set simctrl0_f [ttk::frame $::sim_f.f0 -relief raised -borderwidth 2]
     set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
                         -variable ::step -command {set ::do_step 1}]
     set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
                         -command {set ::do_step 1}]
     set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
                         -command "incr ::data(r0,health) -5"]
-    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan" \
+    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan robot" \
                         -command "set ::data(r0,ping) 1"]
-    set end_b      [ttk::button $sim_f.f0.end -text "Close" \
-                        -command end_sim]
 
     grid $simctrl0_f -column 0 -row 0 -sticky nsew
     grid $stepsys_cb -column 0 -row 0 -sticky nsew
     grid $step_b     -column 1 -row 0 -sticky nsew
     grid $damage_b   -column 2 -row 0 -sticky nsew
     grid $ping_b     -column 3 -row 0 -sticky nsew
-    grid $end_b      -column 4 -row 0 -sticky nsew
 
     # Create and grid second row of simulation control box
     # This frame contains three rows of status data
@@ -322,23 +317,8 @@
 }
 </pre>
 <a name="robo3"></a>
-<a name="create5fsimctrl2fend5fsim"></a>
-<h3>2.1.1.  create_simctrl/end_sim [ procedure ]  </h3>
-<p class="item_name">NAME</p>
-<p>   end_sim
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   End simulation.
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc end_sim {} {
-    # reset is defined in battle.tcl
-    reset
-}
-</pre>
-<a name="robo4"></a>
 <a name="create5fsimctrl2fver5frange"></a>
-<h3>2.1.2.  create_simctrl/ver_range [ procedure ]  </h3>
+<h3>2.1.1.  create_simctrl/ver_range [ procedure ]  </h3>
 <p class="item_name">NAME</p>
 <p>   ver_range
 </p>
@@ -357,9 +337,9 @@
     set ::data(r0,$var) $val
 }
 </pre>
-<a name="robo5"></a>
+<a name="robo4"></a>
 <a name="create5fsimctrl2fexamine"></a>
-<h3>2.1.3.  create_simctrl/examine [ procedure ]  </h3>
+<h3>2.1.2.  create_simctrl/examine [ procedure ]  </h3>
 <p class="item_name">NAME</p>
 <p>   examine
 </p>
@@ -373,9 +353,9 @@
     puts $::status_val
 }
 </pre>
-<a name="robo6"></a>
+<a name="robo5"></a>
 <a name="create5fsimctrl2fsetval"></a>
-<h3>2.1.4.  create_simctrl/setval [ procedure ]  </h3>
+<h3>2.1.3.  create_simctrl/setval [ procedure ]  </h3>
 <p class="item_name">NAME</p>
 <p>   setval
 </p>
@@ -387,54 +367,85 @@
     $::data(r0,interp) eval set $::status_var $::status_val
 }
 </pre>
-<a name="robo7"></a>
-<a name="init5fsim2fsim5frobot"></a>
-<h2>2.2.  init_sim/sim_robot [ procedure ]  </h2>
+<a name="robo6"></a>
+<a name="init5fsim2frun5fsim"></a>
+<h2>2.2.  init_sim/run_sim [ procedure ]  </h2>
 <p class="item_name">NAME</p>
-<p>   sim_robot
+<p>   run_sim
 </p>
 <p class="item_name">DESCRIPTION</p>
+<p>   Run simulation.
+</p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc sim_robot {} {
-    while {$::running == 1} {
-        # Reset health of target
-        set ::data(target,health) $::parms(health)
+<pre class="source">proc run_sim {} {
+    set ::StatusBarMsg "Running"
+    button_state disabled "Halt" halt_sim
 
-        foreach robot $::activeRobots {
-            if {($::data($robot,alert) ne {}) &amp;&amp; \
-                    ($::data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set ::data($robot,sysreturn,[- $::tick 1]) \
-                    "alert $::data($robot,alert) $::data($robot,ping) $::data($robot,sysreturn,[- $::tick 1])"
+    # Start simulation
+    set ::running 1
 
-                # Robot is notified; reset alert request
-                set ::data($robot,ping) {}
-            }
-            ${robot}Run $::data($robot,sysreturn,[- $::tick 1])
-        }
-        set ::sim_syscall $::data(r0,syscall,$::tick)
+    # gui_init_robots is defined in gui.tcl. Make target black.
+    gui_init_robots 1
 
-        act
+    # act and tick are defined in tclrobots.tcl
+    act
+    tick
 
-        if {$::data(r0,sysreturn,$::tick) ne ""} {
-            lappend ::sim_syscall "=&gt;" $::data(r0,sysreturn,$::tick)
-        }
-        update_robots
+    # Procedure run_robots is found in tclrobots.tcl
+    coroutine run_robotsCo run_robots
+}
+</pre>
+<a name="robo7"></a>
+<a name="run5fsim2fhalt5fsim"></a>
+<h3>2.2.1.  run_sim/halt_sim [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   halt_sim
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Halt a running simulation.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc halt_sim {} {
+    set ::running 0
+    set ::StatusBarMsg "Stopping simulation"
+    set ::halted 1
 
-        # GUI
-        show_robots
-        show_scan
+    button_state disabled "Reset" reset_sim
+}
+</pre>
+<a name="robo8"></a>
+<a name="halt5fsim2freset5fsim"></a>
+<h4>2.2.1.1.  halt_sim/reset_sim [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   reset_sim
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Reset to file select state.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc reset_sim {} {
+    set ::StatusBarMsg "Cleaning up"
+    update
 
-        tick
+    set ::running 0
+    set ::halted 1
+    destroy $::sim_f
 
-        if {$::step} {
-            vwait ::do_step
-            set ::do_step 0
-        }
-        after $::parms(tick) [info coroutine]
-        yield
+    foreach robot $::activeRobots {
+        disable_robot $robot
     }
+    if {$::parms(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
+    grid forget $::game_f
+    destroy $::game_f.health
+    destroy $::game_f.msg
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+
+    set ::StatusBarMsg "Select robot files for battle"
+    button_state normal "Run Battle" {init_mode battle}
 }
 </pre>
 

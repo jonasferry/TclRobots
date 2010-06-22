@@ -6,46 +6,48 @@
 <li>2.1. <a href="#robo2">init_gui/gui_settings</a></li>
 <li>2.2. <a href="#robo3">init_gui/ellipsepath</a></li>
 <li>2.3. <a href="#robo4">init_gui/create_common_widgets</a></li>
-<li>2.4. <a href="#robo5">init_gui/fileBox</a></li>
+<li>2.4. <a href="#robo6">init_gui/fileBox</a></li>
 <ul>
-<li>2.4.1. <a href="#robo6">fileBox/fileOK</a></li>
-<li>2.4.2. <a href="#robo7">fileBox/choose_file</a></li>
-<li>2.4.3. <a href="#robo8">fileBox/choose_all</a></li>
-<li>2.4.4. <a href="#robo9">fileBox/selInsert</a></li>
-<li>2.4.5. <a href="#robo10">fileBox/fillLst</a></li>
+<li>2.4.1. <a href="#robo7">fileBox/fileOK</a></li>
+<li>2.4.2. <a href="#robo8">fileBox/choose_file</a></li>
+<li>2.4.3. <a href="#robo9">fileBox/choose_all</a></li>
+<li>2.4.4. <a href="#robo10">fileBox/selInsert</a></li>
+<li>2.4.5. <a href="#robo11">fileBox/fillLst</a></li>
 </ul>
-<li>2.5. <a href="#robo11">init_gui/remove_file</a></li>
-<li>2.6. <a href="#robo12">init_gui/remove_all</a></li>
-<li>2.7. <a href="#robo13">init_gui/create_arena</a></li>
-<li>2.8. <a href="#robo14">init_gui/highlightRobot</a></li>
-<li>2.9. <a href="#robo15">init_gui/init_mode</a></li>
+<li>2.5. <a href="#robo12">init_gui/remove_file</a></li>
+<li>2.6. <a href="#robo13">init_gui/remove_all</a></li>
+<li>2.7. <a href="#robo14">init_gui/create_arena</a></li>
+<li>2.8. <a href="#robo15">init_gui/highlightRobot</a></li>
+<li>2.9. <a href="#robo16">init_gui/init_mode</a></li>
 </ul>
-<li>3. <a href="#robo16">init_battle/show_arena</a></li>
-<li>4. <a href="#robo17">init_battle/button_state</a></li>
-<li>5. <a href="#robo18">init_battle/gui_init_robots</a></li>
+<li>3. <a href="#robo5">gui/create_health_msg</a></li>
+<li>4. <a href="#robo17">init_battle/show_arena</a></li>
+<li>5. <a href="#robo18">init_battle/button_state</a></li>
+<li>6. <a href="#robo19">init_battle/gui_init_robots</a></li>
 <ul>
-<li>5.1. <a href="#robo19">gui_init_robots/distinct_colors</a></li>
+<li>6.1. <a href="#robo20">gui_init_robots/distinct_colors</a></li>
 <ul>
-<li>5.1.1. <a href="#robo20">distinct_colors/hls2tk</a></li>
+<li>6.1.1. <a href="#robo21">distinct_colors/hls2tk</a></li>
 <ul>
-<li>5.1.1.1. <a href="#robo21">hls2tk/hls2rgb</a></li>
+<li>6.1.1.1. <a href="#robo22">hls2tk/hls2rgb</a></li>
 </ul>
 </ul>
-<li>5.2. <a href="#robo22">gui_init_robots/brightness</a></li>
+<li>6.2. <a href="#robo23">gui_init_robots/brightness</a></li>
+<li>6.3. <a href="#robo24">gui_init_robots/gui_create_robot</a></li>
 </ul>
-<li>6. <a href="#robo23">gui/update_gui</a></li>
+<li>7. <a href="#robo25">gui/update_gui</a></li>
 <ul>
-<li>6.1. <a href="#robo24">update_gui/show_robots</a></li>
-<li>6.2. <a href="#robo25">update_gui/show_scan</a></li>
+<li>7.1. <a href="#robo26">update_gui/show_robots</a></li>
+<li>7.2. <a href="#robo27">update_gui/show_scan</a></li>
 <ul>
-<li>6.2.1. <a href="#robo26">show_scan/arc_path</a></li>
+<li>7.2.1. <a href="#robo28">show_scan/arc_path</a></li>
 </ul>
-<li>6.3. <a href="#robo27">update_gui/show_health</a></li>
+<li>7.3. <a href="#robo29">update_gui/show_health</a></li>
 </ul>
-<li>7. <a href="#robo28">gui/tk_dialog2</a></li>
-<li>8. <a href="#robo29">gui/show_explode</a></li>
-<li>9. <a href="#robo30">gui/show_die</a></li>
-<li>10. <a href="#robo31">gui/show_msg</a></li>
+<li>8. <a href="#robo30">gui/tk_dialog2</a></li>
+<li>9. <a href="#robo31">gui/show_explode</a></li>
+<li>10. <a href="#robo32">gui/show_die</a></li>
+<li>11. <a href="#robo33">gui/show_msg</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="gui2ffile5fheader"></a>
@@ -80,7 +82,7 @@
     # Try to get tkpath
     if {[catch {package require tkpath}]} {
         # Try to get tkpath from a local lib
-        set libpath [file join $::thisDir lib]
+        set libpath [file join $::thisDir lib/tkpath]
         if {[file isdirectory $libpath]} {
             lappend ::auto_path $libpath
         }
@@ -296,20 +298,9 @@
     set ::game_f [ttk::frame .f3]
 
     create_arena
-
-    # The robot health list
-    set ::robotHealth {}
-    set ::robotHealth_lb [listbox $::game_f.h -background black \
-                              -listvariable ::robotHealth]
-    bind $::robotHealth_lb &lt;&lt;ListboxSelect&gt;&gt; highlightRobot
-
-    # The robot message box
-    set ::robotMsg {}
-    set ::robotMsg_lb [listbox $::game_f.msg -background black \
-                           -listvariable ::robotMsg]
 }
 </pre>
-<a name="robo5"></a>
+<a name="robo6"></a>
 <a name="init5fgui2ffileBox"></a>
 <h2>2.4.  init_gui/fileBox [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -382,7 +373,7 @@
     return $win
 }
 </pre>
-<a name="robo6"></a>
+<a name="robo7"></a>
 <a name="fileBox2ffileOK"></a>
 <h3>2.4.1.  fileBox/fileOK [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -412,7 +403,7 @@
     }
 }
 </pre>
-<a name="robo7"></a>
+<a name="robo8"></a>
 <a name="fileBox2fchoose5ffile"></a>
 <h3>2.4.2.  fileBox/choose_file [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -432,7 +423,7 @@
     $::robotlist_lb xview $index
 }
 </pre>
-<a name="robo8"></a>
+<a name="robo9"></a>
 <a name="fileBox2fchoose5fall"></a>
 <h3>2.4.3.  fileBox/choose_all [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -452,7 +443,7 @@
 
 }
 </pre>
-<a name="robo9"></a>
+<a name="robo10"></a>
 <a name="fileBox2fselInsert"></a>
 <h3>2.4.4.  fileBox/selInsert [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -473,7 +464,7 @@
     #$win.sel select range 0 0
 }
 </pre>
-<a name="robo10"></a>
+<a name="robo11"></a>
 <a name="fileBox2ffillLst"></a>
 <h3>2.4.5.  fileBox/fillLst [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -524,7 +515,7 @@
     $win.l.lst xview $index
 }
 </pre>
-<a name="robo11"></a>
+<a name="robo12"></a>
 <a name="init5fgui2fremove5ffile"></a>
 <h2>2.5.  init_gui/remove_file [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -540,7 +531,7 @@
     }
 }
 </pre>
-<a name="robo12"></a>
+<a name="robo13"></a>
 <a name="init5fgui2fremove5fall"></a>
 <h2>2.6.  init_gui/remove_all [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -552,7 +543,7 @@
     set ::robotList {}
 }
 </pre>
-<a name="robo13"></a>
+<a name="robo14"></a>
 <a name="init5fgui2fcreate5farena"></a>
 <h2>2.7.  init_gui/create_arena [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -563,27 +554,31 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc create_arena {} {
+    global parms arena_c
+
     if {[info commands ::tkp::canvas] ne ""} {
         set ::tkp::depixelize 0
-        set ::arena_c [tkp::canvas $::game_f.c -background white]
-        set ::data(tkp) 1
+        set arena_c [tkp::canvas $::game_f.c -background white]
+        set parms(tkp) 1
 
         # A gradient for a ball. Used for explosion
-        set ::data(gradient,expl) [$::arena_c gradient create radial \
-                -stops "{0 red 0.8} {1 yellow 0}" \
-                -radialtransition {0.5 0.5 0.5 0.5 0.5}]
+        set parms(gradient,expl) \
+            [$arena_c gradient create radial \
+                 -stops "{0 red 0.8} {1 yellow 0}" \
+                 -radialtransition {0.5 0.5 0.5 0.5 0.5}]
         # A gradient for a ball. Used for missile
-        set ::data(gradient,miss) [$::arena_c gradient create radial \
-                -stops "{0 darkgray} {1 black}" \
-                -radialtransition {0.6 0.4 0.8 0.7 0.3}]
+        set parms(gradient,miss) \
+            [$arena_c gradient create radial \
+                 -stops "{0 darkgray} {1 black}" \
+                 -radialtransition {0.6 0.4 0.8 0.7 0.3}]
     } else {
-        set ::arena_c [canvas $::game_f.c -background white]
-        set ::data(tkp) 0
+        set arena_c [canvas $::game_f.c -background white]
+        set parms(tkp) 0
     }
-    bind $::arena_c &lt;Configure&gt; {show_arena}
+    bind $arena_c &lt;Configure&gt; {show_arena}
 }
 </pre>
-<a name="robo14"></a>
+<a name="robo15"></a>
 <a name="init5fgui2fhighlightRobot"></a>
 <h2>2.8.  init_gui/highlightRobot [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -605,7 +600,7 @@
     }
 }
 </pre>
-<a name="robo15"></a>
+<a name="robo16"></a>
 <a name="init5fgui2finit5fmode"></a>
 <h2>2.9.  init_gui/init_mode [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -620,6 +615,9 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_mode {mode} {
+    # Set the global mode variable to selected mode
+    set ::game_mode $mode
+
     # Check that the number of selected robots is correct
     switch $mode {
         battle {
@@ -658,9 +656,30 @@
     }
 }
 </pre>
-<a name="robo16"></a>
+<a name="robo5"></a>
+<a name="gui2fcreate5fhealth5fmsg"></a>
+<h1>3.  gui/create_health_msg [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   create_health_msg
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc create_health_msg {path} {
+    # The robot health list
+    set ::robotHealth {}
+    set ::robotHealth_lb [listbox ${path}.health -background black \
+                              -listvariable ::robotHealth]
+    bind $::robotHealth_lb &lt;&lt;ListboxSelect&gt;&gt; highlightRobot
+
+    # The robot message box
+    set ::robotMsg {}
+    set ::robotMsg_lb [listbox ${path}.msg -background black \
+                           -listvariable ::robotMsg]
+}
+</pre>
+<a name="robo17"></a>
 <a name="init5fbattle2fshow5farena"></a>
-<h1>3.  init_battle/show_arena [ procedure ]  </h1>
+<h1>4.  init_battle/show_arena [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   show_arena
 </p>
@@ -693,9 +712,9 @@
     $::arena_c lower wall
 }
 </pre>
-<a name="robo17"></a>
+<a name="robo18"></a>
 <a name="init5fbattle2fbutton5fstate"></a>
-<h1>4.  init_battle/button_state [ procedure ]  </h1>
+<h1>5.  init_battle/button_state [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   button_state
 </p>
@@ -725,9 +744,9 @@
     $::quit_b  configure -state $state
 }
 </pre>
-<a name="robo18"></a>
+<a name="robo19"></a>
 <a name="init5fbattle2fgui5finit5frobots"></a>
-<h1>5.  init_battle/gui_init_robots [ procedure ]  </h1>
+<h1>6.  init_battle/gui_init_robots [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   gui_init_robots
 </p>
@@ -748,52 +767,14 @@
 
     set i 0
     foreach robot $::allRobots color $colors {
-        # Set colors as far away as possible from each other visually
-        set ::data($robot,color) $color
-        set ::data($robot,brightness) [brightness $color]
-        # Precreate robot on canvas
-        set ::data($robot,shape) [lindex $::parms(shapes) [% $i 4]]
-        set ::data($robot,paths) [string map [list % $color] \
-                [lindex $::parms(paths) [% $i [llength $::parms(paths)]]]]
-        if {$::data(tkp)} {
-            foreach {path opts} $::data($robot,paths) {
-                $::arena_c create path $path \
-                        -fill "" -stroke $color \
-                        {*}$opts \
-                        -tags "robot r$::data($robot,num)"
-            }
-            set ::data($robot,robotid) r$::data($robot,num)
-            # Auto-adapt scale to a robot size
-            set bbox [$::arena_c bbox r$::data($robot,num)]
-            lassign $bbox x1 y1 x2 y2
-            set size [max [- $x2 $x1] [- $y2 $y1]]
-            set ::data($robot,scale) [expr {80.0 / $size}]
-        } else {
-            set ::data($robot,robotid) [$::arena_c create line \
-                    -100 -100 -100 -100 \
-                    -fill $::data($robot,color) \
-                    -arrow last -arrowshape $::data($robot,shape) \
-                    -tags "r$::data($robot,num) robot"]
-        }
-        set ::data($robot,highlight) 0
-        # Precreate scan mark on canvas
-        if {$::data(tkp)} {
-            set path [arc_path 0 1]
-            set ::data($robot,scanid) [$::arena_c create path $path \
-                    -fill "" -fillopacity 0.3 -stroke "" \
-                    -tags "scan s$::data($robot,num)"]
-        } else {
-            set ::data($robot,scanid) [$::arena_c create arc -100 -100 -100 -100 \
-                    -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
-                    -width 1 -tags "scan s$::data($robot,num)"]
-        }
+        gui_create_robot $robot $color $i
         incr i
     }
 }
 </pre>
-<a name="robo19"></a>
+<a name="robo20"></a>
 <a name="gui5finit5frobots2fdistinct5fcolors"></a>
-<h2>5.1.  gui_init_robots/distinct_colors [ procedure ]  </h2>
+<h2>6.1.  gui_init_robots/distinct_colors [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   distinct_colors
 </p>
@@ -823,9 +804,9 @@
     return $rc
 }
 </pre>
-<a name="robo20"></a>
+<a name="robo21"></a>
 <a name="distinct5fcolors2fhls2tk"></a>
-<h3>5.1.1.  distinct_colors/hls2tk [ procedure ]  </h3>
+<h3>6.1.1.  distinct_colors/hls2tk [ procedure ]  </h3>
 <p class="item_name">NAME</p>
 <p>   hls2tk
 </p>
@@ -842,9 +823,9 @@
     return #$init
 }
 </pre>
-<a name="robo21"></a>
+<a name="robo22"></a>
 <a name="hls2tk2fhls2rgb"></a>
-<h4>5.1.1.1.  hls2tk/hls2rgb [ procedure ]  </h4>
+<h4>6.1.1.1.  hls2tk/hls2rgb [ procedure ]  </h4>
 <p class="item_name">NAME</p>
 <p>   hls2rgb
 </p>
@@ -875,9 +856,9 @@
     return [list $r $g $b]
 }
 </pre>
-<a name="robo22"></a>
+<a name="robo23"></a>
 <a name="gui5finit5frobots2fbrightness"></a>
-<h2>5.2.  gui_init_robots/brightness [ procedure ]  </h2>
+<h2>6.2.  gui_init_robots/brightness [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   brightness
 </p>
@@ -891,9 +872,65 @@
     expr {($r*0.3 + $g*0.59 + $b*0.11)/$max}
 }
 </pre>
-<a name="robo23"></a>
+<a name="robo24"></a>
+<a name="gui5finit5frobots2fgui5fcreate5frobot"></a>
+<h2>6.3.  gui_init_robots/gui_create_robot [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   gui_create_robot
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc gui_create_robot {robot color shape} {
+    global data
+
+    # Set colors as far away as possible from each other visually
+    set data($robot,color) $color
+    set data($robot,brightness) [brightness $color]
+    # Precreate robot on canvas
+    set data($robot,shape) [lindex $::parms(shapes) [% $shape 4]]
+    set data($robot,paths) \
+        [string map [list % $color] \
+             [lindex $::parms(paths) [% $shape [llength $::parms(paths)]]]]
+    if {$::parms(tkp)} {
+        foreach {path opts} $data($robot,paths) {
+            $::arena_c create path $path \
+                -fill "" -stroke $color \
+                {*}$opts \
+                -tags "robot r$data($robot,num)"
+        }
+        set data($robot,robotid) r$data($robot,num)
+        # Auto-adapt scale to a robot size
+        set bbox [$::arena_c bbox r$data($robot,num)]
+        lassign $bbox x1 y1 x2 y2
+        set size [max [- $x2 $x1] [- $y2 $y1]]
+        set data($robot,scale) [expr {80.0 / $size}]
+    } else {
+        set data($robot,robotid) \
+            [$::arena_c create line \
+                 -100 -100 -100 -100 \
+                 -fill $data($robot,color) \
+                 -arrow last -arrowshape $data($robot,shape) \
+                 -tags "r$data($robot,num) robot"]
+    }
+    set data($robot,highlight) 0
+    # Precreate scan mark on canvas
+    if {$::parms(tkp)} {
+        set path [arc_path 0 1]
+        set data($robot,scanid) \
+            [$::arena_c create path $path \
+                 -fill "" -fillopacity 0.3 -stroke "" \
+                 -tags "scan s$data($robot,num)"]
+    } else {
+        set data($robot,scanid) \
+            [$::arena_c create arc -100 -100 -100 -100 \
+                 -start 0 -extent 0 -fill "" -outline "" -stipple gray50 \
+                 -width 1 -tags "scan s$data($robot,num)"]
+    }
+}
+</pre>
+<a name="robo25"></a>
 <a name="gui2fupdate5fgui"></a>
-<h1>6.  gui/update_gui [ procedure ]  </h1>
+<h1>7.  gui/update_gui [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   update_gui
 </p>
@@ -906,9 +943,9 @@
     update
 }
 </pre>
-<a name="robo24"></a>
+<a name="robo26"></a>
 <a name="update5fgui2fshow5frobots"></a>
-<h2>6.1.  update_gui/show_robots [ procedure ]  </h2>
+<h2>7.1.  update_gui/show_robots [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   show_robots
 </p>
@@ -924,7 +961,7 @@
             set x [* $::data($robot,x) $::scale]
             set y [* [- 1000 $::data($robot,y)] $::scale]
             #puts "loc $robot $x ($::data($robot,x)) $y ($::data($robot,y))"
-            if {$::data(tkp)} {
+            if {$::parms(tkp)} {
                 set val [* $::data($robot,scale) $::scale]
                 set cosPhi [expr {$::c_tab($::data($robot,hdg))*$val}]
                 set sinPhi [expr {$::s_tab($::data($robot,hdg))*$val}]
@@ -953,9 +990,9 @@
             set x [* $::data($robot,mx) $::scale]
             set y [* [- 1000 $::data($robot,my)] $::scale]
             set val [* 6 $::scale]
-            if {$::data(tkp)} {
+            if {$::parms(tkp)} {
                 $::arena_c create circle $x $y -r $val \
-                        -fill $::data(gradient,miss) \
+                        -fill $::parms(gradient,miss) \
                         -fillopacity 0.7 -stroke "" -tags m$::data($robot,num)
             } else {
                 $::arena_c create oval \
@@ -966,9 +1003,9 @@
     }
 }
 </pre>
-<a name="robo25"></a>
+<a name="robo27"></a>
 <a name="update5fgui2fshow5fscan"></a>
-<h2>6.2.  update_gui/show_scan [ procedure ]  </h2>
+<h2>7.2.  update_gui/show_scan [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   show_scan
 </p>
@@ -978,7 +1015,7 @@
 <p class="item_name">SOURCE</p>
 <pre class="source">proc show_scan {} {
     # Hide the scan arcs by default
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         $::arena_c itemconfigure scan -fill ""
     } else {
         $::arena_c itemconfigure scan -outline ""
@@ -997,7 +1034,7 @@
                 set y [* [- 1000 $::data($robot,y)] $::scale]
                 #puts "scan $robot $x $y"
                 set val [* $::parms(mismax) $::scale]
-                if {$::data(tkp)} {
+                if {$::parms(tkp)} {
                     set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
                     # Scale to radius and move to location
                     set matrix [list [list $val 0] [list 0 $val] [list $x $y]]
@@ -1018,9 +1055,9 @@
     }
 }
 </pre>
-<a name="robo26"></a>
+<a name="robo28"></a>
 <a name="show5fscan2farc5fpath"></a>
-<h3>6.2.1.  show_scan/arc_path [ procedure ]  </h3>
+<h3>7.2.1.  show_scan/arc_path [ procedure ]  </h3>
 <p class="item_name">NAME</p>
 <p>   arc_path
 </p>
@@ -1046,9 +1083,9 @@
     return $path
 }
 </pre>
-<a name="robo27"></a>
+<a name="robo29"></a>
 <a name="update5fgui2fshow5fhealth"></a>
-<h2>6.3.  update_gui/show_health [ procedure ]  </h2>
+<h2>7.3.  update_gui/show_health [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   show_health
 </p>
@@ -1067,9 +1104,9 @@
     }
 }
 </pre>
-<a name="robo28"></a>
+<a name="robo30"></a>
 <a name="gui2ftk5fdialog2"></a>
-<h1>7.  gui/tk_dialog2 [ procedure ]  </h1>
+<h1>8.  gui/tk_dialog2 [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   tk_dialog2
 </p>
@@ -1183,9 +1220,9 @@
     return $::tkPriv(button)
 }
 </pre>
-<a name="robo29"></a>
+<a name="robo31"></a>
 <a name="gui2fshow5fexplode"></a>
-<h1>8.  gui/show_explode [ procedure ]  </h1>
+<h1>9.  gui/show_explode [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   show_explode
 </p>
@@ -1200,9 +1237,9 @@
     set x [* $::data($robot,mx) $::scale]
     set y [* [- 1000 $::data($robot,my)] $::scale]
 
-    if {$::data(tkp)} {
+    if {$::parms(tkp)} {
         set id [$::arena_c create circle $x $y -r 0 \
-                -fill $::data(gradient,expl) \
+                -fill $::parms(gradient,expl) \
                 -fillopacity 0.7 -stroke "" -tags e$::data($robot,num)]
 
         # Loop over all animation frames
@@ -1244,9 +1281,9 @@
     after $delay  "$::arena_c delete e$::data($robot,num)"
 }
 </pre>
-<a name="robo30"></a>
+<a name="robo32"></a>
 <a name="gui2fshow5fdie"></a>
-<h1>9.  gui/show_die [ procedure ]  </h1>
+<h1>10.  gui/show_die [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   show_die
 </p>
@@ -1290,9 +1327,9 @@
     after 500 "$::arena_c delete die$::data($robot,num)"
 }
 </pre>
-<a name="robo31"></a>
+<a name="robo33"></a>
 <a name="gui2fshow5fmsg"></a>
-<h1>10.  gui/show_msg [ procedure ]  </h1>
+<h1>11.  gui/show_msg [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   show_msg
 </p>
