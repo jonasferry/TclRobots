@@ -1,0 +1,531 @@
+<h3>TABLE OF CONTENTS</h3>
+<ul>
+<li>1. <a href="#robo0">tournament/file_header</a></li>
+<li>2. <a href="#robo1">tournament/init_tourn</a></li>
+<ul>
+<li>2.1. <a href="#robo2">init_tourn/get_filenames_tourn</a></li>
+<li>2.2. <a href="#robo3">init_tourn/init_gui_tourn</a></li>
+<ul>
+<li>2.2.1. <a href="#robo4">init_gui_tourn/create_tournctrl</a></li>
+</ul>
+<li>2.3. <a href="#robo5">init_tourn/build_matchlist</a></li>
+<li>2.4. <a href="#robo9">init_tourn/run_tourn</a></li>
+<ul>
+<li>2.4.1. <a href="#robo10">run_tourn/halt_tourn</a></li>
+<ul>
+<li>2.4.1.1. <a href="#robo11">halt_tourn/reset_tourn</a></li>
+</ul>
+<li>2.4.2. <a href="#robo12">run_tourn/score_tourn</a></li>
+</ul>
+</ul>
+<li>3. <a href="#robo6">tournament/update_tourn</a></li>
+<ul>
+<li>3.1. <a href="#robo7">update_tourn/show_score</a></li>
+<li>3.2. <a href="#robo8">update_tourn/show_matches</a></li>
+</ul>
+</ul>
+<a name="robo0"></a>
+<a name="tournament2ffile5fheader"></a>
+<h1>1.  tournament/file_header [ file ]  </h1>
+<p class="item_name">NAME</p>
+<p>   tournament.tcl
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   This file defines the functionality and GUI description of the
+   TclRobots tournament mode.
+</p>
+
+<p>   It runs round-robin one-on-one battles until all robots have battled
+   every other robot once. Scores are awarded for a win (3p) and a tie
+   (1p). At the end of the tournament the scores are compared to find a
+   winner.
+</p>
+
+<p>   The GUI is the same as single battle mode, with the tournament score
+   added.
+</p>
+
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+   on TclRobots 2.0 by Tom Poindexter.
+</p>
+
+<p>   See http://tclrobots.org for more information.
+</p>
+<p class="item_name">COPYRIGHT</p>
+<p>   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
+   Simplified BSD License. See LICENSE file for details.
+</p>
+<a name="robo1"></a>
+<a name="tournament2finit5ftourn"></a>
+<h1>2.  tournament/init_tourn [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   init_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   This procedure starts the tournament.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc init_tourn {} {
+    global allRobots allRobots_tourn activeRobots activeRobots_tourn data \
+        data_tourn score
+
+    # Clear any old data
+    array unset data
+
+    debug breakpoint
+
+    if {$::gui} {
+        get_filenames_tourn
+        init_gui_tourn
+    }
+    # Init all robots, can't use init_game from tclrobots.tcl because
+    # interpreters should be initialised separately in tournament mode
+    init_parms
+    init_trig_tables
+    init_rand
+    init_files
+    init_robots
+
+    if {$::gui} {
+        # Init robots on GUI
+        gui_init_robots
+
+        # Remove canvas items; these will be initialised again for each match
+        $::arena_c delete robot
+        $::arena_c delete scan
+    }
+    foreach robot $allRobots {
+        set score($robot) 0
+    }
+    # Remember allRobots, activeRobots and data
+    set allRobots_tourn    $allRobots
+    set activeRobots_tourn $activeRobots
+    array set data_tourn   [array get data]
+
+    build_matchlist
+
+    if {$::gui} {
+        set ::current_match [lindex $::matchlist 0]
+        update_tourn
+    }
+    # Figure out the longest robot name to line up the report nicely
+    set ::long_name 0
+    foreach name [array names data *,name] {
+        if {[string length $data($name)] &gt; $::long_name} {
+            set ::long_name [string length $data($name)]
+        }
+    }
+}
+</pre>
+<a name="robo2"></a>
+<a name="init5ftourn2fget5ffilenames5ftourn"></a>
+<h2>2.1.  init_tourn/get_filenames_tourn [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   get_filenames_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Gets the robot filenames from the file list window.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc get_filenames_tourn {} {
+    # get robot filenames from window
+    set ::robotFiles $::robotList
+}
+</pre>
+<a name="robo3"></a>
+<a name="init5ftourn2finit5fgui5ftourn"></a>
+<h2>2.2.  init_tourn/init_gui_tourn [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   init_gui_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Creates theemacs -r ~/Desktop/code/tcl/tclrobots/tclrobots/tclrobots.tcl tournament mode GUI.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc init_gui_tourn {} {
+    grid forget $::sel_f
+
+    show_arena
+
+    # Create and grid the tournament control box
+    create_tournctrl
+
+    # Clear message boxes
+    set ::robotHealth {}
+    set ::robotMsg    {}
+
+    # start robots
+    set ::StatusBarMsg "Optionally select match time and outfile and press START"
+    button_state disabled "START" run_tourn
+}
+</pre>
+<a name="robo4"></a>
+<a name="init5fgui5ftourn2fcreate5ftournctrl"></a>
+<h3>2.2.1.  init_gui_tourn/create_tournctrl [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   create_tournctrl
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Create and grid the tournament control box.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc create_tournctrl {} {
+    global tourn_f
+
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    grid $::game_f  -column 0 -row 2 -sticky nsew
+    grid $::arena_c -column 0 -row 0 -rowspan 2 -sticky nsew
+
+    set  tourn_f [ttk::frame $::game_f.tourn]
+    grid $tourn_f -column 1 -row 0 -sticky nsew
+
+    create_health_msg $tourn_f
+
+    set tournctrl1_f [ttk::frame $tourn_f.time -relief raised -borderwidth 2]
+    set tourntime_l  [ttk::label $tourn_f.time.l \
+                          -text "Max minutes / match:"]
+    set tourntime_e  [ttk::entry $tourn_f.time.e \
+                          -textvariable tlimit]
+
+    grid $tourntime_l -column 0 -row 0 -sticky nsew
+    grid $tourntime_e -column 0 -row 1 -sticky nsew
+
+    set ::tournScore    {}
+    set ::tournScore_lb   [listbox $tourn_f.score -background black \
+                               -listvariable ::tournScore]
+
+    set ::tournMatches  {}
+    set ::tournMatches_lb [listbox $tourn_f.match -background black \
+                               -foreground white -listvariable ::tournMatches]
+
+    set tournctrl2_f [ttk::frame $tourn_f.file -relief raised -borderwidth 2]
+    set tournfile_l  [ttk::label $tourn_f.file.l \
+                          -text "Optional results filename:"]
+    set tournfile_e  [ttk::entry $tourn_f.file.e \
+                          -textvariable outfile]
+
+    grid $tournfile_l -column 0 -row 0 -sticky nsew
+    grid $tournfile_e -column 0 -row 1 -sticky nsew
+
+    # Fix resizing of widgets
+    grid columnconfigure $::game_f 0 -weight 1
+    grid columnconfigure $::game_f 1 -weight 1
+    grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $tourn_f 0 -weight 1
+    grid columnconfigure $tourn_f 1 -weight 1
+    grid rowconfigure    $tourn_f  0 -weight 1
+    grid rowconfigure    $tourn_f  1 -weight 1
+    grid rowconfigure    $tourn_f  2 -weight 1
+
+    # Grid all major widgets
+    grid $::robotHealth_lb  -column 0 -row 0 -sticky nsew
+    grid $::tournScore_lb   -column 0 -row 1 -sticky nsew
+    grid $::tournMatches_lb -column 0 -row 2 -sticky nsew
+    grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
+    grid $::robotMsg_lb     -column 1 -row 0 -sticky nsew -rowspan 3
+    grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
+}
+</pre>
+<a name="robo5"></a>
+<a name="init5ftourn2fbuild5fmatchlist"></a>
+<h2>2.3.  init_tourn/build_matchlist [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   build_matchlist
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Builds the list of matches in the tournament. Makes sure robots do
+   not fight themselves or multiple times against the same opponent.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc build_matchlist {} {
+    global allRobots matchlist
+
+    set matchlist {}
+    foreach robot $allRobots {
+        foreach target $allRobots {
+            # Make sure all matches are unique
+            if {[&lt;= [lsearch $allRobots $target] \
+                     [lsearch $allRobots $robot]]} {
+                continue
+            }
+            lappend matchlist [list $robot $target]
+        }
+    }
+}
+</pre>
+<a name="robo9"></a>
+<a name="init5ftourn2frun5ftourn"></a>
+<h2>2.4.  init_tourn/run_tourn [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   run_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Runs the tournament.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc run_tourn {} {
+    global allRobots allRobots_tourn activeRobots activeRobots_tourn \
+        data data_tourn running matchlist score matchlog
+
+    if {$::gui} {
+        set ::StatusBarMsg "Running"
+        set ::halted  0
+        button_state disabled "Halt" halt_tourn
+    }
+    set matchlog ""
+    puts "MATCHES:\n"
+
+    foreach match $matchlist {
+        if {$::gui} {
+            # Remove old canvas items
+            $::arena_c delete robot
+            $::arena_c delete scan
+            set ::current_match $match
+        }
+        set robot  [lindex $match 0]
+        set target [lindex $match 1]
+
+        # Switch all and active robots to current tournament pair
+        set allRobots    "$robot $target"
+        set activeRobots $allRobots
+
+        # Unset old data array, but retain some information
+        array unset data
+        foreach robot $allRobots {
+            set data($robot,code) $data_tourn($robot,code)
+            set data($robot,name) $data_tourn($robot,name)
+            set data($robot,num)  $data_tourn($robot,num)
+        }
+        # Init current two robots' interpreters
+        init_robots
+        init_interps
+
+        if {$::gui} {
+            foreach robot $allRobots {
+                gui_create_robot $robot $data_tourn($robot,color) \
+                    [lsearch -exact $allRobots_tourn $robot]
+            }
+        }
+        set running 1
+        set ::stopped 0
+        set ::halted 0
+        coroutine run_robotsCo run_robots
+        vwait ::stopped
+
+        if {$::halted} {
+            # Do not score tournament if it was halted
+            break
+        } else {
+            # Set match score for tournament mode
+            set match_msg ""
+            # Fix padding
+            for {set i [string length $data($robot,name)]} \
+                {$i &lt;= $::long_name} {incr i} {
+                    append match_msg " "
+                }
+            if {[llength $activeRobots] == 1} {
+                incr score([lindex $activeRobots 0]) 3
+                if {$robot eq $activeRobots} {
+                    append match_msg \
+                        "$data($robot,name)(w) vs $data($target,name)"
+                } else {
+
+                    append match_msg \
+                        "$data($robot,name)    vs $data($target,name)(w)"
+                }
+            } else {
+                foreach robot $activeRobots {
+                    incr score($robot) 1
+                }
+                append match_msg \
+                    "$data($robot,name)    vs $data($target,name) (tie)"
+            }
+            if {$::gui} {
+                update_tourn
+            }
+            puts $match_msg
+            append matchlog "$match_msg\n"
+
+            # Disable robots and clear messages
+            foreach robot $activeRobots {
+                disable_robot $robot
+                set ::robotMsg {}
+            }
+        }
+        # Switch back all and active robots to remembered values
+        set allRobots    $allRobots_tourn
+        set activeRobots $activeRobots_tourn
+
+        score_tourn
+    }
+}
+</pre>
+<a name="robo10"></a>
+<a name="run5ftourn2fhalt5ftourn"></a>
+<h3>2.4.1.  run_tourn/halt_tourn [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   halt_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Halt a running tournament.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc halt_tourn {} {
+    set ::running 0
+    set ::halted 1
+    set ::StatusBarMsg "Tournament halted"
+
+    button_state disabled "Reset" reset_tourn
+}
+</pre>
+<a name="robo11"></a>
+<a name="halt5ftourn2freset5ftourn"></a>
+<h4>2.4.1.1.  halt_tourn/reset_tourn [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   reset_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Reset to file select state.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc reset_tourn {} {
+    set ::StatusBarMsg "Cleaning up"
+    update
+
+    set ::running 0
+    set ::halted 1
+    destroy $::tourn_f
+
+    foreach robot $::activeRobots {
+        disable_robot $robot
+    }
+    if {$::parms(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
+    grid forget $::game_f
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+
+    set ::StatusBarMsg "Select robot files for battle"
+    button_state normal "Run Battle" {init_mode battle}
+}
+</pre>
+<a name="robo12"></a>
+<a name="run5ftourn2fscore5ftourn"></a>
+<h3>2.4.2.  run_tourn/score_tourn [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   score_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Sort tournament scores, display them and if requested report them to
+   file.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc score_tourn {} {
+    global allRobots data score matchlog outfile
+
+    # Sort the scores
+    set score_sorted {}
+    foreach robot $allRobots {
+        lappend score_sorted "$robot $score($robot)"
+    }
+    set ::win_msg "TOURNAMENT SCORES:\n\n"
+    foreach robotscore [lsort -integer -index 1 \
+                            -decreasing $score_sorted] {
+        set robot [lindex $robotscore 0]
+        append ::win_msg "[format %3d $score($robot)] $data($robot,name)\n"
+    }
+    # show results
+    if {$::gui} {
+        if {$::halted} {
+            set ::StatusBarMsg "Battle halted"
+        } else {
+            tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
+        }
+        button_state disabled "Reset" reset_tourn
+    } else {
+        puts "\n$::win_msg"
+    }
+    # Set up report file message
+    set outmsg ""
+    append outmsg "MATCHES:\n$matchlog\n"
+    append outmsg "$::win_msg"
+
+    if {$outfile ne ""} {
+        debug "$outfile :::: $outmsg"
+        catch {write_file $outfile $outmsg}
+    }
+}
+</pre>
+<a name="robo6"></a>
+<a name="tournament2fupdate5ftourn"></a>
+<h1>3.  tournament/update_tourn [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   update_tourn
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_tourn {} {
+    show_score
+    show_matches
+    update
+}
+</pre>
+<a name="robo7"></a>
+<a name="update5ftourn2fshow5fscore"></a>
+<h2>3.1.  update_tourn/show_score [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   show_score
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc show_score {} {
+    global allRobots_tourn data score tournScore tournScore_lb
+
+    set tournScore {}
+    set index 0
+    foreach robot $allRobots_tourn {
+        lappend tournScore "[format %3d $score($robot)] $data($robot,name)"
+        $tournScore_lb itemconfigure $index -foreground $data($robot,color)
+        if {$data($robot,brightness) &gt; 0.5} {
+            $tournScore_lb itemconfigure $index -background black
+        }
+        incr index
+    }
+}
+</pre>
+<a name="robo8"></a>
+<a name="update5ftourn2fshow5fmatches"></a>
+<h2>3.2.  update_tourn/show_matches [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   show_matches
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc show_matches {} {
+    set ::tournMatches {}
+    set index 0
+
+    foreach match $::matchlist {
+        lappend ::tournMatches "$::data([lindex $match 0],name) vs $::data([lindex $match 1],name)"
+
+        if {$match eq $::current_match} {
+            # Highlight current match
+            $::tournMatches_lb itemconfigure $index -background white
+            $::tournMatches_lb itemconfigure $index -foreground black
+
+            if {$index &gt; 0} {
+                # Remove highlight from previous match
+                $::tournMatches_lb itemconfigure [- $index 1] \
+                    -background black
+                $::tournMatches_lb itemconfigure [- $index 1] \
+                    -foreground white
+            }
+        }
+        incr index
+    }
+}
+</pre>
+
