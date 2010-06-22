@@ -63,18 +63,35 @@ proc init_battle {} {
     set ::robotHealth {}
     set ::robotMsg    {}
 
-    # start robots
-    set ::StatusBarMsg "Running"
-    set ::halted  0
-    button_state disabled "Halt" halt_battle
-
     # Init
     init_game
 
+    # start robots
+    set ::StatusBarMsg "Press START to start battle"
+    set ::halted 0
+    button_state disabled "START" run_battle
+}
+#******
+
+#****P* init_battle/run_battle
+#
+# NAME
+#
+#   run_battle
+#
+# DESCRIPTION
+#
+#   Run single battle.
+#
+# SOURCE
+#
+proc run_battle {} {
     # Init robots on GUI
     gui_init_robots
 
-    # Start game
+    set ::StatusBarMsg "Running"
+    button_state disabled "Halt" halt_battle
+
     run_game
 
     # find winnner
@@ -87,7 +104,7 @@ proc init_battle {} {
 }
 #******
 
-#****P* init_battle/halt_battle
+#****P* run_battle/halt_battle
 #
 # NAME
 #
@@ -108,7 +125,7 @@ proc halt_battle {} {
 }
 #******
 
-#****P* init_battle/reset_battle
+#****P* halt_battle/reset_battle
 #
 # NAME
 #

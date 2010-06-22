@@ -62,7 +62,8 @@ proc init_sim {} {
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
-    button_state disabled
+    set ::halted  0
+    button_state disabled "Halt" halt_sim
 
     # init is defined in tclrobots.tcl
 #    init_game
@@ -119,6 +120,61 @@ proc init_sim {} {
     set ::step 1
     # Procedure run_robots is found in tclrobots.tcl
     coroutine run_robotsCo run_robots
+}
+#******
+
+#****P* init_sim/halt_sim
+#
+# NAME
+#
+#   halt_sim
+#
+# DESCRIPTION
+#
+#   Halt a running simulation.
+#
+# SOURCE
+#
+proc halt_sim {} {
+    set ::running 0
+    set ::StatusBarMsg "Stopping simulation"
+    set ::halted 1
+
+    button_state disabled "Reset" reset_sim
+}
+#******
+
+#****P* init_sim/reset_sim
+#
+# NAME
+#
+#   reset_sim
+#
+# DESCRIPTION
+#
+#   Reset to file select state.
+#
+# SOURCE
+#
+proc reset_sim {} {
+    set ::StatusBarMsg "Cleaning up"
+    update
+
+    foreach robot $::activeRobots {
+        disable_robot $robot
+    }
+    if {$::parms(tkp)} {
+        $::arena_c delete {*}[$::arena_c children 0]
+    } else {
+        $::arena_c delete all
+    }
+    grid forget $::game_f
+    destroy $::game_f.health
+    destroy $::game_f.msg
+    grid $::sel_f -column 0 -row 2 -sticky nsew
+
+    set ::StatusBarMsg "Select robot files for battle"
+    button_state normal "Run Battle" {init_mode battle}
 }
 #******
 
@@ -310,6 +366,7 @@ proc create_simctrl {} {
 }
 #******
 
+if 0 {
 #****P* create_simctrl/end_sim
 #
 # NAME
@@ -328,6 +385,7 @@ proc end_sim {} {
     reset
 }
 #******
+}
 
 #****P* create_simctrl/ver_range
 #
