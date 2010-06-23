@@ -45,7 +45,6 @@ proc main {} {
     set ::max_ticks   6000
     set ::robotFiles  {}
     set ::tourn_type  0
-    set ::numlist     0
     set ::outfile     ""
     set ::silent      0
     set ::verbose     0
@@ -80,6 +79,11 @@ proc main {} {
             }
         }
     }
+    # Initialise basic settings
+    init_parms
+    init_trig_tables
+    init_rand
+
     if {[llength $::robotFiles] >= 2 && !$::gui} {
         if {$::tourn_type == 0} {
             # Run single battle in terminal
@@ -127,9 +131,6 @@ proc init_game {} {
     set robmsg_out ""
     set tick 0
 
-    init_parms
-    init_trig_tables
-    init_rand
     init_files
     init_robots
     init_interps
@@ -150,88 +151,90 @@ proc init_game {} {
 # SOURCE
 #
 proc init_parms {} {
+    global parms
+
     # milliseconds per tick
     if {$::gui} {
-        set ::parms(tick) 100
+        set parms(tick) 100
     } else {
-        set ::parms(tick) 0
+        set parms(tick) 0
     }
     # meters of possible error on scan resolution
-    set ::parms(errdist) 10
+    set parms(errdist) 10
     # distance traveled at 100% per tick
-    set ::parms(sp) 10
+    set parms(sp) 10
     # accel/deaccel speed per tick as % speed
-    set ::parms(accel) 10
+    set parms(accel) 10
     # maximum range for a missile
-    set ::parms(mismax) 700
+    set parms(mismax) 700
     # distance missiles travel per tick
-    set ::parms(msp) 100
+    set parms(msp) 100
     # missile reload time in ticks
-    set ::parms(mreload) [round [+ [/ $::parms(mismax) $::parms(msp)] 0.5]]
+    set parms(mreload) [round [+ [/ $parms(mismax) $parms(msp)] 0.5]]
     # missile long reload time after clip
-    set ::parms(lreload) [* $::parms(mreload) 3]
+    set parms(lreload) [* $parms(mreload) 3]
     # number of missiles per clip
-    set ::parms(clip)	4
+    set parms(clip)	4
     # max turn speed < 25 deg. delta
-    set ::parms(turn,0) 100
+    set parms(turn,0) 100
     #  "   "     "   " 50  "     "
-    set ::parms(turn,1) 50
+    set parms(turn,1) 50
     #  "   "     "   " 75  "     "
-    set ::parms(turn,2) 30
+    set parms(turn,2) 30
     #  "   "     "   > 75  "     "
-    set ::parms(turn,3) 20
+    set parms(turn,3) 20
     # max rate of turn per tick at speed < 25
-    set ::parms(rate,0) 90
+    set parms(rate,0) 90
     #  "   "   "   "    "   "   "    "   " 50
-    set ::parms(rate,1) 60
+    set parms(rate,1) 60
     #  "   "   "   "    "   "   "    "   " 75
-    set ::parms(rate,2) 40
+    set parms(rate,2) 40
     #  "   "   "   "    "   "   "    "   > 75
-    set ::parms(rate,3) 30
+    set parms(rate,3) 30
     #  "   "   "   "    "   "   "    "   > 75
-    set ::parms(rate,4) 20
+    set parms(rate,4) 20
     # robot start health
     if {$::debug} {
         # Debug health for quick matches
-        set ::parms(health) 10
+        set parms(health) 10
     } else {
         # Normal health
-        set ::parms(health) 100
+        set parms(health) 100
     }
     # diameter of direct missile damage
-    set ::parms(dia0) 6
+    set parms(dia0) 6
     #     "    "  maximum   "      "
-    set ::parms(dia1) 10
+    set parms(dia1) 10
     #     "    "  medium    "      "
-    set ::parms(dia2) 20
+    set parms(dia2) 20
     #     "    "  minimum   "      "
-    set ::parms(dia3) 40
+    set parms(dia3) 40
     # damage within range 0
-    set ::parms(hit0) -25
+    set parms(hit0) -25
     #    "       "     "   1
-    set ::parms(hit1) -12
+    set parms(hit1) -12
     #    "       "     "   2
-    set ::parms(hit2) -7
+    set parms(hit2) -7
     #    "       "     "   3
-    set ::parms(hit3) -3
+    set parms(hit3) -3
     #    "    from collision into wall
-    set ::parms(coll) -5
+    set parms(coll) -5
     # speed when heat builds
-    set ::parms(heatsp) 35
+    set parms(heatsp) 35
     # max heat index, sets speed to heatsp
-    set ::parms(heatmax) 200
+    set parms(heatmax) 200
     # inverse heating rate (greater hrate=slower)
-    set ::parms(hrate) 10
+    set parms(hrate) 10
     # cooling rate per tick, after overheat
-    set ::parms(cooling) -25
+    set parms(cooling) -25
     # cannon heating rate per shell
-    set ::parms(canheat) 20
+    set parms(canheat) 20
     # cannon cooling rate per tick
-    set ::parms(cancool) -1
+    set parms(cancool) -1
     # cannon heat index where scanner is inop
-    set ::parms(scanbad) 35
+    set parms(scanbad) 35
     # quadrants, can be used to spread out robots at start
-    set ::parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
 }
 #******
 

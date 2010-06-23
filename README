@@ -33,9 +33,8 @@ TABLE OF CONTENTS
 
 1. WHAT IS TCLROBOTS?
 
-TclRobots is a programming game where you must write a Tcl program that
-controls a robot. The robot's mission is to survive a battle with other
-robots.
+TclRobots is a programming game where you write a Tcl program to control
+a robot. The robot's mission is to survive a battle with other robots.
 
 At least two robots compete during a battle, each running different
 programs (or possibly the same program in different robots). Each robot

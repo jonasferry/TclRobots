@@ -65,34 +65,18 @@ proc init_sim {} {
     set ::halted  0
     button_state disabled "Halt" halt_sim
 
-    # init is defined in tclrobots.tcl
-#    init_game
-
+    # init
     set ::finish ""
     set ::robmsg_out ""
-#    set ::tick 0
-
-    init_parms
-    init_trig_tables
-    init_rand
     init_files
-#    init_robots
-
-
-#    set ::tick 0
 
     set ::allRobots {r0 target}
     set ::activeRobots $::allRobots
-
-#    set f [open [lindex $::robotList 0]]
-#    set ::data(r0,code) [read $f]
-#    close $f
 
     # Make target run a dummy program
     set ::data(target,code) {while {1} {set x [loc_x]}}
     set ::data(target,name) target
     set ::data(target,num)  12345
-
 
     # init_robots is defined in tclrobots.tcl
     init_robots
