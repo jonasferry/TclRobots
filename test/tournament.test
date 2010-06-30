@@ -1,0 +1,39 @@
+package require tcltest
+namespace import ::tcltest::*
+namespace import ::tcl::mathop::*
+namespace import ::tcltest::*
+
+try {
+    source tournament.tcl
+} on error {} {
+    try {
+        source ../tournament.tcl
+    } on error {} {
+        puts "### Error: Could not source tournament.tcl; check directory"
+        exit
+    }
+}
+
+test sort_score {Test sort_score} {
+     -result 1
+     -body {
+         global allRobots_tourn data score tournRanking
+
+         set allRobots_tourn {r0 r1 r2 r3}
+
+         set index 0
+         foreach robot $allRobots_tourn {
+             set data($robot,name) name${index}
+             set score($robot) [* $index 3]
+             incr index
+         }
+         sort_score
+
+         if {$tournRanking == {r3 r2 r1 r0}} {
+             return 1
+         } else {
+             return 0
+         }
+     }
+}
+cleanupTests
