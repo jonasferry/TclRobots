@@ -53,7 +53,7 @@ proc main {} {
     set state none
     foreach arg $::argv {
         if {$state eq "seed"} {
-            set ::seed $arg
+            set ::seed_arg $arg
             set state none
             continue
         } elseif {$state eq "outfile"} {
@@ -79,11 +79,6 @@ proc main {} {
             }
         }
     }
-    # Initialise basic settings
-    init_parms
-    init_trig_tables
-    init_rand
-
     if {[llength $::robotFiles] >= 2 && !$::gui} {
         if {$::tourn_type == 0} {
             # Run single battle in terminal
@@ -124,16 +119,23 @@ proc main {} {
 #
 # SOURCE
 #
-proc init_game {} {
-    global finish robmsg_out tick
+proc init_game {{mode all}} {
+    if {$mode ne "match"} {
+        global finish robmsg_out tick
 
-    set finish ""
-    set robmsg_out ""
-    set tick 0
+        set finish ""
+        set robmsg_out ""
+        set tick 0
 
-    init_files
-    init_robots
-    init_interps
+        init_parms
+        init_trig_tables
+        init_rand
+        init_files
+    }
+    if {$mode ne "base"} {
+        init_robots
+        init_interps
+    }
 }
 #******
 
@@ -234,7 +236,7 @@ proc init_parms {} {
     # cannon heat index where scanner is inop
     set parms(scanbad) 35
     # quadrants, can be used to spread out robots at start
-    set parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set parms(quads) {{100 100} {600 100} {100 600} {600 600}}
 }
 #******
 
@@ -275,11 +277,14 @@ proc init_trig_tables {} {
 # SOURCE
 #
 proc init_rand {} {
-    # Set random seed. Note that this works on Linux and Mac, but needs
-    # to be done differently on Windows.
-    if {![info exists ::seed]} {
+    # Set random seed.
+    if {![info exists ::seed_arg]} {
+        # file atime does not work in Windows systems
         set ::seed [* [pid] [file atime /dev/tty]]
+    } else {
+        set ::seed $::seed_arg
     }
+    debug "seed: $::seed"
     srand $::seed
 }
 #******
@@ -321,8 +326,8 @@ proc init_files {} {
 
     foreach robot $allRobots {
         set name [file tail [lindex $::robotFiles $file_index]]
-        # Search for duplicate robot names
 
+        # Search for duplicate robot names
         foreach used_name [array names data *,name] {
             if {$name eq $data($used_name)} {
                 set name "$data($used_name)([+ $file_index 1])"
@@ -492,8 +497,11 @@ proc init_interps {} {
 #
 proc run_game {} {
     set ::running 1
+    set ::paused  0
+
     coroutine run_robotsCo run_robots
     vwait ::running
+
     debug "activerobots: $::activeRobots"
     find_winner
 }
@@ -515,64 +523,70 @@ proc run_robots {} {
     global data activeRobots tick running gui parms
 
     while {$running == 1} {
-        if {$::game_mode eq "simulator"} {
-            # Reset health of target
-            set ::data(target,health) $::parms(health)
-        }
-        foreach robot $activeRobots {
-            if {($data($robot,alert) ne {}) && \
-                    ($data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set data($robot,sysreturn,[- $tick 1]) \
-                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
-
-                # Robot is notified; reset alert request
-                set data($robot,ping) {}
+        if {!$::paused} {
+            if {$::game_mode eq "simulator"} {
+                # Reset health of target
+                set data(target,health) [* $parms(health) 10]
             }
-            ${robot}Run $data($robot,sysreturn,[- $tick 1])
-        }
-        act
+            foreach robot $activeRobots {
+                if {($data($robot,alert) ne {}) && \
+                        ($data($robot,ping) ne {})} {
+                    # Prepend alert data to sysreturn no notify robot it's
+                    # been scanned.
+                    set data($robot,sysreturn,[- $tick 1]) \
+                        "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
 
-        # Print extra information in simulator GUI
-        if {[eq $::game_mode "simulator"] &&
-            [ne $::data(r0,sysreturn,$::tick) ""]} {
-            lappend ::sim_syscall "=>" $::data(r0,sysreturn,$::tick)
-        }
-        update_robots
+                    # Robot is notified; reset alert request
+                    set data($robot,ping) {}
+                }
+                ${robot}Run $data($robot,sysreturn,[- $tick 1])
+            }
+            act
 
-        if {$gui} {
-            update_gui
-        }
-        tick
+            # Print extra information in simulator GUI
+            if {[eq $::game_mode "simulator"] &&
+                [ne $::data(r0,sysreturn,$::tick) ""]} {
+                set ::sim_syscall $data(r0,syscall,$tick)
+                append ::sim_syscall " => " $::data(r0,sysreturn,$tick)
+            }
+            update_robots
 
-        # Check if single step is active in simulator mode
-        if {[eq $::game_mode "simulator"] && $::step} {
-            vwait ::do_step
-            set ::do_step 0
-        }
-        if {$parms(tick) < 5} {
-            # Don't bother at high speed
-            after $parms(tick) [info coroutine]
-        } elseif {$tick <= 5} {
-            # Let the first few ticks pass before measuring
-            after $parms(tick) [info coroutine]
-            set ::timeAt5 [clock milliseconds]
+            if {$gui} {
+                update_gui
+            }
+            tick
+
+            # Check if single step is active in simulator mode
+            if {[eq $::game_mode "simulator"] && $::step} {
+                vwait ::do_step
+                set ::do_step 0
+            }
+            if {$parms(tick) < 5} {
+                # Don't bother at high speed
+                after $parms(tick) [info coroutine]
+            } elseif {$tick <= 5} {
+                # Let the first few ticks pass before measuring
+                after $parms(tick) [info coroutine]
+                set ::timeAt5 [clock milliseconds]
+            } else {
+                # Try to measure time, to adjust the tick delay for load
+                set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
+                set delay [expr {$target - [clock milliseconds]}]
+                # Sanity check value
+                if {$delay > $parms(tick)} {
+                    set delay $parms(tick)
+                } elseif {$delay < 5} {
+                    set delay 5
+                }
+                after $delay [info coroutine]
+                # Keep the lag visible
+                set ::StatusBarMsg "Running $delay"
+            }
+            yield
         } else {
-            # Try to measure time, to adjust the tick delay for load
-            set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
-            set delay [expr {$target - [clock milliseconds]}]
-            # Sanity check value
-            if {$delay > $parms(tick)} {
-                set delay $parms(tick)
-            } elseif {$delay < 5} {
-                set delay 5
-            }
-            after $delay [info coroutine]
-            # Keep the lag visible
-            set ::StatusBarMsg "Running $delay"
+            # Game is paused
+            update
         }
-        yield
     }
     set ::stopped 1
     debug "destroying coroutine [info coroutine]"
@@ -638,11 +652,13 @@ proc update_robots {} {
         set num_miss [check_missiles $robot]
 
         # skip rest if robot dead
-        if {!$data($robot,status)} {continue}
-
+        if {!$data($robot,status)} {
+            continue
+        }
         # update missile reloader
-        if {$data($robot,reload)} {incr data($robot,reload) -1}
-
+        if {$data($robot,reload)} {
+            incr data($robot,reload) -1
+        }
         # check for barrel overheat, apply cooling
         check_barrel $robot
 
@@ -700,7 +716,9 @@ proc check_missiles {robot} {
 
             # assign damage to all within explosion ranges
             foreach target $activeRobots {
-                if {!$data($target,status)} {continue}
+                if {!$data($target,status)} {
+                    continue
+                }
                 assign_missile_damage $robot $target
             }
         }

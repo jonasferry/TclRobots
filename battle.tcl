@@ -68,7 +68,7 @@ proc init_battle {} {
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
-    button_state disabled "START" run_battle
+    button_state "game" "START" run_battle
 }
 #******
 
@@ -85,43 +85,22 @@ proc init_battle {} {
 # SOURCE
 #
 proc run_battle {} {
+    button_state "game" "Reset" reset_battle
+
     # Init robots on GUI
     gui_init_robots
 
-    set ::StatusBarMsg "Running"
-    button_state disabled "Halt" halt_battle
-
     set ::halted 0
+    button_state "running"
     run_game
 
     # find winnner
     if {$::halted} {
         set ::StatusBarMsg "Battle halted"
     } else {
+        button_state "reset"
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-    button_state disabled "Reset" reset_battle
-}
-#******
-
-#****P* run_battle/halt_battle
-#
-# NAME
-#
-#   halt_battle
-#
-# DESCRIPTION
-#
-#   Halt a running match.
-#
-# SOURCE
-#
-proc halt_battle {} {
-    set ::running 0
-    set ::StatusBarMsg "Stopping battle"
-    set ::halted 1
-
-    button_state disabled "Reset" reset_battle
 }
 #******
 
@@ -138,6 +117,9 @@ proc halt_battle {} {
 # SOURCE
 #
 proc reset_battle {} {
+    set ::running 0
+    set ::halted 1
+
     set ::StatusBarMsg "Cleaning up"
     update
 
@@ -154,7 +136,6 @@ proc reset_battle {} {
     destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
-    set ::StatusBarMsg "Select robot files for battle"
-    button_state normal "Run Battle" {init_mode battle}
+    button_state "file"
 }
 #******

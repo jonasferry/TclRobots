@@ -49,10 +49,11 @@ proc init_sim {} {
     # controls. Simulator controls are defined later.
     grid $::game_f -column 0 -row 2 -sticky nsew
     grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotMsg_lb    -column 1 -row 0            -sticky nsew
+    grid $::robotMsg_lb    -column 2 -row 0            -sticky nsew
     grid columnconfigure $::game_f 0 -weight 1
     grid rowconfigure    $::game_f 0 -weight 1
     grid columnconfigure $::game_f 1 -weight 1
+    grid columnconfigure $::game_f 2 -weight 1
 
     # show_arena is defined in gui.tcl
     show_arena
@@ -63,12 +64,8 @@ proc init_sim {} {
     # start robots
     set ::StatusBarMsg "Running Simulator"
     set ::halted  0
-    button_state disabled "Halt" halt_sim
 
-    # init
-    set ::finish ""
-    set ::robmsg_out ""
-    init_files
+    init_game base
 
     set ::allRobots {r0 target}
     set ::activeRobots $::allRobots
@@ -79,9 +76,7 @@ proc init_sim {} {
     set ::data(target,num)  12345
 
     # init_robots is defined in tclrobots.tcl
-    init_robots
-    init_interps
-
+    init_game match
     set ::tick 0
 
     # Set target signature, make it black and place it in center of the arena
@@ -97,7 +92,7 @@ proc init_sim {} {
 
     # start robots
     set ::StatusBarMsg "Press START to start simulation"
-    button_state disabled "START" run_sim
+    button_state "game" run_sim reset_sim
 }
 #******
 
@@ -117,52 +112,44 @@ proc create_simctrl {} {
     global sim_f
 
     set  sim_f  [ttk::frame $::game_f.sim]
-    grid $sim_f -column 1 -row 1 -sticky nsew
+    grid $sim_f -column 1 -row 0 -sticky nsew
 
     # Create and grid first row of simulation control box
-    set simctrl0_f [ttk::frame $::sim_f.f0 -relief raised -borderwidth 2]
-    set stepsys_cb [ttk::checkbutton $sim_f.f0.cb -text "Step syscalls" \
+    set stepsys_cb [ttk::checkbutton $sim_f.cb -text "Step syscalls" \
                         -variable ::step -command {set ::do_step 1}]
-    set step_b     [ttk::button $sim_f.f0.step -text "Single Step" \
+    set step_b     [ttk::button $sim_f.step -text "Single Step" \
                         -command {set ::do_step 1}]
-    set damage_b   [ttk::button $sim_f.f0.damage -text "5% Hit" \
+    set damage_b   [ttk::button $sim_f.damage -text "5% Hit" \
                         -command "incr ::data(r0,health) -5"]
-    set ping_b     [ttk::button $sim_f.f0.ping -text "Scan robot" \
+    set ping_b     [ttk::button $sim_f.ping -text "Scan robot" \
                         -command "set ::data(r0,ping) 1"]
+    set sep0_s     [ttk::separator $sim_f.sep0 -orient horizontal]
 
-    grid $simctrl0_f -column 0 -row 0 -sticky nsew
-    grid $stepsys_cb -column 0 -row 0 -sticky nsew
-    grid $step_b     -column 1 -row 0 -sticky nsew
-    grid $damage_b   -column 2 -row 0 -sticky nsew
-    grid $ping_b     -column 3 -row 0 -sticky nsew
-
-    # Create and grid second row of simulation control box
-    # This frame contains three rows of status data
-    # This is the first row of simulation status box
+    grid $stepsys_cb -column 0 -row 0 -sticky nsew -columnspan 2
+    grid $step_b     -column 2 -row 0 -sticky nsew -columnspan 2
+    grid $damage_b   -column 0 -row 1 -sticky nsew -columnspan 2
+    grid $ping_b     -column 2 -row 1 -sticky nsew -columnspan 2
+    grid $sep0_s     -column 0 -row 2 -sticky nsew -columnspan 4
 
     # Limit the width of the entry fields in the status box
     set e_width 4
+    set padding {0 0 4}
 
-    set simctrl1_f  [ttk::frame $sim_f.f1     -relief raised -borderwidth 2]
-    set xstat_l     [ttk::label $sim_f.f1.xl  -text "X"]
-    set xstat_e     [ttk::entry $sim_f.f1.xe  -width $e_width \
+    set xstat_l     [ttk::label $sim_f.xl -text "X" -anchor e \
+                         -padding $padding]
+    set xstat_e     [ttk::entry $sim_f.xe -width $e_width \
                          -textvariable ::data(r0,x)]
-    set ystat_l     [ttk::label $sim_f.f1.yl  -text "Y"]
-    set ystat_e     [ttk::entry $sim_f.f1.ye  -width $e_width \
+    set ystat_l     [ttk::label $sim_f.yl -text "Y" -anchor e \
+                         -padding {2 0}]
+    set ystat_e     [ttk::entry $sim_f.ye -width $e_width \
                      -textvariable ::data(r0,y)]
-    set heatstat_l  [ttk::label $sim_f.f1.htl -text "Heat"]
-    set heatstat_e  [ttk::entry $sim_f.f1.hte -width $e_width \
-                     -textvariable ::data(r0,heat)]
 
-    grid $simctrl1_f -column 0 -row 1 -sticky nsew
-    grid $xstat_l    -column 0 -row 0 -sticky nsew
-    grid $xstat_e    -column 1 -row 0 -sticky nw
-    grid $ystat_l    -column 2 -row 0 -sticky nsew
-    grid $ystat_e    -column 3 -row 0 -sticky nw
-    grid $heatstat_l -column 4 -row 0 -sticky nsew
-    grid $heatstat_e -column 5 -row 0 -sticky nw
+    grid $xstat_l    -column 0 -row 3 -sticky nsew
+    grid $xstat_e    -column 1 -row 3 -sticky nsew
+    grid $ystat_l    -column 2 -row 3 -sticky nsew
+    grid $ystat_e    -column 3 -row 3 -sticky nsew
 
-    # Create bindings for user to set X, Y and Heat values manually
+    # Create bindings for user to set X and Y values manually
     bind  $xstat_e <Return> {
         ver_range x 0 999
         set ::data(r0,orgx)  $::data(r0,x)
@@ -183,32 +170,23 @@ proc create_simctrl {} {
         set ::data(r0,orgy)  $::data(r0,y)
         set ::data(r0,range) 0
     }
-    bind  $heatstat_e <Return> {
-        ver_range heat 0 200
-    }
-    bind  $heatstat_e <Leave>  {
-        ver_range heat 0 200
-    }
 
     # Create and grid second row of simulation status box
-    set speedstat_l  [ttk::label $sim_f.f1.sl   -text "Speed"]
-    set speedstat_e  [ttk::entry $sim_f.f1.se   -width $e_width \
+    set speedstat_l  [ttk::label $sim_f.sl -text "Speed" -anchor e \
+                         -padding $padding]
+    set speedstat_e  [ttk::entry $sim_f.se -width $e_width \
                           -textvariable ::data(r0,speed)]
-    set hdgstat_l    [ttk::label $sim_f.f1.hdl  -text "Heading"]
-    set hdgstat_e    [ttk::entry $sim_f.f1.hde  -width $e_width \
+    set hdgstat_l    [ttk::label $sim_f.hdl -text "Heading" -anchor e \
+                         -padding $padding]
+    set hdgstat_e    [ttk::entry $sim_f.hde -width $e_width \
                           -textvariable ::data(r0,hdg)]
-    set healthstat_l [ttk::label $sim_f.f1.hthl -text "Health"]
-    set healthstat_e [ttk::entry $sim_f.f1.hthe -width $e_width \
-                          -textvariable ::data(r0,health)]
 
-    grid $speedstat_l  -column 0 -row 1 -sticky nsew
-    grid $speedstat_e  -column 1 -row 1 -sticky nw
-    grid $hdgstat_l    -column 2 -row 1 -sticky nsew
-    grid $hdgstat_e    -column 3 -row 1 -sticky nw
-    grid $healthstat_l -column 4 -row 1 -sticky nsew
-    grid $healthstat_e -column 5 -row 1 -sticky nw
+    grid $speedstat_l  -column 0 -row 4 -sticky nsew
+    grid $speedstat_e  -column 1 -row 4 -sticky nsew
+    grid $hdgstat_l    -column 2 -row 4 -sticky nsew
+    grid $hdgstat_e    -column 3 -row 4 -sticky nsew
 
-    # Create bindings for user to set X, Y and Heat values manually
+    # Create bindings for user to set X and Y values manually
     bind  $speedstat_e <Return> {
         ver_range speed 0 100
         set ::data(r0,dspeed) $::data(r0,speed)
@@ -227,6 +205,29 @@ proc create_simctrl {} {
         set ::data(r0,dhdg)  $::data(r0,hdg)
         set ::data(r0,range) 0
     }
+
+    # Create and grid third row of simulation status box
+    set heatstat_l  [ttk::label $sim_f.htl -text "Heat" -anchor e \
+                         -padding $padding]
+    set heatstat_e  [ttk::entry $sim_f.hte -width $e_width \
+                     -textvariable ::data(r0,heat)]
+    set healthstat_l [ttk::label $sim_f.hthl -text "Health" -anchor e \
+                         -padding $padding]
+    set healthstat_e [ttk::entry $sim_f.hthe -width $e_width \
+                          -textvariable ::data(r0,health)]
+
+    grid $heatstat_l   -column 0 -row 5 -sticky nsew
+    grid $heatstat_e   -column 1 -row 5 -sticky nsew
+    grid $healthstat_l -column 2 -row 5 -sticky nsew
+    grid $healthstat_e -column 3 -row 5 -sticky nsew
+
+    # Create bindings for user to set Heat and Health values manually
+    bind  $heatstat_e <Return> {
+        ver_range heat 0 200
+    }
+    bind  $heatstat_e <Leave>  {
+        ver_range heat 0 200
+    }
     bind  $healthstat_e <Return> {
         ver_range health 0 $::parms(health)
     }
@@ -234,57 +235,62 @@ proc create_simctrl {} {
         ver_range health 0 $::parms(health)
     }
 
-    # Create and grid third row of simulation status box
-    set lastsys0_l [ttk::label $sim_f.f1.s0 -text "Last syscall:"]
-    set lastsys1_l [ttk::label $sim_f.f1.s1 -width [* $e_width 3] \
-                        -textvariable ::sim_syscall -anchor w]
-    set tick0_l    [ttk::label $sim_f.f1.t0 -text "Tick:"]
-    set tick1_l    [ttk::label $sim_f.f1.t1 -width $e_width \
-                        -textvariable ::tick]
-    set barrel0_l  [ttk::label $sim_f.f1.b0 -text "Barrel:"]
-    set barrel1_l  [ttk::label $sim_f.f1.b1 -width $e_width \
-                        -textvariable ::data(r0,btemp)]
+    # Create and grid fourth row of simulation status box
+    set tick0_l    [ttk::label $sim_f.t0 -text "Tick" -anchor e \
+                         -padding $padding]
+    set tick1_l    [ttk::label $sim_f.t1 -width $e_width \
+                        -textvariable ::tick \
+                        -relief sunken -borderwidth 1]
+    set barrel0_l  [ttk::label $sim_f.b0 -text "Barrel" -anchor e \
+                         -padding $padding]
+    set barrel1_l  [ttk::label $sim_f.b1 -width $e_width \
+                        -textvariable ::data(r0,btemp) \
+                        -relief sunken -borderwidth 1]
 
-    grid $lastsys0_l -column 0 -row 2 -sticky nsew
-    grid $lastsys1_l -column 1 -row 2 -sticky nwe
-    grid $tick0_l    -column 2 -row 2 -sticky nsew
-    grid $tick1_l    -column 3 -row 2 -sticky nw
-    grid $barrel0_l  -column 4 -row 2 -sticky nsew
-    grid $barrel1_l  -column 5 -row 2 -sticky nw
+    grid $tick0_l    -column 0 -row 6 -sticky nsew
+    grid $tick1_l    -column 1 -row 6 -sticky nsew
+    grid $barrel0_l  -column 2 -row 6 -sticky nsew
+    grid $barrel1_l  -column 3 -row 6 -sticky nsew
+
+    # Create and grid fifth row of simulation status box
+    set lastsys0_l [ttk::label $sim_f.s0 -text "Syscall" -anchor e \
+                         -padding $padding]
+    set lastsys1_l [ttk::label $sim_f.s1 -width [* $e_width 3] \
+                        -textvariable ::sim_syscall -anchor w \
+                        -relief sunken -borderwidth 1]
+    set sep1_s     [ttk::separator $sim_f.sep1 -orient horizontal]
+
+    grid $lastsys0_l -column 0 -row 7 -sticky nsew
+    grid $lastsys1_l -column 1 -row 7 -sticky nsew -columnspan 3
+    grid $sep1_s     -column 0 -row 8 -sticky nsew -columnspan 4
 
     # Create and grid third row of simulation control box
     set ::status_var {}
     set ::status_val {}
 
-    set simctrl2_f [ttk::frame $sim_f.f2     -relief raised -borderwidth 2]
-    set var_l      [ttk::label $sim_f.f2.vrl -text "Variable:"]
-    set var_e      [ttk::entry $sim_f.f2.vre \
+    set var_l      [ttk::label $sim_f.vrl -text "Variable"]
+    set var_e      [ttk::entry $sim_f.vre -width $e_width \
                         -textvariable ::status_var]
-    set val_l      [ttk::label $sim_f.f2.vll -text "Value:"]
-    set val_e      [ttk::entry $sim_f.f2.vle -width $e_width \
+    set val_l      [ttk::label $sim_f.vll -text "Value"]
+    set val_e      [ttk::entry $sim_f.vle -width $e_width \
                         -textvariable ::status_val]
-    set examine_b  [ttk::button $sim_f.f2.xb -text "Examine" -command examine]
-    set set_b      [ttk::button $sim_f.f2.sb -text "Set" -command setval]
+    set examine_b  [ttk::button $sim_f.xb -text "Examine" -command examine]
+    set set_b      [ttk::button $sim_f.sb -text "Set" -command setval]
 
-    grid $simctrl2_f -column 0 -row 2 -sticky nsew
-    grid $var_l      -column 0 -row 0 -sticky nsew
-    grid $var_e      -column 1 -row 0 -sticky nsew
-    grid $val_l      -column 2 -row 0 -sticky nsew
-    grid $val_e      -column 3 -row 0 -sticky nsew
-    grid $examine_b  -column 4 -row 0 -sticky nsew
-    grid $set_b      -column 5 -row 0 -sticky nsew
+    grid $var_l      -column 0 -row 9  -sticky nsew
+    grid $var_e      -column 1 -row 9  -sticky nsew -columnspan 2
+    grid $examine_b  -column 3 -row 9  -sticky nsew
+    grid $val_l      -column 0 -row 10 -sticky nsew
+    grid $val_e      -column 1 -row 10 -sticky nsew -columnspan 2
+    grid $set_b      -column 3 -row 10 -sticky nsew
 
     bind $var_e <Key-Return> "$examine_b invoke"
     bind $val_e <Key-Return> "$set_b     invoke"
 
     # Make the simulation control box resizable
-    foreach w [winfo children $sim_f] {
-        grid columnconfigure $w 0 -weight 1
-        for {set i 0} {$i < 6} {incr i} {
-            grid columnconfigure $w $i -weight 1
-        }
+    for {set i 0} {$i < 3} {incr i} {
+        grid columnconfigure $sim_f $i -weight 1
     }
-    grid columnconfigure $sim_f 0 -weight 1
 }
 #******
 
@@ -361,8 +367,7 @@ proc setval {} {
 # SOURCE
 #
 proc run_sim {} {
-    set ::StatusBarMsg "Running"
-    button_state disabled "Halt" halt_sim
+    button_state "running"
 
     # Start simulation
     set ::running 1
@@ -376,27 +381,6 @@ proc run_sim {} {
 
     # Procedure run_robots is found in tclrobots.tcl
     coroutine run_robotsCo run_robots
-}
-#******
-
-#****P* run_sim/halt_sim
-#
-# NAME
-#
-#   halt_sim
-#
-# DESCRIPTION
-#
-#   Halt a running simulation.
-#
-# SOURCE
-#
-proc halt_sim {} {
-    set ::running 0
-    set ::StatusBarMsg "Stopping simulation"
-    set ::halted 1
-
-    button_state disabled "Reset" reset_sim
 }
 #******
 
@@ -414,10 +398,10 @@ proc halt_sim {} {
 #
 proc reset_sim {} {
     set ::StatusBarMsg "Cleaning up"
-    update
 
     set ::running 0
     set ::halted 1
+    update
     destroy $::sim_f
 
     foreach robot $::activeRobots {
@@ -433,7 +417,6 @@ proc reset_sim {} {
     destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
-    set ::StatusBarMsg "Select robot files for battle"
-    button_state normal "Run Battle" {init_mode battle}
+    button_state "file"
 }
 #******

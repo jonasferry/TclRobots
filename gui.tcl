@@ -159,10 +159,13 @@ proc init_gui {} {
     grid $remove_b       -column 0 -row 0 -sticky nsew
     grid $removeall_b    -column 1 -row 0 -sticky nsew
 
-    grid rowconfigure $::sel_f       0 -weight 1
-    grid columnconfigure $::sel_f    0 -weight 1
-    grid rowconfigure $sel1_f        1 -weight 1
-    grid rowconfigure $robotlist_f all -weight 1
+    grid rowconfigure $::sel_f        0 -weight 1
+    grid columnconfigure $::sel_f     0 -weight 1
+    grid columnconfigure $::sel_f     1 -weight 1
+    grid columnconfigure $sel1_f      0 -weight 1
+    grid columnconfigure $robotlist_f 0 -weight 1
+    grid rowconfigure $sel1_f         1 -weight 1
+    grid rowconfigure $robotlist_f  all -weight 1
 
     # Create widgets common to battle, simulator and tournament
     create_common_widgets
@@ -273,25 +276,21 @@ proc create_common_widgets {} {
 
     # Create button frame and buttons
     set ::buttons_f [ttk::frame .f1]
-    set ::run_b     [ttk::button .f1.b0 -text "Run Battle" \
-                         -command {init_mode battle}]
-    # init_sim is defined in simulator.tcl
-    set ::sim_b     [ttk::button .f1.b1 -text "Simulator" \
-                         -command {init_mode simulator}]
-    set ::tourn_b   [ttk::button .f1.b2 -text "Tournament" \
-                         -command {init_mode tournament}]
-    set ::help_b    [ttk::button .f1.b3 -text "Help" \
-                         -command {init_mode help}]
-    set ::quit_b    [ttk::button .f1.b4 -text "Quit" \
-                         -command {destroy .; exit}]
+    set ::b0_b      [ttk::button .f1.b0]
+    set ::b1_b      [ttk::button .f1.b1]
+    set ::b2_b      [ttk::button .f1.b2]
+    set ::b3_b      [ttk::button .f1.b3]
+    set ::b4_b      [ttk::button .f1.b4]
+
+    button_state "file"
 
     # Grid button frame and buttons
     grid $::buttons_f -column 0 -row 0 -sticky nsew
-    grid $::run_b     -column 0 -row 0 -sticky nsew
-    grid $::sim_b     -column 1 -row 0 -sticky nsew
-    grid $::tourn_b   -column 2 -row 0 -sticky nsew
-    grid $::help_b    -column 3 -row 0 -sticky nsew
-    grid $::quit_b    -column 4 -row 0 -sticky nsew
+    grid $::b0_b      -column 0 -row 0 -sticky nsew
+    grid $::b1_b      -column 1 -row 0 -sticky nsew
+    grid $::b2_b      -column 2 -row 0 -sticky nsew
+    grid $::b3_b      -column 3 -row 0 -sticky nsew
+    grid $::b4_b      -column 4 -row 0 -sticky nsew
 
     grid columnconfigure $::buttons_f all -weight 1
 
@@ -767,33 +766,56 @@ proc show_arena {} {
 #
 #   button_state
 #
-#
 # SYNOPSIS
 #
-#   button_state button_text cmd state
+#   button_state button_txt cmd state
 #
 # DESCRIPTION
 #
-#   Changes the row of control buttons to normal/disabled.
-#
-#   Sets different texts and commands for the run button. If no text is
-#   specified for the run button it is disabled with the old text
-#   remaining.
+#   Changes the row of control buttons.
 #
 # SOURCE
 #
-proc button_state {state {button_text {}} {cmd {}}} {
-    # Set cmd
-    if {$button_text ne {}} {
-        $::run_b configure -state normal -text $button_text -command $cmd
+proc button_state {state {run_cmd {}} {reset_cmd {}}} {
+    if {$state eq "file"} {
+        set ::StatusBarMsg "Select robot files for battle"
+
+        $::b0_b configure -state normal -text "Run Battle" \
+            -command {init_mode battle}
+        $::b1_b configure -state normal -text "Simulator" \
+           -command {init_mode simulator}
+        $::b2_b configure -state normal -text "Tournament" \
+            -command {init_mode tournament}
+        $::b3_b configure -state normal -text "Help" \
+            -command {init_mode help}
+        $::b4_b configure -state normal -text "Quit" \
+            -command {destroy .; exit}
+    } elseif {$state eq "game"} {
+        $::b0_b configure -state disabled -text {}
+        $::b1_b configure -state disabled -text {}
+        $::b2_b configure -state normal -text "START" \
+            -command $run_cmd
+        $::b3_b configure -state normal -text "Reset" \
+            -command $reset_cmd
+        $::b4_b configure -state normal -text "Quit" \
+            -command {destroy .; exit}
+    } elseif {$state eq "running"} {
+        $::b2_b configure -state normal -text "Pause" \
+            -command {button_state paused}
+        set ::paused 0
+        set ::StatusBarMsg "Running"
+    } elseif {$state eq "paused"} {
+        $::b2_b configure -state normal -text "START" \
+            -command {button_state running}
+        set ::paused 1
+        set ::StatusBarMsg "Paused"
+    } elseif {$state eq "reset"} {
+        $::b2_b configure -state disabled -text {}
     } else {
-        $::run_b configure -state $state -command $cmd
+        # Error
+        puts "Illegal button state"
+        exit
     }
-    # Set state
-    $::sim_b   configure -state $state
-    $::tourn_b configure -state $state
-    $::help_b  configure -state $state
-    $::quit_b  configure -state $state
 }
 #******
 
