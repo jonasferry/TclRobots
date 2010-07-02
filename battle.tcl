@@ -68,7 +68,7 @@ proc init_battle {} {
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
-    button_state "game" "START" run_battle
+    button_state "game" run_battle reset_battle
 }
 #******
 

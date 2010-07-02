@@ -584,7 +584,7 @@ proc run_robots {} {
             }
             yield
         } else {
-            # Game is paused
+            # Game is paused, but GUI needs to respond
             update
         }
     }
