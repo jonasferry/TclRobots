@@ -1,10 +1,12 @@
 SRC = battle.tcl gui.tcl help.tcl simulator.tcl tclrobots.tcl tournament.tcl
 
-all: doc
+all: doc test
 
 doc:
 	doc/script/generate-doc
 
+test:
+	test/all.tcl
 
 header.syntax: $(SRC) helper.syntax
 	nagelfar -header header.syntax helper.syntax $(SRC)
@@ -12,4 +14,4 @@ header.syntax: $(SRC) helper.syntax
 check: header.syntax
 	nagelfar header.syntax $(SRC)
 
-.PHONY: all doc check
+.PHONY: all doc test check

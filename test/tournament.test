@@ -3,15 +3,9 @@ namespace import ::tcltest::*
 namespace import ::tcl::mathop::*
 namespace import ::tcltest::*
 
-try {
-    source tournament.tcl
-} on error {} {
-    try {
-        source ../tournament.tcl
-    } on error {} {
-        puts "### Error: Could not source tournament.tcl; check directory"
-        exit
-    }
+if {[catch {source tournament.tcl}]} {
+    puts "### Error: Could not source tournament.tcl; run in main directory"
+    exit
 }
 
 test sort_score {Test sort_score} {
