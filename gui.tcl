@@ -35,19 +35,28 @@
 proc init_gui {} {
     package require Tk
     # Try to get tkpath
+#    if {[catch {package require tkpath}]} {
+#        # Try to get tkpath from a local lib
+#        set libpath [file join $::thisDir lib/tkpath]
+#        if {[file isdirectory $libpath]} {
+#            lappend ::auto_path $libpath
+#        }
+#	lappend ::auto_path $libpath
+#    }
+    set libpath [file join $::thisDir lib/tkpath]
+    lappend ::auto_path $libpath
+    
     if {[catch {package require tkpath}]} {
-        # Try to get tkpath from a local lib
-        set libpath [file join $::thisDir lib/tkpath]
-        if {[file isdirectory $libpath]} {
-            lappend ::auto_path $libpath
-        }
-    }
-    if {[catch {package require tkpath}]} {
-        # Try to get tkpath from a local dylib
-        if {[file exists libtkpath0.3.1.dylib]} {
-            catch {
-                # Try for a local copy
-                load ./libtkpath0.3.1.dylib
+	# Check current operating system
+	if {$::tcl_platform(platform) eq "windows"} {
+	    catch {
+		load $libpath/tkpath031.dll
+		source tkpath.tcl
+		package require tkpath
+	    }
+	} elseif {$::tcl_platform(os) eq "Darwin"} {
+	    catch {
+                load $libpath/libtkpath0.3.1.dylib
                 source tkpath.tcl
                 package require tkpath
             }

@@ -1,55 +1,57 @@
+# TclRobots - Sample robot control program
+# Jonas Ferry 2010, Tom Poindexter 1996
 #
-# TclRobots - sample robot control program
-# Tom Poindexter
-#
-# charger.tr
-#  -based on clockwise.tr
-#  -scan in wide resolution until something is found
-#  -charge the opponent
-#  -use narrow to pinpoint target & fire, countinuing while found
-#  -ignore damage
+# Charger scans first in wide then in narrow resolution until a target
+# is found. It charges the target while firing the cannon. When Charger
+# has not seen a target for a while it starts the wide scanner
+# again. Charger ignores damage and does not avoid walls.
 
+# 'dir' is scanner direction
+# 'nothing' is a timer to restart wide scanner when nothing is found
+# 'closest' is direction to closest cannon out-of-range target
 set dir [rand 360]
 set nothing 0
 set closest 0
 
-# start of main code
-
 while {1} {
-
-    # look for an opponet
+    # Start of main code:
+    # - Wide scan looking for an opponent
     set rng [scanner $dir 10]
 
-    # if found and inrange
     if {$rng > 0 && $rng < 700} {
-
-        # begin narrow scan
-        set start [expr ($dir+20)%360]
+        # Target is found found and in range:
+        # - Begin narrow scan
+        set start [expr ($dir + 20) % 360]
         for {set limit 1} {$limit <= 40} {incr limit} {
-            set dir [expr ($start-($limit)+360)%360]
+            set dir [expr ($start - ($limit) + 360) % 360]
             set rng [scanner $dir 1]
             if {$rng > 0 && $rng < 700} {
-                # fire a shell, and backup scan so not to miss a moving target
+                # Target is found found and in range:
+                # - Reset scanner timer
+                # - Fire cannon
+                # - Charge!
+                # - Back up scanner to not miss a moving target
                 set nothing 0
-                # charge!
                 cannon $dir $rng
                 drive $dir 70
                 incr limit -4
             }
         }
     } else {
+        # No target found or out of range:
+        # - Increase scanner timer
+        # - If out-of-range target is found, make note of direction
         incr nothing
-        if {$rng > 700} {set closest $dir}
+        if {$rng > 700} {
+            set closest $dir
+        }
     }
-
     drive 0 0
-    # check for nothing found in reasonable time
+
+    # Check for nothing found in reasonable time
     if {$nothing >= 30} {
         set nothing 0
         drive $closest 100
-        # NOT SUPPORTED in coroutine based TclRobots
-        #after 10000 drive 0 0
     }
-
-    set dir [expr ($dir-20+360)%360]
+    set dir [expr ($dir - 20 + 360) % 360]
 }

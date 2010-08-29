@@ -279,8 +279,7 @@ proc init_trig_tables {} {
 proc init_rand {} {
     # Set random seed.
     if {![info exists ::seed_arg]} {
-        # file atime does not work in Windows systems
-        set ::seed [* [pid] [file atime /dev/tty]]
+	set ::seed [int [* [rand] [clock clicks]]]
     } else {
         set ::seed $::seed_arg
     }
@@ -1545,7 +1544,6 @@ proc sysDrive {robot} {
     } else {
         set data($robot,dir) -
     }
-
     set data($robot,sysreturn,$tick) $data($robot,dspeed)
 }
 #******
