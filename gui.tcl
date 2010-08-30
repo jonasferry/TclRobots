@@ -427,7 +427,7 @@ proc fileOK {win execproc} {
     # catch {  selInsert $win [lindex [selection get] 0] }
     catch {  selInsert $win [$win.l.lst get [$win.l.lst curselection]] }
 
-    set f [lindex [$win.sel get] 0]
+    set f [$win.sel get]
     if {[file isdirectory $f]} {
         #set f [file dirname $f]
         #set f [file dirname $f]
