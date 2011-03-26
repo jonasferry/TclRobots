@@ -45,7 +45,7 @@ proc init_gui {} {
 #    }
     set libpath [file join $::thisDir lib/tkpath]
     lappend ::auto_path $libpath
-    
+
     if {[catch {package require tkpath}]} {
 	# Check current operating system
 	if {$::tcl_platform(platform) eq "windows"} {
@@ -786,6 +786,11 @@ proc show_arena {} {
 # SOURCE
 #
 proc button_state {state {run_cmd {}} {reset_cmd {}}} {
+    global game
+
+    debug "$game(state)"
+    debug $state
+
     if {$state eq "file"} {
         set ::StatusBarMsg "Select robot files for battle"
 
@@ -811,15 +816,13 @@ proc button_state {state {run_cmd {}} {reset_cmd {}}} {
     } elseif {$state eq "running"} {
         $::b2_b configure -state normal -text "Pause" \
             -command {button_state paused}
-        set ::paused 0
+        set game(state) "run"
         set ::StatusBarMsg "Running"
     } elseif {$state eq "paused"} {
         $::b2_b configure -state normal -text "START" \
             -command {button_state running}
-        set ::paused 1
+        set game(state) "pause"
         set ::StatusBarMsg "Paused"
-    } elseif {$state eq "reset"} {
-        $::b2_b configure -state disabled -text {}
     } else {
         # Error
         puts "Illegal button state"

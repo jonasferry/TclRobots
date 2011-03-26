@@ -37,7 +37,6 @@ proc init_sim {} {
     # Read from robot file names; only the first file is used
     set ::robotFiles [lrange $::robotList 0 0]
 
-    set halted  0
     set ticks   0
     set ::StatusBarMsg "Simulator"
 
@@ -63,7 +62,6 @@ proc init_sim {} {
 
     # start robots
     set ::StatusBarMsg "Running Simulator"
-    set ::halted  0
 
     init_game base
 
@@ -367,10 +365,12 @@ proc setval {} {
 # SOURCE
 #
 proc run_sim {} {
+    global game
+
     button_state "running"
 
     # Start simulation
-    set ::running 1
+    set game(state) "run"
 
     # gui_init_robots is defined in gui.tcl. Make target black.
     gui_init_robots 1
@@ -397,10 +397,11 @@ proc run_sim {} {
 # SOURCE
 #
 proc reset_sim {} {
+    global game
+
     set ::StatusBarMsg "Cleaning up"
 
-    set ::running 0
-    set ::halted 1
+    set game(state) "halt"
     update
     destroy $::sim_f
 

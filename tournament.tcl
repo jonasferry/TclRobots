@@ -43,7 +43,7 @@
 #
 proc init_tourn {} {
     global allRobots allRobots_tourn activeRobots activeRobots_tourn data \
-        data_tourn score
+        data_tourn game score
 
     # Clear any old data
     array unset data
@@ -80,10 +80,7 @@ proc init_tourn {} {
     }
 
     if {$::gui} {
-        set ::running 0
-        set ::stopped 0
-        set ::halted  0
-        set ::paused  0
+        set game(state) "halt"
 
         set ::matchnum 0
         set ::tournRanking $allRobots_tourn
@@ -348,11 +345,10 @@ proc show_matches {} {
 # SOURCE
 #
 proc run_tourn {} {
-    global allRobots allRobots_tourn activeRobots activeRobots_tourn \
-        data data_tourn running matchlist score matchlog
+    global activeRobots activeRobots_tourn allRobots allRobots_tourn \
+        data data_tourn game matchlist matchlog score
 
     if {$::gui} {
-        set ::halted 0
         button_state "running"
     }
     set matchlog ""
@@ -390,18 +386,18 @@ proc run_tourn {} {
                     [lsearch -exact $allRobots_tourn $robot]
             }
         }
-        set running 1
-        set ::stopped 0
-        set ::halted 0
-        coroutine run_robotsCo run_robots
-        vwait ::stopped
+	set game(state) "run"
 
-        if {$::halted} {
-            # Do not score tournament if it was halted
-            break
-        } else {
+        coroutine run_robotsCo run_robots
+
+	while {$game(state) eq "run" || $game(state) eq "pause"} {
+	    vwait game(state)
+	}
+        if {$game(state) ne "halt"} {
+	    debug "hello"
             # Set match score for tournament mode
-            set match_msg ""
+            # Do not score tournament if it was halted
+	    set match_msg ""
             # Fix padding
             for {set i [string length $data($robot,name)]} \
                 {$i <= $::long_name} {incr i} {
@@ -432,16 +428,16 @@ proc run_tourn {} {
             }
             puts $match_msg
             append matchlog "$match_msg\n"
+	    }
 
-            # Disable robots and clear messages
-            foreach robot $activeRobots {
-                disable_robot $robot
-                set ::robotMsg {}
-            }
-        }
-    }
-    button_state "reset"
-    report_score
+	# Disable robots and clear messages
+	foreach robot $activeRobots {
+	    disable_robot $robot
+	    set ::robotMsg {}
+	}
+	button_state "file"
+	report_score
+	}
 }
 #******
 
@@ -458,11 +454,12 @@ proc run_tourn {} {
 # SOURCE
 #
 proc reset_tourn {} {
+    global game
+
     set ::StatusBarMsg "Cleaning up"
     update
 
-    set ::running 0
-    set ::halted 1
+    set game(state) "halt"
     destroy $::tourn_f
 
     foreach robot $::activeRobots {
@@ -525,7 +522,7 @@ proc sort_score {} {
 # SOURCE
 #
 proc report_score {} {
-    global tournScore matchlog outfile
+    global game matchlog tournScore
 
     set ::win_msg "TOURNAMENT SCORES:\n\n"
     foreach robotscore $tournScore {
@@ -533,7 +530,7 @@ proc report_score {} {
     }
     # show results
     if {$::gui} {
-        if {$::halted} {
+        if {$game(state) eq "halt"} {
             set ::StatusBarMsg "Battle halted"
         } else {
             tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
@@ -546,9 +543,9 @@ proc report_score {} {
     append outmsg "MATCHES:\n$matchlog\n"
     append outmsg "$::win_msg"
 
-    if {$outfile ne ""} {
-        debug "$outfile :::: $outmsg"
-        catch {write_file $outfile $outmsg}
+    if {$game(outfile) ne ""} {
+        debug "$game(outfile) :::: $outmsg"
+        catch {write_file $game(outfile) $outmsg}
     }
 }
 #******

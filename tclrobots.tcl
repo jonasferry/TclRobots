@@ -21,6 +21,20 @@
 #
 #******
 
+#******
+# CODING STANDARD
+#
+# In no particular order:
+#
+#  * Minimize the number of global variables. The default global
+#    variables are argv, data, game and parms.
+#
+#  * The global keyword is preferred over the :: notation. List global
+#    variables in alphabetical order. See proc main for an example.
+#
+#
+#******
+
 #****P* tclrobots/main
 #
 # NAME
@@ -34,41 +48,38 @@
 # SOURCE
 #
 proc main {} {
+    global argv game
+
     namespace import ::tcl::mathop::*
     namespace import ::tcl::mathfunc::*
 
     set ::thisScript [file join [pwd] [info script]]
     set ::thisDir [file dirname $::thisScript]
 
-    set ::gui         0
-    set ::debug       0
-    set ::max_ticks   6000
-    set ::robotFiles  {}
-    set ::tourn_type  0
-    set ::outfile     ""
-    set ::silent      0
-    set ::verbose     0
-    set ::game_mode   ""
+    set ::gui           0
+    set ::debug         0
+    set ::max_ticks     6000
+    set ::robotFiles    {}
+    set ::tourn_type    0
+    set game(outfile)   ""
+    set game(loglevel)  1
+    set ::game_mode     ""
+    set game(state)     ""
+    set game(numbattle) 1
 
-    set state none
-    foreach arg $::argv {
-        if {$state eq "seed"} {
-            set ::seed_arg $arg
-            set state none
-            continue
-        } elseif {$state eq "outfile"} {
-            set ::outfile $arg
-            set state none
-            continue
-        }
+    set len [llength $argv]
+    for {set i 0} {$i < $len} {incr i} {
+	set arg [lindex $argv $i]
+
         switch -glob -- $arg  {
-            -o       {set state outfile}
-            -silent  {set ::silent 1; set ::verbose 0}
-            -verbose {set ::verbose 1; set ::silent 0}
+            -o       {incr i; set game(outfile) $arg}
+            -silent  {set game(loglevel) 0}
+            -verbose {set game(loglevel) 1}
             -msg     {set ::msgoff 1}
             -t*      {set ::tourn_type 1}
+	    -n       {incr i; set game(numbattle) [lindex $argv $i]}
             -gui     {set ::gui 1}
-            -seed    {set state seed}
+            -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
             -debug   {set ::debug 1}
             default {
                 if {[file isfile [pwd]/$arg]} {
@@ -82,19 +93,36 @@ proc main {} {
     if {[llength $::robotFiles] >= 2 && !$::gui} {
         if {$::tourn_type == 0} {
             # Run single battle in terminal
-            puts "\nSingle battle started\n"
-            set running_time [/ [lindex [time {init_game;run_game}] 0] \
-                                  1000000.0]
-            puts "seed: $::seed"
-            puts "time: $running_time seconds\n"
-            puts "Single battle finished\n"
+	    if {$game(numbattle) == 1} {
+		puts "\nSingle battle started\n"
+	    } else {
+		puts "\nSingle battles started\n"
+	    }
+            set running_time [/ [lindex [time {
+		while {$game(numbattle) > 0} {
+		    init_game
+		    debug run
+		    run_game
+		    debug done
+		    set game(state) ""
+		    debug $game(numbattle)
+		    incr game(numbattle) -1
+		}
+	    }] 0] 1000000.0]
+            puts "seed: $game(seed)"
+            puts "time: $running_time seconds"
+	    if {$game(numbattle) == 1} {
+		puts "\nSingle battle finished\n"
+	    } else {
+		puts "\nSingle battles finished\n"
+	    }
         } else {
             # Run tournament in terminal
             puts "\nTournament started\n"
             source $::thisDir/tournament.tcl
             set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
                                   1000000.0]
-            puts "seed: $::seed"
+            puts "seed: $game(seed)"
             puts "time: $running_time seconds\n"
             puts "Tournament finished\n"
         }
@@ -120,21 +148,23 @@ proc main {} {
 # SOURCE
 #
 proc init_game {{mode all}} {
+    global game
+
     if {$mode ne "match"} {
-        global finish robmsg_out tick
-
-        set finish ""
-        set robmsg_out ""
-        set tick 0
-
-        init_parms
-        init_trig_tables
-        init_rand
-        init_files
+	global finish robmsg_out tick
+	
+	set finish ""
+	set robmsg_out ""
+	set tick 0
+	
+	init_parms
+	init_trig_tables
+	init_rand
+	init_files
     }
     if {$mode ne "base"} {
-        init_robots
-        init_interps
+	init_robots
+	init_interps
     }
 }
 #******
@@ -277,14 +307,15 @@ proc init_trig_tables {} {
 # SOURCE
 #
 proc init_rand {} {
+    global game
+
     # Set random seed.
-    if {![info exists ::seed_arg]} {
-	set ::seed [int [* [rand] [clock clicks]]]
+    if {![info exists game(seed_arg)]} {
+	set game(seed) [int [* [rand] [clock clicks]]]
     } else {
-        set ::seed $::seed_arg
+        set game(seed) $game(seed_arg)
     }
-    debug "seed: $::seed"
-    srand $::seed
+    srand $game(seed)
 }
 #******
 
@@ -304,6 +335,7 @@ proc init_files {} {
     global data allRobots activeRobots robotFiles
 
     set allRobots {}
+    array unset data
 
     # Pick a random element from a list; use this for reading code!
     # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
@@ -323,16 +355,20 @@ proc init_files {} {
     set allSigs {}
     set file_index 0
 
+    debug $allRobots
+
     foreach robot $allRobots {
         set name [file tail [lindex $::robotFiles $file_index]]
 
         # Search for duplicate robot names
         foreach used_name [array names data *,name] {
             if {$name eq $data($used_name)} {
+		debug "name $name used_name $used_name file $file_index"
                 set name "$data($used_name)([+ $file_index 1])"
             }
         }
         incr file_index
+	debug "name $name"
 
         # generate a new unique signature
         set newsig [mrand 65535]
@@ -495,14 +531,19 @@ proc init_interps {} {
 # SOURCE
 #
 proc run_game {} {
-    set ::running 1
-    set ::paused  0
+    global game
 
+    set game(state) "run"
     coroutine run_robotsCo run_robots
-    vwait ::running
-
-    debug "activerobots: $::activeRobots"
-    find_winner
+    while {$game(state) eq "run" ||
+	   $game(state) eq "pause"} {
+	vwait game(state)
+    }
+    debug $game(state)
+    if {$game(state) ne "halt"} {
+	debug "activerobots: $::activeRobots"
+	find_winner
+    }
 }
 #******
 
@@ -519,10 +560,10 @@ proc run_game {} {
 # SOURCE
 #
 proc run_robots {} {
-    global data activeRobots tick running gui parms
+    global activeRobots data game gui parms tick
 
-    while {$running == 1} {
-        if {!$::paused} {
+    while {$game(state) eq "run" || $game(state) eq "pause"} {
+        if {$game(state) ne "pause"} {
             if {$::game_mode eq "simulator"} {
                 # Reset health of target
                 set data(target,health) [* $parms(health) 10]
@@ -587,7 +628,7 @@ proc run_robots {} {
             update
         }
     }
-    set ::stopped 1
+    #set game(state) "halt"
     debug "destroying coroutine [info coroutine]"
     rename [info coroutine] ""
     yield
@@ -644,7 +685,7 @@ proc act {} {
 # SOURCE
 #
 proc update_robots {} {
-    global allRobots data
+    global allRobots data game
 
     foreach robot $allRobots {
         # check all flying missiles
@@ -685,7 +726,7 @@ proc update_robots {} {
 
     if {($num_rob<=1 || $num_team==1) && $num_miss==0} {
         # Stop game
-        set ::running 0
+        set game(state) "end"
     }
 }
 #******
@@ -1122,10 +1163,12 @@ proc disable_robot {robot} {
 # SOURCE
 #
 proc tick {} {
+    global game
+
     if {$::tick < $::max_ticks} {
         incr ::tick
     } else {
-        set ::running 0
+        set game(state) "end"
     }
 }
 #******
@@ -1143,7 +1186,7 @@ proc tick {} {
 # SOURCE
 #
 proc find_winner {} {
-    global data activeRobots winner outfile robmsg_out
+    global game data activeRobots winner robmsg_out
 
     set winner ""
     set num_team 0
@@ -1217,8 +1260,8 @@ proc find_winner {} {
     append outmsg "SCORE:\n$score\n\n"
     append outmsg "MESSAGES:\n$robmsg_out"
 
-    if {$outfile ne ""} {
-        catch {write_file $outfile $outmsg}
+    if {$game(outfile) ne ""} {
+        catch {write_file $game(outfile) $outmsg}
     }
 }
 #******
@@ -1676,7 +1719,7 @@ proc sysTeamGet {robot} {
 # SOURCE
 #
 proc sysDputs {robot msg} {
-    global gui data outfile robmsg_out
+    global game gui data robmsg_out
 
     set msg [join $msg]
 
@@ -1689,7 +1732,7 @@ proc sysDputs {robot msg} {
         # Output to terminal
         puts "$data($robot,name): $msg"
     }
-    if {$outfile ne ""} {
+    if {$game(outfile) ne ""} {
         append robmsg_out "$data($robot,name): $msg\n"
     }
 }
@@ -1747,10 +1790,10 @@ proc debug {args} {
         } elseif {[lindex $args 0] eq "exit"} {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
-            puts "[join [lrange $args 1 end]] (dbg: $caller)"
+            puts "- [join [lrange $args 1 end]] (dbg: $caller)\n"
             exit
         } else {
-            puts "[join $args] (dbg: $caller)"
+            puts "- [join $args] (dbg: $caller)\n"
         }
     }
 }

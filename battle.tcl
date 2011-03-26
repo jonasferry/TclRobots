@@ -85,20 +85,22 @@ proc init_battle {} {
 # SOURCE
 #
 proc run_battle {} {
+    global game
+
     button_state "game" "Reset" reset_battle
 
     # Init robots on GUI
     gui_init_robots
 
-    set ::halted 0
     button_state "running"
     run_game
 
+    puts "state: $game(state)"
+
     # find winnner
-    if {$::halted} {
+    if {$game(state) eq "halt"} {
         set ::StatusBarMsg "Battle halted"
     } else {
-        button_state "reset"
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
 }
@@ -117,8 +119,9 @@ proc run_battle {} {
 # SOURCE
 #
 proc reset_battle {} {
-    set ::running 0
-    set ::halted 1
+    global game
+
+    set game(state) "halt"
 
     set ::StatusBarMsg "Cleaning up"
     update
