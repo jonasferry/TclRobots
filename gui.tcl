@@ -60,6 +60,13 @@ proc init_gui {} {
                 source tkpath.tcl
                 package require tkpath
             }
+        } else {
+            # Try 64bit linux version
+	    catch {
+                load $libpath/libtkpath0.3.1.64.so
+                source tkpath.tcl
+                package require tkpath
+            }
         }
     }
     gui_settings
