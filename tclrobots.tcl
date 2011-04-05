@@ -66,6 +66,7 @@ proc main {} {
     set ::game_mode     ""
     set game(state)     ""
     set game(numbattle) 1
+    set game(winner)    {}
 
     set len [llength $argv]
     for {set i 0} {$i < $len} {incr i} {
@@ -115,6 +116,18 @@ proc main {} {
 		puts "\nSingle battle finished\n"
 	    } else {
 		puts "\nSingle battles finished\n"
+		foreach robot $::allRobots {
+		    set count 0
+		    foreach winner $game(winner) {
+			if {$::data($robot,name) eq $winner} {
+			    incr count
+			}
+		    }
+		    lappend winnerList "$count $::data($robot,name)"
+		}
+		foreach item [lsort -index 0 -decreasing $winnerList] {
+		    puts $item
+		}
 	    }
         } else {
             # Run tournament in terminal
@@ -1194,6 +1207,7 @@ proc find_winner {} {
     set win_color black
     foreach robot $activeRobots {
         lappend winner $data($robot,name)
+	lappend game(winner) $data($robot,name)
 
         if {$data($robot,team) != ""} {
             if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
