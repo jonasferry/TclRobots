@@ -33,6 +33,8 @@
 # SOURCE
 #
 proc init_gui {} {
+    global version
+
     package require Tk
     # Try to get tkpath
 #    if {[catch {package require tkpath}]} {
@@ -111,7 +113,7 @@ proc init_gui {} {
             lappend ::parms(paths) $path
         }
     }
-    wm title . "TclRobots"
+    wm title . "TclRobots $version"
     wm iconname . TclRobots
     wm protocol . WM_DELETE_WINDOW "catch {.f1.b4 invoke}"
 

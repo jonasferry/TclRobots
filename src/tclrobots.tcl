@@ -48,7 +48,10 @@
 # SOURCE
 #
 proc main {} {
-    global argv game
+    global argv game version
+
+    # Provide package name for starpack build, see Makefile
+    package provide app-tclrobots 1.0
 
     namespace import ::tcl::mathop::*
     namespace import ::tcl::mathfunc::*
@@ -56,6 +59,7 @@ proc main {} {
     set ::thisScript [file join [pwd] [info script]]
     set ::thisDir [file dirname $::thisScript]
 
+    set version         "3.0-alpha (2011-06-27)"
     set ::gui           0
     set ::debug         0
     set ::max_ticks     6000
@@ -82,6 +86,7 @@ proc main {} {
             -gui     {set ::gui 1}
             -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
             -debug   {set ::debug 1}
+	    -version {puts "TclRobots $version"; exit}
             default {
                 if {[file isfile [pwd]/$arg]} {
                     lappend ::robotFiles [pwd]/$arg
