@@ -17,7 +17,7 @@ proc gen_src_doc {srcfile docfile} {
     global srcdocs
 
     # Generate html
-    exec robodoc --src $srcfile --doc ./doc/$docfile --singlefile \
+    exec robodoc --src src/$srcfile --doc ./doc/$docfile --singlefile \
         --html --sections --toc --rc ./doc/script/robodoc.rc --nosort \
         --headless --footless --nopre
 

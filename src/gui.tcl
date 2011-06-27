@@ -43,7 +43,7 @@ proc init_gui {} {
 #        }
 #	lappend ::auto_path $libpath
 #    }
-    set libpath [file join $::thisDir lib/tkpath]
+    set libpath [file join $::thisDir ../lib/tkpath]
     lappend ::auto_path $libpath
 
     if {[catch {package require tkpath}]} {

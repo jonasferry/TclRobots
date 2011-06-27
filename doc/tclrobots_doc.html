@@ -87,41 +87,39 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc main {} {
+    global argv game
+
     namespace import ::tcl::mathop::*
     namespace import ::tcl::mathfunc::*
 
     set ::thisScript [file join [pwd] [info script]]
     set ::thisDir [file dirname $::thisScript]
 
-    set ::gui         0
-    set ::debug       0
-    set ::max_ticks   6000
-    set ::robotFiles  {}
-    set ::tourn_type  0
-    set ::outfile     ""
-    set ::silent      0
-    set ::verbose     0
-    set ::game_mode   ""
+    set ::gui           0
+    set ::debug         0
+    set ::max_ticks     6000
+    set ::robotFiles    {}
+    set ::tourn_type    0
+    set game(outfile)   ""
+    set game(loglevel)  1
+    set ::game_mode     ""
+    set game(state)     ""
+    set game(numbattle) 1
+    set game(winner)    {}
 
-    set state none
-    foreach arg $::argv {
-        if {$state eq "seed"} {
-            set ::seed $arg
-            set state none
-            continue
-        } elseif {$state eq "outfile"} {
-            set ::outfile $arg
-            set state none
-            continue
-        }
+    set len [llength $argv]
+    for {set i 0} {$i &lt; $len} {incr i} {
+        set arg [lindex $argv $i]
+
         switch -glob -- $arg  {
-            -o       {set state outfile}
-            -silent  {set ::silent 1; set ::verbose 0}
-            -verbose {set ::verbose 1; set ::silent 0}
+            -o       {incr i; set game(outfile) $arg}
+            -silent  {set game(loglevel) 0}
+            -verbose {set game(loglevel) 1}
             -msg     {set ::msgoff 1}
             -t*      {set ::tourn_type 1}
+            -n       {incr i; set game(numbattle) [lindex $argv $i]}
             -gui     {set ::gui 1}
-            -seed    {set state seed}
+            -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
             -debug   {set ::debug 1}
             default {
                 if {[file isfile [pwd]/$arg]} {
@@ -132,27 +130,51 @@
             }
         }
     }
-    # Initialise basic settings
-    init_parms
-    init_trig_tables
-    init_rand
-
     if {[llength $::robotFiles] &gt;= 2 &amp;&amp; !$::gui} {
         if {$::tourn_type == 0} {
             # Run single battle in terminal
-            puts "\nSingle battle started\n"
-            set running_time [/ [lindex [time {init_game;run_game}] 0] \
-                                  1000000.0]
-            puts "seed: $::seed"
-            puts "time: $running_time seconds\n"
-            puts "Single battle finished\n"
+            if {$game(numbattle) == 1} {
+                puts "\nSingle battle started\n"
+            } else {
+                puts "\nSingle battles started\n"
+            }
+            set running_time [/ [lindex [time {
+                while {$game(numbattle) &gt; 0} {
+                    init_game
+                    debug run
+                    run_game
+                    debug done
+                    set game(state) ""
+                    debug $game(numbattle)
+                    incr game(numbattle) -1
+                }
+            }] 0] 1000000.0]
+            puts "seed: $game(seed)"
+            puts "time: $running_time seconds"
+            if {$game(numbattle) == 1} {
+                puts "\nSingle battle finished\n"
+            } else {
+                puts "\nSingle battles finished\n"
+                foreach robot $::allRobots {
+                    set count 0
+                    foreach winner $game(winner) {
+                        if {$::data($robot,name) eq $winner} {
+                            incr count
+                        }
+                    }
+                    lappend winnerList "$count $::data($robot,name)"
+                }
+                foreach item [lsort -index 0 -decreasing $winnerList] {
+                    puts $item
+                }
+            }
         } else {
             # Run tournament in terminal
             puts "\nTournament started\n"
             source $::thisDir/tournament.tcl
             set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
                                   1000000.0]
-            puts "seed: $::seed"
+            puts "seed: $game(seed)"
             puts "time: $running_time seconds\n"
             puts "Tournament finished\n"
         }
@@ -172,16 +194,25 @@
 </p>
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc init_game {} {
-    global finish robmsg_out tick
+<pre class="source">proc init_game {{mode all}} {
+    global game
 
-    set finish ""
-    set robmsg_out ""
-    set tick 0
-
-    init_files
-    init_robots
-    init_interps
+    if {$mode ne "match"} {
+        global finish robmsg_out tick
+        
+        set finish ""
+        set robmsg_out ""
+        set tick 0
+        
+        init_parms
+        init_trig_tables
+        init_rand
+        init_files
+    }
+    if {$mode ne "base"} {
+        init_robots
+        init_interps
+    }
 }
 </pre>
 <a name="robo9"></a>
@@ -193,11 +224,19 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_game {} {
-    set ::running 1
+    global game
+
+    set game(state) "run"
     coroutine run_robotsCo run_robots
-    vwait ::running
-    debug "activerobots: $::activeRobots"
-    find_winner
+    while {$game(state) eq "run" ||
+           $game(state) eq "pause"} {
+        vwait game(state)
+    }
+    debug $game(state)
+    if {$game(state) ne "halt"} {
+        debug "activerobots: $::activeRobots"
+        find_winner
+    }
 }
 </pre>
 <a name="robo10"></a>
@@ -209,69 +248,75 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_robots {} {
-    global data activeRobots tick running gui parms
+    global activeRobots data game gui parms tick
 
-    while {$running == 1} {
-        if {$::game_mode eq "simulator"} {
-            # Reset health of target
-            set ::data(target,health) $::parms(health)
-        }
-        foreach robot $activeRobots {
-            if {($data($robot,alert) ne {}) &amp;&amp; \
-                    ($data($robot,ping) ne {})} {
-                # Prepend alert data to sysreturn no notify robot it's
-                # been scanned.
-                set data($robot,sysreturn,[- $tick 1]) \
-                    "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
-
-                # Robot is notified; reset alert request
-                set data($robot,ping) {}
+    while {$game(state) eq "run" || $game(state) eq "pause"} {
+        if {$game(state) ne "pause"} {
+            if {$::game_mode eq "simulator"} {
+                # Reset health of target
+                set data(target,health) [* $parms(health) 10]
             }
-            ${robot}Run $data($robot,sysreturn,[- $tick 1])
-        }
-        act
+            foreach robot $activeRobots {
+                if {($data($robot,alert) ne {}) &amp;&amp; \
+                        ($data($robot,ping) ne {})} {
+                    # Prepend alert data to sysreturn no notify robot it's
+                    # been scanned.
+                    set data($robot,sysreturn,[- $tick 1]) \
+                        "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
 
-        # Print extra information in simulator GUI
-        if {[eq $::game_mode "simulator"] &amp;&amp;
-            [ne $::data(r0,sysreturn,$::tick) ""]} {
-            lappend ::sim_syscall "=&gt;" $::data(r0,sysreturn,$::tick)
-        }
-        update_robots
+                    # Robot is notified; reset alert request
+                    set data($robot,ping) {}
+                }
+                ${robot}Run $data($robot,sysreturn,[- $tick 1])
+            }
+            act
 
-        if {$gui} {
-            update_gui
-        }
-        tick
+            # Print extra information in simulator GUI
+            if {[eq $::game_mode "simulator"] &amp;&amp;
+                [ne $::data(r0,sysreturn,$::tick) ""]} {
+                set ::sim_syscall $data(r0,syscall,$tick)
+                append ::sim_syscall " =&gt; " $::data(r0,sysreturn,$tick)
+            }
+            update_robots
 
-        # Check if single step is active in simulator mode
-        if {[eq $::game_mode "simulator"] &amp;&amp; $::step} {
-            vwait ::do_step
-            set ::do_step 0
-        }
-        if {$parms(tick) &lt; 5} {
-            # Don't bother at high speed
-            after $parms(tick) [info coroutine]
-        } elseif {$tick &lt;= 5} {
-            # Let the first few ticks pass before measuring
-            after $parms(tick) [info coroutine]
-            set ::timeAt5 [clock milliseconds]
+            if {$gui} {
+                update_gui
+            }
+            tick
+
+            # Check if single step is active in simulator mode
+            if {[eq $::game_mode "simulator"] &amp;&amp; $::step} {
+                vwait ::do_step
+                set ::do_step 0
+            }
+            if {$parms(tick) &lt; 5} {
+                # Don't bother at high speed
+                after $parms(tick) [info coroutine]
+            } elseif {$tick &lt;= 5} {
+                # Let the first few ticks pass before measuring
+                after $parms(tick) [info coroutine]
+                set ::timeAt5 [clock milliseconds]
+            } else {
+                # Try to measure time, to adjust the tick delay for load
+                set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
+                set delay [expr {$target - [clock milliseconds]}]
+                # Sanity check value
+                if {$delay &gt; $parms(tick)} {
+                    set delay $parms(tick)
+                } elseif {$delay &lt; 5} {
+                    set delay 5
+                }
+                after $delay [info coroutine]
+                # Keep the lag visible
+                set ::StatusBarMsg "Running $delay"
+            }
+            yield
         } else {
-            # Try to measure time, to adjust the tick delay for load
-            set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
-            set delay [expr {$target - [clock milliseconds]}]
-            # Sanity check value
-            if {$delay &gt; $parms(tick)} {
-                set delay $parms(tick)
-            } elseif {$delay &lt; 5} {
-                set delay 5
-            }
-            after $delay [info coroutine]
-            # Keep the lag visible
-            set ::StatusBarMsg "Running $delay"
+            # Game is paused, but GUI needs to respond
+            update
         }
-        yield
     }
-    set ::stopped 1
+    #set game(state) "halt"
     debug "destroying coroutine [info coroutine]"
     rename [info coroutine] ""
     yield
@@ -320,18 +365,20 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc update_robots {} {
-    global allRobots data
+    global allRobots data game
 
     foreach robot $allRobots {
         # check all flying missiles
         set num_miss [check_missiles $robot]
 
         # skip rest if robot dead
-        if {!$data($robot,status)} {continue}
-
+        if {!$data($robot,status)} {
+            continue
+        }
         # update missile reloader
-        if {$data($robot,reload)} {incr data($robot,reload) -1}
-
+        if {$data($robot,reload)} {
+            incr data($robot,reload) -1
+        }
         # check for barrel overheat, apply cooling
         check_barrel $robot
 
@@ -359,7 +406,7 @@
 
     if {($num_rob&lt;=1 || $num_team==1) &amp;&amp; $num_miss==0} {
         # Stop game
-        set ::running 0
+        set game(state) "end"
     }
 }
 </pre>
@@ -386,7 +433,9 @@
 
             # assign damage to all within explosion ranges
             foreach target $activeRobots {
-                if {!$data($target,status)} {continue}
+                if {!$data($target,status)} {
+                    continue
+                }
                 assign_missile_damage $robot $target
             }
         }
@@ -749,10 +798,12 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc tick {} {
+    global game
+
     if {$::tick &lt; $::max_ticks} {
         incr ::tick
     } else {
-        set ::running 0
+        set game(state) "end"
     }
 }
 </pre>
@@ -765,7 +816,7 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc find_winner {} {
-    global data activeRobots winner outfile robmsg_out
+    global game data activeRobots winner robmsg_out
 
     set winner ""
     set num_team 0
@@ -773,6 +824,7 @@
     set win_color black
     foreach robot $activeRobots {
         lappend winner $data($robot,name)
+        lappend game(winner) $data($robot,name)
 
         if {$data($robot,team) != ""} {
             if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
@@ -839,8 +891,8 @@
     append outmsg "SCORE:\n$score\n\n"
     append outmsg "MESSAGES:\n$robmsg_out"
 
-    if {$outfile ne ""} {
-        catch {write_file $outfile $outmsg}
+    if {$game(outfile) ne ""} {
+        catch {write_file $game(outfile) $outmsg}
     }
 }
 </pre>
@@ -938,7 +990,7 @@
     # cannon heat index where scanner is inop
     set parms(scanbad) 35
     # quadrants, can be used to spread out robots at start
-    set parms(quads)  {{100 100} {600 100} {100 600} {600 600}}
+    set parms(quads) {{100 100} {600 100} {100 600} {600 600}}
 }
 </pre>
 <a name="robo4"></a>
@@ -969,12 +1021,15 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_rand {} {
-    # Set random seed. Note that this works on Linux and Mac, but needs
-    # to be done differently on Windows.
-    if {![info exists ::seed]} {
-        set ::seed [* [pid] [file atime /dev/tty]]
+    global game
+
+    # Set random seed.
+    if {![info exists game(seed_arg)]} {
+        set game(seed) [int [* [rand] [clock clicks]]]
+    } else {
+        set game(seed) $game(seed_arg)
     }
-    srand $::seed
+    srand $game(seed)
 }
 </pre>
 <a name="robo6"></a>
@@ -989,6 +1044,7 @@
     global data allRobots activeRobots robotFiles
 
     set allRobots {}
+    array unset data
 
     # Pick a random element from a list; use this for reading code!
     # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
@@ -1008,16 +1064,20 @@
     set allSigs {}
     set file_index 0
 
+    debug $allRobots
+
     foreach robot $allRobots {
         set name [file tail [lindex $::robotFiles $file_index]]
-        # Search for duplicate robot names
 
+        # Search for duplicate robot names
         foreach used_name [array names data *,name] {
             if {$name eq $data($used_name)} {
+                debug "name $name used_name $used_name file $file_index"
                 set name "$data($used_name)([+ $file_index 1])"
             }
         }
         incr file_index
+        debug "name $name"
 
         # generate a new unique signature
         set newsig [mrand 65535]
@@ -1447,7 +1507,6 @@
     } else {
         set data($robot,dir) -
     }
-
     set data($robot,sysreturn,$tick) $data($robot,dspeed)
 }
 </pre>
@@ -1550,7 +1609,7 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc sysDputs {robot msg} {
-    global gui data outfile robmsg_out
+    global game gui data robmsg_out
 
     set msg [join $msg]
 
@@ -1563,7 +1622,7 @@
         # Output to terminal
         puts "$data($robot,name): $msg"
     }
-    if {$outfile ne ""} {
+    if {$game(outfile) ne ""} {
         append robmsg_out "$data($robot,name): $msg\n"
     }
 }
@@ -1618,10 +1677,10 @@
         } elseif {[lindex $args 0] eq "exit"} {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
-            puts "[join [lrange $args 1 end]] (dbg: $caller)"
+            puts "- [join [lrange $args 1 end]] (dbg: $caller)\n"
             exit
         } else {
-            puts "[join $args] (dbg: $caller)"
+            puts "- [join $args] (dbg: $caller)\n"
         }
     }
 }

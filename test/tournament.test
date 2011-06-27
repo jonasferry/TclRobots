@@ -3,7 +3,7 @@ namespace import ::tcltest::*
 namespace import ::tcl::mathop::*
 namespace import ::tcltest::*
 
-if {[catch {source tournament.tcl}]} {
+if {[catch {source src/tournament.tcl}]} {
     puts "### Error: Could not source tournament.tcl; run in main directory"
     exit
 }

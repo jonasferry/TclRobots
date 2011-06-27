@@ -78,7 +78,7 @@ proc main {} {
             -verbose {set game(loglevel) 1}
             -msg     {set ::msgoff 1}
             -t*      {set ::tourn_type 1}
-	    -n       {incr i; set game(numbattle) [lindex $argv $i]}
+            -n       {incr i; set game(numbattle) [lindex $argv $i]}
             -gui     {set ::gui 1}
             -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
             -debug   {set ::debug 1}

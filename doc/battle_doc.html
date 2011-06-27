@@ -4,13 +4,8 @@
 <li>2. <a href="#robo1">battle/init_battle</a></li>
 <ul>
 <li>2.1. <a href="#robo2">init_battle/run_battle</a></li>
-<ul>
-<li>2.1.1. <a href="#robo3">run_battle/halt_battle</a></li>
-<ul>
-<li>2.1.1.1. <a href="#robo4">halt_battle/reset_battle</a></li>
 </ul>
-</ul>
-</ul>
+<li>3. <a href="#robo3">halt_battle/reset_battle</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="battle2ffile5fheader"></a>
@@ -78,7 +73,7 @@
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
-    button_state disabled "START" run_battle
+    button_state "game" run_battle reset_battle
 }
 </pre>
 <a name="robo2"></a>
@@ -92,45 +87,29 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_battle {} {
+    global game
+
+    button_state "game" "Reset" reset_battle
+
     # Init robots on GUI
     gui_init_robots
 
-    set ::StatusBarMsg "Running"
-    button_state disabled "Halt" halt_battle
-
-    set ::halted 0
+    button_state "running"
     run_game
 
+    puts "state: $game(state)"
+
     # find winnner
-    if {$::halted} {
+    if {$game(state) eq "halt"} {
         set ::StatusBarMsg "Battle halted"
     } else {
         tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
     }
-    button_state disabled "Reset" reset_battle
 }
 </pre>
 <a name="robo3"></a>
-<a name="run5fbattle2fhalt5fbattle"></a>
-<h3>2.1.1.  run_battle/halt_battle [ procedure ]  </h3>
-<p class="item_name">NAME</p>
-<p>   halt_battle
-</p>
-<p class="item_name">DESCRIPTION</p>
-<p>   Halt a running match.
-</p>
-<p class="item_name">SOURCE</p>
-<pre class="source">proc halt_battle {} {
-    set ::running 0
-    set ::StatusBarMsg "Stopping battle"
-    set ::halted 1
-
-    button_state disabled "Reset" reset_battle
-}
-</pre>
-<a name="robo4"></a>
 <a name="halt5fbattle2freset5fbattle"></a>
-<h4>2.1.1.1.  halt_battle/reset_battle [ procedure ]  </h4>
+<h1>3.  halt_battle/reset_battle [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   reset_battle
 </p>
@@ -139,6 +118,10 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc reset_battle {} {
+    global game
+
+    set game(state) "halt"
+
     set ::StatusBarMsg "Cleaning up"
     update
 
@@ -155,8 +138,7 @@
     destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
-    set ::StatusBarMsg "Select robot files for battle"
-    button_state normal "Run Battle" {init_mode battle}
+    button_state "file"
 }
 </pre>
 
