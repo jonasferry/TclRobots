@@ -34,13 +34,13 @@
 # SOURCE
 #
 proc init_battle {} {
-    global data
+    global data game
 
     # Clear any old data
     array unset data
 
     # get robot filenames from window
-    set ::robotFiles $::robotList
+    set game(robotfiles) $::robotList
 
     grid forget $::sel_f
 

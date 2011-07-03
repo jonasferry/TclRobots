@@ -34,8 +34,10 @@
 # SOURCE
 #
 proc init_sim {} {
+    global game
+
     # Read from robot file names; only the first file is used
-    set ::robotFiles [lrange $::robotList 0 0]
+    set game(robotFiles) [lrange $::robotList 0 0]
 
     set ticks   0
     set ::StatusBarMsg "Simulator"

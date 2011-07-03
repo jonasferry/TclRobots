@@ -75,7 +75,7 @@ proc init_tourn {} {
 
     build_matchlist
 
-    if {$::debug} {
+    if {$game(debug)} {
         #set ::matchlist {{r0 r1} {r0 r1} {r0 r1}}
     }
 
@@ -114,8 +114,10 @@ proc init_tourn {} {
 # SOURCE
 #
 proc get_filenames_tourn {} {
+    global data
+
     # get robot filenames from window
-    set ::robotFiles $::robotList
+    set data(robotfiles) $::robotList
 }
 #******
 

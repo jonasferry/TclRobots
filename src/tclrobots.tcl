@@ -48,7 +48,7 @@
 # SOURCE
 #
 proc main {} {
-    global argv game version
+    global argv game gui version
 
     # Provide package name for starpack build, see Makefile
     package provide app-tclrobots 1.0
@@ -59,45 +59,45 @@ proc main {} {
     set ::thisScript [file join [pwd] [info script]]
     set ::thisDir [file dirname $::thisScript]
 
-    set version         "3.0-alpha (2011-06-27)"
-    set ::gui           0
-    set ::debug         0
-    set ::max_ticks     6000
-    set ::robotFiles    {}
-    set ::tourn_type    0
+    set version          "3.0-alpha (2011-06-27)"
+    set gui              0
+    set game(debug)      0
+    set game(max_ticks)  6000
+    set game(robotfiles) {}
+    set game(tourn_type) 0
     set game(outfile)   ""
     set game(loglevel)  1
-    set ::game_mode     ""
+    set game(simulator)  0
     set game(state)     ""
     set game(numbattle) 1
     set game(winner)    {}
 
     set len [llength $argv]
     for {set i 0} {$i < $len} {incr i} {
-	set arg [lindex $argv $i]
+        set arg [lindex $argv $i]
 
         switch -glob -- $arg  {
             -o       {incr i; set game(outfile) $arg}
             -silent  {set game(loglevel) 0}
             -verbose {set game(loglevel) 1}
             -msg     {set ::msgoff 1}
-            -t*      {set ::tourn_type 1}
+            -t*      {set game(tourn_type) 1}
             -n       {incr i; set game(numbattle) [lindex $argv $i]}
-            -gui     {set ::gui 1}
+            -gui     {set gui 1}
             -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
-            -debug   {set ::debug 1}
-	    -version {puts "TclRobots $version"; exit}
+            -debug   {set game(debug) 1}
+            -version {puts "TclRobots $version"; exit}
             default {
                 if {[file isfile [pwd]/$arg]} {
-                    lappend ::robotFiles [pwd]/$arg
+                    lappend game(robotfiles) [pwd]/$arg
                 } else {
                     puts "'$arg' not found, skipping"
                 }
             }
         }
     }
-    if {[llength $::robotFiles] >= 2 && !$::gui} {
-        if {$::tourn_type == 0} {
+    if {[llength $game(robotfiles)] >= 2 && !$gui} {
+        if {$game(tourn_type) == 0} {
             # Run single battle in terminal
 	    if {$game(numbattle) == 1} {
 		puts "\nSingle battle started\n"
@@ -146,7 +146,7 @@ proc main {} {
         }
     } else {
         # Run GUI
-        set ::gui 1
+        set gui 1
         source $::thisDir/gui.tcl
         init_gui
     }
@@ -201,10 +201,10 @@ proc init_game {{mode all}} {
 # SOURCE
 #
 proc init_parms {} {
-    global parms
+    global game gui parms
 
     # milliseconds per tick
-    if {$::gui} {
+    if {$gui} {
         set parms(tick) 100
     } else {
         set parms(tick) 0
@@ -244,7 +244,7 @@ proc init_parms {} {
     #  "   "   "   "    "   "   "    "   > 75
     set parms(rate,4) 20
     # robot start health
-    if {$::debug} {
+    if {$game(debug)} {
         # Debug health for quick matches
         set parms(health) 10
     } else {
@@ -350,7 +350,7 @@ proc init_rand {} {
 # SOURCE
 #
 proc init_files {} {
-    global data allRobots activeRobots robotFiles
+    global activeRobots allRobots data game 
 
     set allRobots {}
     array unset data
@@ -358,14 +358,14 @@ proc init_files {} {
     # Pick a random element from a list; use this for reading code!
     # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
 
-    for {set i 0} {$i < [llength $robotFiles]} {incr i} {
+    for {set i 0} {$i < [llength $game(robotfiles)]} {incr i} {
         # Give the robots names like r0, r1, etc.
         set robot r$i
         # Update list of robots
         lappend allRobots $robot
 
         # Read code
-        set f [open [lindex $robotFiles $i]]
+        set f [open [lindex $game(robotfiles) $i]]
         set data($robot,code) [read $f]
         close $f
 
@@ -376,7 +376,7 @@ proc init_files {} {
     debug $allRobots
 
     foreach robot $allRobots {
-        set name [file tail [lindex $::robotFiles $file_index]]
+        set name [file tail [lindex $game(robotfiles) $file_index]]
 
         # Search for duplicate robot names
         foreach used_name [array names data *,name] {
@@ -418,7 +418,7 @@ proc init_files {} {
 # SOURCE
 #
 proc init_robots {} {
-    global data allRobots activeRobots robotFiles
+    global activeRobots allRobots data game 
 
     foreach robot $allRobots {
         set x [mrand 1000]
@@ -582,7 +582,7 @@ proc run_robots {} {
 
     while {$game(state) eq "run" || $game(state) eq "pause"} {
         if {$game(state) ne "pause"} {
-            if {$::game_mode eq "simulator"} {
+            if {$game(simulator)} {
                 # Reset health of target
                 set data(target,health) [* $parms(health) 10]
             }
@@ -602,7 +602,7 @@ proc run_robots {} {
             act
 
             # Print extra information in simulator GUI
-            if {[eq $::game_mode "simulator"] &&
+            if {$game(simulator) &&
                 [ne $::data(r0,sysreturn,$::tick) ""]} {
                 set ::sim_syscall $data(r0,syscall,$tick)
                 append ::sim_syscall " => " $::data(r0,sysreturn,$tick)
@@ -615,7 +615,7 @@ proc run_robots {} {
             tick
 
             # Check if single step is active in simulator mode
-            if {[eq $::game_mode "simulator"] && $::step} {
+            if {$game(simulator) && $::step} {
                 vwait ::do_step
                 set ::do_step 0
             }
@@ -1107,7 +1107,7 @@ proc check_wall {robot} {
 # SOURCE
 #
 proc check_health {} {
-    global activeRobots data tick
+    global activeRobots gui data tick
 
     set num_rob  0
     set diffteam ""
@@ -1119,7 +1119,7 @@ proc check_health {} {
                 set data($robot,health) 0
                 disable_robot $robot
                 append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
-                if {$::gui} {
+                if {$gui} {
                     after 1 "show_die $robot"
                 }
             } else {
@@ -1181,9 +1181,9 @@ proc disable_robot {robot} {
 # SOURCE
 #
 proc tick {} {
-    global game
+    global game 
 
-    if {$::tick < $::max_ticks} {
+    if {$::tick < $game(max_ticks)} {
         incr ::tick
     } else {
         set game(state) "end"
@@ -1799,7 +1799,9 @@ proc mrand {max} {
 # SOURCE
 #
 proc debug {args} {
-    if {$::debug} {
+    global game
+   
+    if {$game(debug)} {
         # Display name of procedure that called debug
         set caller [lindex [info level [- [info level] 1]] 0]
         if {[lindex $args 0] eq "breakpoint"} {

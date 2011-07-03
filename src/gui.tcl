@@ -33,7 +33,7 @@
 # SOURCE
 #
 proc init_gui {} {
-    global version
+    global game version
 
     package require Tk
     # Try to get tkpath
@@ -144,7 +144,7 @@ proc init_gui {} {
     set robotlist_f  [ttk::frame $::sel_f.fr.f]
 
     # The robot list
-    set ::robotList $::robotFiles
+    set ::robotList $game(robotfiles)
     set ::robotlist_lb [listbox $::sel_f.fr.f.lb -relief sunken  \
                             -yscrollcommand "$::sel_f.fr.f.s set" \
                             -selectmode single -listvariable ::robotList]
@@ -698,9 +698,11 @@ proc highlightRobot {} {
 # SOURCE
 #
 proc init_mode {mode} {
-    # Set the global mode variable to selected mode
-    set ::game_mode $mode
+    global game
 
+    if {[eq $mode "simulator"]} {
+        set game(simulator) 1
+    }
     # Check that the number of selected robots is correct
     switch $mode {
         battle {
