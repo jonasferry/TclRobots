@@ -456,23 +456,23 @@ proc run_tourn {} {
 # SOURCE
 #
 proc reset_tourn {} {
-    global game
+    global game parms
+
+    set game(state) "halt"
 
     set ::StatusBarMsg "Cleaning up"
     update
 
-    set game(state) "halt"
-    destroy $::tourn_f
-
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
+    if {$parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all
     }
     grid forget $::game_f
+    destroy $::tourn_f
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"

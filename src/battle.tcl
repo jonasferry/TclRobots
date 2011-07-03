@@ -119,7 +119,7 @@ proc run_battle {} {
 # SOURCE
 #
 proc reset_battle {} {
-    global game
+    global game parms
 
     set game(state) "halt"
 
@@ -129,7 +129,7 @@ proc reset_battle {} {
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
+    if {$parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all
