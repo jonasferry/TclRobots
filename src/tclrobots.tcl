@@ -48,7 +48,7 @@
 # SOURCE
 #
 proc main {} {
-    global argv game gui version
+    global allRobots argv data game gui msgoff thisDir thisScript version
 
     # Provide package name for starpack build, see Makefile
     package provide app-tclrobots 1.0
@@ -56,8 +56,8 @@ proc main {} {
     namespace import ::tcl::mathop::*
     namespace import ::tcl::mathfunc::*
 
-    set ::thisScript [file join [pwd] [info script]]
-    set ::thisDir [file dirname $::thisScript]
+    set thisScript [file join [pwd] [info script]]
+    set thisDir [file dirname $thisScript]
 
     set version          "3.0-alpha (2011-06-27)"
     set gui              0
@@ -80,7 +80,7 @@ proc main {} {
             -o       {incr i; set game(outfile) $arg}
             -silent  {set game(loglevel) 0}
             -verbose {set game(loglevel) 1}
-            -msg     {set ::msgoff 1}
+            -msg     {set msgoff 1}
             -t*      {set game(tourn_type) 1}
             -n       {incr i; set game(numbattle) [lindex $argv $i]}
             -gui     {set gui 1}
@@ -121,14 +121,14 @@ proc main {} {
 		puts "\nSingle battle finished\n"
 	    } else {
 		puts "\nSingle battles finished\n"
-		foreach robot $::allRobots {
+		foreach robot $allRobots {
 		    set count 0
 		    foreach winner $game(winner) {
-			if {$::data($robot,name) eq $winner} {
+			if {$data($robot,name) eq $winner} {
 			    incr count
 			}
 		    }
-		    lappend winnerList "$count $::data($robot,name)"
+		    lappend winnerList "$count $data($robot,name)"
 		}
 		foreach item [lsort -index 0 -decreasing $winnerList] {
 		    puts $item
@@ -137,7 +137,7 @@ proc main {} {
         } else {
             # Run tournament in terminal
             puts "\nTournament started\n"
-            source $::thisDir/tournament.tcl
+            source $thisDir/tournament.tcl
             set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
                                   1000000.0]
             puts "seed: $game(seed)"
@@ -147,7 +147,7 @@ proc main {} {
     } else {
         # Run GUI
         set gui 1
-        source $::thisDir/gui.tcl
+        source $thisDir/gui.tcl
         init_gui
     }
 }
@@ -166,23 +166,21 @@ proc main {} {
 # SOURCE
 #
 proc init_game {{mode all}} {
-    global game
-
     if {$mode ne "match"} {
-	global finish robmsg_out tick
+        global finish robmsg_out tick
 	
-	set finish ""
-	set robmsg_out ""
-	set tick 0
+        set finish ""
+        set robmsg_out ""
+        set tick 0
 	
-	init_parms
-	init_trig_tables
-	init_rand
-	init_files
+        init_parms
+        init_trig_tables
+        init_rand
+        init_files
     }
     if {$mode ne "base"} {
-	init_robots
-	init_interps
+        init_robots
+        init_interps
     }
 }
 #******
@@ -301,13 +299,14 @@ proc init_parms {} {
 # SOURCE
 #
 proc init_trig_tables {} {
+    global c_tab s_tab
     # init sin & cos tables
     set pi  [* 4 [atan 1]]
     set d2r [/ 180 $pi]
 
     for {set i 0} {$i<360} {incr i} {
-        set ::s_tab($i) [sin [/ $i $d2r]]
-        set ::c_tab($i) [cos [/ $i $d2r]]
+        set s_tab($i) [sin [/ $i $d2r]]
+        set c_tab($i) [cos [/ $i $d2r]]
     }
 }
 #******
@@ -418,7 +417,7 @@ proc init_files {} {
 # SOURCE
 #
 proc init_robots {} {
-    global activeRobots allRobots data game 
+    global activeRobots allRobots data game parms 
 
     foreach robot $allRobots {
         set x [mrand 1000]
@@ -440,7 +439,7 @@ proc init_robots {} {
         # robot current range on this heading
         set data($robot,range) 0
         # robot current health
-        set data($robot,health) $::parms(health)
+        set data($robot,health) $parms(health)
         # robot inflicted damage
         set data($robot,inflicted) 0
         # robot current speed
@@ -513,7 +512,7 @@ proc init_robots {} {
 # SOURCE
 #
 proc init_interps {} {
-    global data allRobots tick
+    global allRobots data thisDir tick
 
     set tick 0
     foreach robot $allRobots {
@@ -524,7 +523,7 @@ proc init_interps {} {
 
         interp alias $data($robot,interp) syscall {} syscall $robot
 
-        $data($robot,interp) invokehidden source $::thisDir/syscalls.tcl
+        $data($robot,interp) invokehidden source $thisDir/syscalls.tcl
 
         $data($robot,interp) eval coroutine \
                 ${robot}Run [list uplevel \#0 $data($robot,code)]
@@ -549,7 +548,7 @@ proc init_interps {} {
 # SOURCE
 #
 proc run_game {} {
-    global game
+    global activeRobots game
 
     set game(state) "run"
     coroutine run_robotsCo run_robots
@@ -559,7 +558,7 @@ proc run_game {} {
     }
     debug $game(state)
     if {$game(state) ne "halt"} {
-	debug "activerobots: $::activeRobots"
+	debug "activerobots: $activeRobots"
 	find_winner
     }
 }
@@ -578,7 +577,8 @@ proc run_game {} {
 # SOURCE
 #
 proc run_robots {} {
-    global activeRobots data game gui parms tick
+    global activeRobots data do_step game gui parms sim_syscall StatusBarMsg \
+    step tick timeAt5
 
     while {$game(state) eq "run" || $game(state) eq "pause"} {
         if {$game(state) ne "pause"} {
@@ -603,9 +603,9 @@ proc run_robots {} {
 
             # Print extra information in simulator GUI
             if {$game(simulator) &&
-                [ne $::data(r0,sysreturn,$::tick) ""]} {
-                set ::sim_syscall $data(r0,syscall,$tick)
-                append ::sim_syscall " => " $::data(r0,sysreturn,$tick)
+                [ne $data(r0,sysreturn,$tick) ""]} {
+                set sim_syscall $data(r0,syscall,$tick)
+                append sim_syscall " => " $data(r0,sysreturn,$tick)
             }
             update_robots
 
@@ -615,9 +615,9 @@ proc run_robots {} {
             tick
 
             # Check if single step is active in simulator mode
-            if {$game(simulator) && $::step} {
-                vwait ::do_step
-                set ::do_step 0
+            if {$game(simulator) && $step} {
+                vwait do_step
+                set do_step 0
             }
             if {$parms(tick) < 5} {
                 # Don't bother at high speed
@@ -625,10 +625,10 @@ proc run_robots {} {
             } elseif {$tick <= 5} {
                 # Let the first few ticks pass before measuring
                 after $parms(tick) [info coroutine]
-                set ::timeAt5 [clock milliseconds]
+                set timeAt5 [clock milliseconds]
             } else {
                 # Try to measure time, to adjust the tick delay for load
-                set target [expr {$parms(tick) * ($tick - 4) + $::timeAt5}]
+                set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
                 set delay [expr {$target - [clock milliseconds]}]
                 # Sanity check value
                 if {$delay > $parms(tick)} {
@@ -638,7 +638,7 @@ proc run_robots {} {
                 }
                 after $delay [info coroutine]
                 # Keep the lag visible
-                set ::StatusBarMsg "Running $delay"
+                set StatusBarMsg "Running $delay"
             }
             yield
         } else {
@@ -666,7 +666,7 @@ proc run_robots {} {
 # SOURCE
 #
 proc act {} {
-    global data activeRobots tick
+    global activeRobots data tick
 
     foreach robot $activeRobots {
         if {$data($robot,status)} {
@@ -762,7 +762,7 @@ proc update_robots {} {
 # SOURCE
 #
 proc check_missiles {robot} {
-    global data activeRobots
+    global activeRobots data 
     set num_miss 0
 
     if {$data($robot,mstate)} {
@@ -798,7 +798,7 @@ proc check_missiles {robot} {
 # SOURCE
 #
 proc update_missile_location {robot} {
-    global data parms c_tab s_tab
+    global c_tab data parms s_tab
 
     set data($robot,mrange) \
         [+ $data($robot,mrange) $parms(msp)]
@@ -824,7 +824,7 @@ proc update_missile_location {robot} {
 # SOURCE
 #
 proc missile_reached_target {robot} {
-    global data gui c_tab s_tab
+    global c_tab data gui s_tab
 
     set data($robot,mstate) 0
     set data($robot,mx) \
@@ -1019,7 +1019,7 @@ proc update_heading {robot} {
 # SOURCE
 #
 proc update_distance {robot} {
-    global data parms c_tab s_tab
+    global c_tab data parms s_tab
 
     if {$data($robot,speed) > 0} {
         set data($robot,range) \
@@ -1107,7 +1107,7 @@ proc check_wall {robot} {
 # SOURCE
 #
 proc check_health {} {
-    global activeRobots gui data tick
+    global activeRobots data finish gui tick
 
     set num_rob  0
     set diffteam ""
@@ -1118,7 +1118,7 @@ proc check_health {} {
                 set data($robot,status) 0
                 set data($robot,health) 0
                 disable_robot $robot
-                append ::finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+                append finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
                 if {$gui} {
                     after 1 "show_die $robot"
                 }
@@ -1153,7 +1153,7 @@ proc check_health {} {
 # SOURCE
 #
 proc disable_robot {robot} {
-    global data activeRobots tick
+    global activeRobots data tick
 
     if {[interp exists $data($robot,interp)]} {
         interp delete $data($robot,interp)
@@ -1181,10 +1181,10 @@ proc disable_robot {robot} {
 # SOURCE
 #
 proc tick {} {
-    global game 
+    global game tick
 
-    if {$::tick < $game(max_ticks)} {
-        incr ::tick
+    if {$tick < $game(max_ticks)} {
+        incr tick
     } else {
         set game(state) "end"
     }
@@ -1204,7 +1204,7 @@ proc tick {} {
 # SOURCE
 #
 proc find_winner {} {
-    global game data activeRobots winner robmsg_out
+    global activeRobots allRobots data finish game robmsg_out win_msg winner 
 
     set winner ""
     set num_team 0
@@ -1226,33 +1226,32 @@ proc find_winner {} {
     # Set winner announcement
     switch [llength $activeRobots] {
         0 {
-            set ::win_msg "No robots left alive"
+            set win_msg "No robots left alive"
         }
         1 {
             if {[string length $diffteam] > 0} {
                 set diffteam "Team $diffteam"
-                set ::win_msg "WINNER:\n$diffteam\n$winner\n"
+                set win_msg "WINNER:\n$diffteam\n$winner\n"
             } else {
-                set ::win_msg "WINNER:\n$winner"
+                set win_msg "WINNER:\n$winner"
             }
         }
         default {
             # check for teams
             if {$num_team == 1} {
-                set ::win_msg "WINNER:\nTeam $diffteam\n$winner"
+                set win_msg "WINNER:\nTeam $diffteam\n$winner"
             } else {
-                set ::win_msg "TIE:\n$winner"
+                set win_msg "TIE:\n$winner"
             }
         }
     }
-    puts "$::win_msg\n"
+    puts "$win_msg\n"
     foreach robot $activeRobots {
         disable_robot $robot
     }
-#    set ::win_msg2 [join [split $::win_msg \n] " "]
     set score "score: "
     set points 1
-    foreach l [split $::finish \n] {
+    foreach l [split $finish \n] {
         set n [lindex $l 0]
         if {[string length $n] == 0} {continue}
         set l [string last _ $n]
@@ -1266,15 +1265,15 @@ proc find_winner {} {
         append score "$n = $points  "
     }
     set players "BATTLE:\n"
-    foreach robot $::allRobots {
+    foreach robot $allRobots {
         append players "$data($robot,name) "
     }
     # Set up report file message
     set outmsg ""
     append outmsg "$players\n\n"
-    append outmsg "$::win_msg\n\n"
-    if {$::finish ne ""} {
-        append outmsg "DEFEATED:\n$::finish\n"
+    append outmsg "$win_msg\n\n"
+    if {$finish ne ""} {
+        append outmsg "DEFEATED:\n$finish\n"
     }
     append outmsg "SCORE:\n$score\n\n"
     append outmsg "MESSAGES:\n$robmsg_out"
@@ -1378,7 +1377,7 @@ proc syscall {args} {
 # SOURCE
 #
 proc sysScanner {robot} {
-    global data parms tick activeRobots
+    global activeRobots data parms tick 
 
     if {($data($robot,syscall,$tick) eq \
              $data($robot,syscall,[- $tick 1]))} {
@@ -1475,6 +1474,7 @@ proc sysScanner {robot} {
 #
 proc sysDsp {robot} {
     global data tick
+
     set data($robot,sysreturn,$tick) $data($robot,sig)
 }
 #******
@@ -1493,6 +1493,7 @@ proc sysDsp {robot} {
 #
 proc sysAlert {robot} {
     global data tick
+
     set data($robot,alert) [lindex $data($robot,syscall,$tick) 1]
     set data($robot,sysreturn,$tick) 1
 }
@@ -1624,6 +1625,7 @@ proc sysDrive {robot} {
 #
 proc sysData {robot} {
     global data tick
+
     set val 0
 
     switch $data($robot,syscall,$tick) {
@@ -1651,6 +1653,7 @@ proc sysData {robot} {
 #
 proc sysTick {robot} {
     global data tick
+
     set data($robot,sysreturn,$tick) $tick
 }
 #******
@@ -1669,6 +1672,7 @@ proc sysTick {robot} {
 #
 proc sysTeamDeclare {robot} {
     global data tick
+
     set team [lindex $data($robot,syscall,$tick) 1]
     set data($robot,team) $team
     set data($robot,sysreturn,$tick) $team
@@ -1689,6 +1693,7 @@ proc sysTeamDeclare {robot} {
 #
 proc sysTeamSend {robot msg} {
     global data
+
     puts "sysTeamSend $robot $msg"
     set data($robot,data) $msg
 }
@@ -1708,6 +1713,7 @@ proc sysTeamSend {robot msg} {
 #
 proc sysTeamGet {robot} {
     global data activeRobots tick
+
     set val ""
 
     if {$data($robot,team) ne {}} {
@@ -1738,7 +1744,7 @@ proc sysTeamGet {robot} {
 # SOURCE
 #
 proc sysDputs {robot msg} {
-    global game gui data robmsg_out
+    global data game gui robmsg_out tick
 
     set msg [join $msg]
 
@@ -1746,7 +1752,7 @@ proc sysDputs {robot msg} {
         # Output to robot message box
         show_msg $robot $msg
         # Output to terminal for debugging
-        debug $robot: $msg ($::tick)
+        debug $robot: $msg ($tick)
     } else {
         # Output to terminal
         puts "$data($robot,name): $msg"
@@ -1799,15 +1805,15 @@ proc mrand {max} {
 # SOURCE
 #
 proc debug {args} {
-    global game
+    global broken game
    
     if {$game(debug)} {
         # Display name of procedure that called debug
         set caller [lindex [info level [- [info level] 1]] 0]
         if {[lindex $args 0] eq "breakpoint"} {
-            set ::broken 1
+            set broken 1
             puts "Breakpoint reached (dbg: $caller)"
-            vwait ::broken
+            vwait broken
         } elseif {[lindex $args 0] eq "exit"} {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
