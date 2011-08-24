@@ -43,21 +43,25 @@
 #
 proc init_tourn {} {
     global allRobots allRobots_tourn activeRobots activeRobots_tourn data \
-        data_tourn game score
+        data_tourn game gui score
 
     # Clear any old data
     array unset data
 
-    if {$::gui} {
+    if {$gui} {
         get_filenames_tourn
         init_gui_tourn
     }
+    #debug "allrobots1 $allRobots"
+
     # Init all robots, can't use init_game from tclrobots.tcl because
     # interpreters should be initialised separately in tournament mode
     init_game base
     init_robots
 
-    if {$::gui} {
+    debug "allrobots2 $allRobots"
+
+    if {$gui} {
         # Init robots on GUI
         gui_init_robots
 
@@ -79,7 +83,7 @@ proc init_tourn {} {
         #set ::matchlist {{r0 r1} {r0 r1} {r0 r1}}
     }
 
-    if {$::gui} {
+    if {$gui} {
         set game(state) "halt"
 
         set ::matchnum 0
@@ -114,10 +118,10 @@ proc init_tourn {} {
 # SOURCE
 #
 proc get_filenames_tourn {} {
-    global data
+    global game robotList
 
     # get robot filenames from window
-    set data(robotfiles) $::robotList
+    set game(robotfiles) $robotList
 }
 #******
 
@@ -134,7 +138,9 @@ proc get_filenames_tourn {} {
 # SOURCE
 #
 proc init_gui_tourn {} {
-    grid forget $::sel_f
+    global robotHealth robotMsg sel_f StatusBarMsg
+
+    grid forget $sel_f
 
     show_arena
 
@@ -142,11 +148,11 @@ proc init_gui_tourn {} {
     create_tournctrl
 
     # Clear message boxes
-    set ::robotHealth {}
-    set ::robotMsg    {}
+    set robotHealth {}
+    set robotMsg    {}
 
     # start robots
-    set ::StatusBarMsg "Optionally select match time and outfile and press START"
+    set StatusBarMsg "Optionally select match time and outfile and press START"
     button_state "game" run_tourn reset_tourn
 }
 #******
@@ -348,16 +354,16 @@ proc show_matches {} {
 #
 proc run_tourn {} {
     global activeRobots activeRobots_tourn allRobots allRobots_tourn \
-        data data_tourn game matchlist matchlog score
+        data data_tourn game gui matchlist matchlog score
 
-    if {$::gui} {
+    if {$gui} {
         button_state "running"
     }
     set matchlog ""
     puts "MATCHES:\n"
 
     foreach match $matchlist {
-        if {$::gui} {
+        if {$gui} {
             # Remove old canvas items
             $::arena_c delete robot
             $::arena_c delete scan
@@ -382,7 +388,7 @@ proc run_tourn {} {
         # Init current two robots' interpreters
         init_game match
 
-        if {$::gui} {
+        if {$gui} {
             foreach robot $allRobots {
                 gui_create_robot $robot $data_tourn($robot,color) \
                     [lsearch -exact $allRobots_tourn $robot]
@@ -424,7 +430,7 @@ proc run_tourn {} {
             }
             sort_score
 
-            if {$::gui} {
+            if {$gui} {
                 update_tourn
                 incr ::matchnum
             }
@@ -524,14 +530,14 @@ proc sort_score {} {
 # SOURCE
 #
 proc report_score {} {
-    global game matchlog tournScore
+    global game gui matchlog tournScore
 
     set ::win_msg "TOURNAMENT SCORES:\n\n"
     foreach robotscore $tournScore {
         append ::win_msg "$robotscore\n"
     }
     # show results
-    if {$::gui} {
+    if {$gui} {
         if {$game(state) eq "halt"} {
             set ::StatusBarMsg "Battle halted"
         } else {

@@ -166,9 +166,9 @@ proc main {} {
 # SOURCE
 #
 proc init_game {{mode all}} {
+    global finish robmsg_out tick
+
     if {$mode ne "match"} {
-        global finish robmsg_out tick
-	
         set finish ""
         set robmsg_out ""
         set tick 0
@@ -244,7 +244,7 @@ proc init_parms {} {
     # robot start health
     if {$game(debug)} {
         # Debug health for quick matches
-        set parms(health) 10
+        set parms(health) 1
     } else {
         # Normal health
         set parms(health) 100
@@ -351,6 +351,8 @@ proc init_rand {} {
 proc init_files {} {
     global activeRobots allRobots data game 
 
+    debug "game $game(robotfiles)"
+
     set allRobots {}
     array unset data
 
@@ -372,7 +374,7 @@ proc init_files {} {
     set allSigs {}
     set file_index 0
 
-    debug $allRobots
+    debug "allRobots $allRobots"
 
     foreach robot $allRobots {
         set name [file tail [lindex $game(robotfiles) $file_index]]
@@ -417,7 +419,7 @@ proc init_files {} {
 # SOURCE
 #
 proc init_robots {} {
-    global activeRobots allRobots data game parms 
+    global allRobots data parms 
 
     foreach robot $allRobots {
         set x [mrand 1000]
