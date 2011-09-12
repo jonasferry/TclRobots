@@ -52,15 +52,8 @@ proc init_tourn {} {
         get_filenames_tourn
         init_gui_tourn
     }
-    #debug "allrobots1 $allRobots"
-
-    # Init all robots, can't use init_match from tclrobots.tcl because
-    # interpreters should be initialised separately in tournament mode
     init_game
-    #init_robots
     init_match
-
-    debug "allrobots2 $allRobots"
 
     if {$gui} {
         # Init robots on GUI
@@ -360,14 +353,11 @@ proc run_tourn {} {
     puts "MATCHES:\n"
 
     foreach match $matchlist {
-	debug "mlist: $matchlist"
-
         if {$gui} {
             # Remove old canvas items
             $::arena_c delete robot
             $::arena_c delete scan
-            debug "Running match $::matchnum $match from $matchlist"
-        }
+	}
         set robot  [lindex $match 0]
         set target [lindex $match 1]
 
@@ -465,8 +455,6 @@ proc reset_tourn {} {
 
     set game(state) "halt"
 
-    debug "state $game(state)"
-
     set ::StatusBarMsg "Cleaning up"
     update
 
@@ -483,7 +471,6 @@ proc reset_tourn {} {
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"
-    debug button_state
 }
 #******
 
@@ -553,7 +540,6 @@ proc report_score {} {
     append outmsg "$::win_msg"
 
     if {$game(outfile) ne ""} {
-        debug "$game(outfile) :::: $outmsg"
         catch {write_file $game(outfile) $outmsg}
     }
 }
