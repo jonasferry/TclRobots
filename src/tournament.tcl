@@ -143,7 +143,7 @@ proc init_gui_tourn {} {
     set robotMsg    {}
 
     # start robots
-    set StatusBarMsg "Optionally select match time and outfile and press START"
+    set StatusBarMsg "Press START to start tournament"
     button_state "game" run_tourn reset_tourn
 }
 #******
@@ -350,6 +350,7 @@ proc run_tourn {} {
         button_state "running"
     }
     set matchlog ""
+    set matchnumber 0
     puts "MATCHES:\n"
 
     foreach match $matchlist {
@@ -371,8 +372,10 @@ proc run_tourn {} {
             set data($robot,code)       $data_tourn($robot,code)
             set data($robot,name)       $data_tourn($robot,name)
             set data($robot,num)        $data_tourn($robot,num)
-            set data($robot,color)      $data_tourn($robot,color)
-            set data($robot,brightness) $data_tourn($robot,brightness)
+	    if {$gui} {
+		set data($robot,color)      $data_tourn($robot,color)
+		set data($robot,brightness) $data_tourn($robot,brightness)
+	    }
         }
         # Init current two robots' interpreters
         init_match
@@ -403,10 +406,10 @@ proc run_tourn {} {
                 incr score([lindex $activeRobots 0]) 3
                 if {$robot eq $activeRobots} {
                     append match_msg \
-                        "$data($robot,name)(w) vs $data($target,name)"
+                        "$data($robot,name)(win) vs $data($target,name)"
                 } else {
                     append match_msg \
-                        "$data($robot,name)    vs $data($target,name)(w)"
+                        "$data($robot,name)    vs $data($target,name)(win)"
                 }
             } else {
                 # Note that this presupposes two-robot matches
@@ -422,7 +425,8 @@ proc run_tourn {} {
                 update_tourn
                 incr ::matchnum
             }
-            puts $match_msg
+	    incr matchnumber
+            puts "Match $matchnumber:$match_msg"
             append matchlog "$match_msg\n"
 	} else {
 	    break
@@ -432,7 +436,9 @@ proc run_tourn {} {
 	    disable_robot $robot
 	    set ::robotMsg {}
 	}
-	button_state "file"
+	if {$gui} {
+	    button_state "file"
+	}
 	report_score
 	}
 }

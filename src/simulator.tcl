@@ -36,8 +36,6 @@
 proc init_sim {} {
     global game
 
-    debug $::robotList
-
     # Read from robot file names; only the first file is used
     set game(robotfiles) [lindex $::robotList 0]
 

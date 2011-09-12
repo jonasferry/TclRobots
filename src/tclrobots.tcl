@@ -48,7 +48,7 @@
 # SOURCE
 #
 proc main {} {
-    global allRobots argv data game gui msgoff thisDir thisScript version
+    global allRobots argv data game gui nomsg thisDir thisScript version
 
     # Provide package name for starpack build, see Makefile
     package provide app-tclrobots 1.0
@@ -59,8 +59,9 @@ proc main {} {
     set thisScript [file join [pwd] [info script]]
     set thisDir [file dirname $thisScript]
 
-    set version          "3.0-alpha (2011-06-27)"
+    set version          "3.0-alpha (2011-09-12)"
     set gui              0
+    set nomsg            0
     set game(debug)      0
     set game(max_ticks)  6000
     set game(robotfiles) {}
@@ -76,16 +77,15 @@ proc main {} {
     for {set i 0} {$i < $len} {incr i} {
         set arg [lindex $argv $i]
 
-        switch -glob -- $arg  {
-            -o       {incr i; set game(outfile) $arg}
-            -silent  {set game(loglevel) 0}
-            -verbose {set game(loglevel) 1}
-            -msg     {set msgoff 1}
-            -t*      {set game(tourn_type) 1}
-            -n       {incr i; set game(numbattle) [lindex $argv $i]}
-            -gui     {set gui 1}
-            -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
+        switch -regexp -- $arg  {
             -debug   {set game(debug) 1}
+            -gui     {set gui 1}
+	    -help    {show_usage; exit}
+            -nomsg   {set nomsg 1}
+            -n       {incr i; set game(numbattle) [lindex $argv $i]}
+            -o       {incr i; set game(outfile) $arg}
+            -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
+            -t.*     {set game(tourn_type) 1}
             -version {puts "TclRobots $version"; exit}
             default {
                 if {[file isfile [pwd]/$arg]} {
@@ -110,7 +110,6 @@ proc main {} {
 		    init_match 
 		    run_game
 		    set game(state) ""
-		    debug $game(numbattle)
 		    incr game(numbattle) -1
 		}
 	    }] 0] 1000000.0]
@@ -149,6 +148,40 @@ proc main {} {
         source $thisDir/gui.tcl
         init_gui
     }
+}
+#******
+
+#****P* main/show_usage
+#
+# NAME
+#
+#   show_usage
+#
+# DESCRIPTION
+#
+#   Shows command-line arguments.
+#
+# SOURCE
+#
+proc show_usage {} {
+    global version
+
+    puts "
+TclRobots $version
+
+Command-line arguments:
+
+-debug     : Enable debug messages and lowered health for quicker battles.
+-gui       : Use GUI; useful in combination with robot files.
+-help      : Show this help.
+-msg       : Disable robot messages.
+-n <N>     : Run N number of battles.
+-o <FILE>  : Set results output file.
+-seed <S>  : Start with random seed S to replay a specific battle.
+-t*        : Run tournament in batch mode.
+-version   : Show version and exit.
+<robot.tr> : Add one ore more robot files.
+"
 }
 #******
 
@@ -362,8 +395,6 @@ proc init_rand {} {
 proc init_files {} {
     global activeRobots allRobots data game 
 
-    debug "game $game(robotfiles)"
-
     set allRobots {}
     array unset data
 
@@ -385,20 +416,16 @@ proc init_files {} {
     set allSigs {}
     set file_index 0
 
-    debug "allRobots $allRobots"
-
     foreach robot $allRobots {
         set name [file tail [lindex $game(robotfiles) $file_index]]
 
         # Search for duplicate robot names
         foreach used_name [array names data *,name] {
             if {$name eq $data($used_name)} {
-		debug "name $name used_name $used_name file $file_index"
-                set name "$data($used_name)([+ $file_index 1])"
+		set name "$data($used_name)([+ $file_index 1])"
             }
         }
         incr file_index
-	debug "name $name"
 
         # generate a new unique signature
         set newsig [mrand 65535]
@@ -569,9 +596,7 @@ proc run_game {} {
 	   $game(state) eq "pause"} {
 	vwait game(state)
     }
-    debug $game(state)
     if {$game(state) ne "halt"} {
-	debug "activerobots: $activeRobots"
 	find_winner
     }
 }
@@ -659,8 +684,6 @@ proc run_robots {} {
             update
         }
     }
-    #set game(state) "halt"
-    debug "destroying coroutine [info coroutine]"
     rename [info coroutine] ""
     yield
 }
@@ -1173,10 +1196,8 @@ proc disable_robot {robot} {
         set index [lsearch -exact $activeRobots $robot]
         set activeRobots [lreplace $activeRobots $index $index]
         array unset data $robot
-        #   set data($robot,syscall,$tick) {}
-        debug "disable robot $robot success"
     } else {
-        debug "disable robot $robot failed; interp does not exist"
+        puts "disable robot $robot failed; interp does not exist"
     }
 }
 #******
@@ -1757,21 +1778,21 @@ proc sysTeamGet {robot} {
 # SOURCE
 #
 proc sysDputs {robot msg} {
-    global data game gui robmsg_out tick
+    global data game gui nomsg robmsg_out tick
 
-    set msg [join $msg]
+    if {!$nomsg} {
+	set msg [join $msg]
 
-    if {$gui} {
-        # Output to robot message box
-        show_msg $robot $msg
-        # Output to terminal for debugging
-        debug $robot: $msg ($tick)
-    } else {
-        # Output to terminal
-        puts "$data($robot,name): $msg"
-    }
-    if {$game(outfile) ne ""} {
-        append robmsg_out "$data($robot,name): $msg\n"
+	if {$gui} {
+	    # Output to robot message box
+	    show_msg $robot $msg
+	} else {
+	    # Output to terminal
+	    puts "$data($robot,name): $msg"
+	}
+	if {$game(outfile) ne ""} {
+	    append robmsg_out "$data($robot,name): $msg\n"
+	}
     }
 }
 #******
