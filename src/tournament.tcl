@@ -141,7 +141,8 @@ proc init_gui_tourn {} {
     show_arena
 
     # Create and grid the tournament control box
-    create_tournctrl
+    create_tourn_gui
+    grid_tourn_gui
 
     # Clear message boxes
     set robotHealth {}
@@ -153,80 +154,73 @@ proc init_gui_tourn {} {
 }
 #******
 
-#****P* init_gui_tourn/create_tournctrl
+#****P* init_gui_tourn/create_tourn_gui
 #
 # NAME
 #
-#   create_tournctrl
+#   create_tourn_gui
 #
 # DESCRIPTION
 #
-#   Create and grid the tournament control box.
+#   Create the tournament GUI.
 #
 # SOURCE
 #
-proc create_tournctrl {} {
-    global tourn_f
+proc create_tourn_gui {} {
+    global game_f tourn_f tournMatches tournMatches_lb \
+	tournScore tournScore_lb
 
     if {![info exists tourn_f]} {
-	set tourn_f [ttk::frame $::game_f.tourn]
+	set tourn_f [ttk::frame $game_f.tourn]
 
-	create_health_msg $tourn_f
-	
-	set tournctrl1_f [ttk::frame $tourn_f.time -relief raised \
-			      -borderwidth 2]
-	set tourntime_l  [ttk::label $tourn_f.time.l \
-			      -text "Max minutes / match:"]
-	set tourntime_e  [ttk::entry $tourn_f.time.e \
-			      -textvariable tlimit]
+	set tournScore_lb   [listbox $tourn_f.score -background black \
+				 -listvariable tournScore]
 
-	set ::tournScore_lb   [listbox $tourn_f.score -background black \
-				   -listvariable ::tournScore]
-
-	set ::tournMatches_lb [listbox $tourn_f.match -background black \
+	set tournMatches_lb [listbox $tourn_f.match -background black \
 				   -foreground white \
-				   -listvariable ::tournMatches]
-
-	set tournctrl2_f [ttk::frame $tourn_f.file -relief raised \
-			      -borderwidth 2]
-	set tournfile_l  [ttk::label $tourn_f.file.l \
-			      -text "Optional results filename:"]
-	set tournfile_e  [ttk::entry $tourn_f.file.e \
-			      -textvariable outfile]
-
-	grid $tourntime_l -column 0 -row 0 -sticky nsew
-	grid $tourntime_e -column 0 -row 1 -sticky nsew
-
-	grid $tournfile_l -column 0 -row 0 -sticky nsew
-	grid $tournfile_e -column 0 -row 1 -sticky nsew
-
-	grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
-	grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
+				   -listvariable tournMatches]
     }
+    grid $tournScore_lb   -column 0 -row 1 -sticky nsew
+    grid $tournMatches_lb -column 0 -row 2 -sticky nsew
+}
+#******
+
+#****P* init_gui_tourn/grid_tourn_gui
+#
+# NAME
+#
+#   grid_tourn_gui
+#
+# DESCRIPTION
+#
+#   Grid the tournament GUI.
+#
+# SOURCE
+#
+proc grid_tourn_gui {} {
+    global arena_c game_f robotMsg_lb robotHealth_lb tourn_f \
+	tournMatches tournMatches_lb tournScore tournScore_lb
+
     # The single battle mode shows the arena, the health box and the
     # message box
-    set ::tournScore    {}
-    set ::tournMatches  {}
+    set tournScore    {}
+    set tournMatches  {}
 
-    grid $::game_f  -column 0 -row 2 -sticky nsew
-    grid $::arena_c -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $tourn_f -column 1 -row 0 -sticky nsew
+    grid $game_f         -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -sticky nsew -rowspan 2
+    grid $robotHealth_lb -column 1 -row 0 -sticky nsew
+    grid $tourn_f        -column 1 -row 1 -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0 -sticky nsew -rowspan 3
 
     # Fix resizing of widgets
-    grid columnconfigure $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
+    grid columnconfigure $game_f  0 -weight 1
+    grid columnconfigure $game_f  1 -weight 1
+    grid rowconfigure    $game_f  0 -weight 1
     grid columnconfigure $tourn_f 0 -weight 1
     grid columnconfigure $tourn_f 1 -weight 1
-    grid rowconfigure    $tourn_f  0 -weight 1
-    grid rowconfigure    $tourn_f  1 -weight 1
-    grid rowconfigure    $tourn_f  2 -weight 1
-
-    # Grid all major widgets
-    grid $::robotHealth_lb  -column 0 -row 0 -sticky nsew
-    grid $::tournScore_lb   -column 0 -row 1 -sticky nsew
-    grid $::tournMatches_lb -column 0 -row 2 -sticky nsew
-    grid $::robotMsg_lb     -column 1 -row 0 -sticky nsew -rowspan 3
+    grid rowconfigure    $tourn_f 0 -weight 1
+    grid rowconfigure    $tourn_f 1 -weight 1
+    grid rowconfigure    $tourn_f 2 -weight 1
 }
 #******
 

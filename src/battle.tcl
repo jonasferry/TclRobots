@@ -42,23 +42,7 @@ proc init_battle {} {
     # get robot filenames from window
     set game(robotfiles) $::robotList
 
-    grid forget $::sel_f
-
-    if {![info exists game_f]} {
-	create_health_msg $game_f
-    }
-
-    # The single battle mode shows the arena, the health box and the
-    # message box
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
-    grid $::robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $::game_f 0 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid columnconfigure $::game_f 2 -weight 1
-
+    grid_battle_gui
     show_arena
 
     # Clear message boxes
@@ -72,6 +56,36 @@ proc init_battle {} {
     # start robots
     set ::StatusBarMsg "Press START to start battle"
     button_state "game" run_battle reset_battle
+}
+#******
+
+#****P* init_battle/grid_battle_gui
+#
+# NAME
+#
+#   grid_battle_gui
+#
+# DESCRIPTION
+#
+#   Grid the battle GUI.
+#
+# SOURCE
+#
+proc grid_battle_gui {} {
+    global arena_c game_f robotHealth_lb robotMsg_lb sel_f
+
+    grid forget $sel_f
+
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    grid $game_f -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $robotHealth_lb -column 1 -row 0            -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
+    grid columnconfigure $game_f 0 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
+    grid columnconfigure $game_f 1 -weight 1
+    grid columnconfigure $game_f 2 -weight 1
 }
 #******
 

@@ -36,25 +36,17 @@
 proc init_sim {} {
     global game
 
+    debug $::robotList
+
     # Read from robot file names; only the first file is used
-    set game(robotFiles) [lrange $::robotList 0 0]
+    set game(robotfiles) [lindex $::robotList 0]
 
     set ticks   0
     set ::StatusBarMsg "Simulator"
 
-    grid forget $::sel_f
-
-    create_health_msg $::game_f
-
-    # The simulator shows the arena, the message box and the simulator
-    # controls. Simulator controls are defined later.
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $::game_f 0 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid columnconfigure $::game_f 2 -weight 1
+    # Create and grid the simulation control box
+    create_simctrl
+    grid_sim_gui
 
     # show_arena is defined in gui.tcl
     show_arena
@@ -84,15 +76,42 @@ proc init_sim {} {
     set ::data(target,x)     500
     set ::data(target,y)     500
 
-    # Create and grid the simulation control box
-    create_simctrl
-
     # Start simulation in continous (non-step) mode
     set ::step 0
 
     # start robots
     set ::StatusBarMsg "Press START to start simulation"
     button_state "game" run_sim reset_sim
+}
+#******
+
+#****P* init_battle/grid_sim_gui
+#
+# NAME
+#
+#   grid_sim_gui
+#
+# DESCRIPTION
+#
+#   Grid the simulator GUI.
+#
+# SOURCE
+#
+proc grid_sim_gui {} {
+    global arena_c game_f robotMsg_lb sel_f sim_f
+
+    grid forget $sel_f
+
+    # The simulator shows the arena, the message box and the simulator
+    # controls. Simulator controls are defined later.
+    grid $game_f -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $sim_f -column 1 -row 0 -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
+    grid columnconfigure $game_f 0 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
+    grid columnconfigure $game_f 1 -weight 1
+    grid columnconfigure $game_f 2 -weight 1
 }
 #******
 
@@ -112,7 +131,6 @@ proc create_simctrl {} {
     global sim_f
 
     set  sim_f  [ttk::frame $::game_f.sim]
-    grid $sim_f -column 1 -row 0 -sticky nsew
 
     # Create and grid first row of simulation control box
     set stepsys_cb [ttk::checkbutton $sim_f.cb -text "Step syscalls" \
@@ -416,8 +434,7 @@ proc reset_sim {} {
         $::arena_c delete all
     }
     grid forget $::game_f
-    destroy $::game_f.health
-    destroy $::game_f.msg
+#    grid forget $::robotMsg_lb
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"

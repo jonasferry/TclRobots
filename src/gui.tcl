@@ -321,6 +321,7 @@ proc create_common_widgets {} {
     set game_f [ttk::frame .f3]
 
     create_arena
+    create_health_msg
 }
 #******
 
@@ -334,18 +335,18 @@ proc create_common_widgets {} {
 #
 # SOURCE
 #
-proc create_health_msg {path} {
-    global robotHealth robotHealth_lb robotMsg robotMsg_lb
+proc create_health_msg {} {
+    global game_f robotHealth robotHealth_lb robotMsg robotMsg_lb
 
     # The robot health list
     set robotHealth {}
-    set robotHealth_lb [listbox ${path}.health -background black \
+    set robotHealth_lb [listbox $game_f.health -background black \
 			    -listvariable robotHealth]
     bind $robotHealth_lb <<ListboxSelect>> highlightRobot
 
     # The robot message box
     set robotMsg {}
-    set robotMsg_lb [listbox ${path}.msg -background black \
+    set robotMsg_lb [listbox $game_f.msg -background black \
 			 -listvariable robotMsg]
 }
 #******
