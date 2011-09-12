@@ -107,9 +107,8 @@ proc main {} {
             set running_time [/ [lindex [time {
 		while {$game(numbattle) > 0} {
 		    init_game
-		    debug run
+		    init_match 
 		    run_game
-		    debug done
 		    set game(state) ""
 		    debug $game(numbattle)
 		    incr game(numbattle) -1
@@ -165,23 +164,35 @@ proc main {} {
 #
 # SOURCE
 #
-proc init_game {{mode all}} {
+proc init_game {} {
     global finish robmsg_out tick
 
-    if {$mode ne "match"} {
-        set finish ""
-        set robmsg_out ""
-        set tick 0
+    set finish ""
+    set robmsg_out ""
+    set tick 0
 	
-        init_parms
-        init_trig_tables
-        init_rand
-        init_files
-    }
-    if {$mode ne "base"} {
-        init_robots
-        init_interps
-    }
+    init_parms
+    init_trig_tables
+    init_rand
+    init_files
+}
+#******
+
+#****P* main/init_match
+#
+# NAME
+#
+#   init_match
+#
+# DESCRIPTION
+#
+#   
+#
+# SOURCE
+#
+proc init_match {} {
+    init_robots
+    init_interps
 }
 #******
 

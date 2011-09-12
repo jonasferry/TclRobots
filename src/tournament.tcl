@@ -56,7 +56,7 @@ proc init_tourn {} {
 
     # Init all robots, can't use init_game from tclrobots.tcl because
     # interpreters should be initialised separately in tournament mode
-    init_game base
+    init_game
     init_robots
 
     debug "allrobots2 $allRobots"
@@ -78,10 +78,6 @@ proc init_tourn {} {
     array set data_tourn   [array get data]
 
     build_matchlist
-
-    if {$game(debug)} {
-        #set ::matchlist {{r0 r1} {r0 r1} {r0 r1}}
-    }
 
     if {$gui} {
         set game(state) "halt"
@@ -133,7 +129,7 @@ proc get_filenames_tourn {} {
 #
 # DESCRIPTION
 #
-#   Creates theemacs -r ~/Desktop/code/tcl/tclrobots/tclrobots/tclrobots.tcl tournament mode GUI.
+#   Creates the tournament mode GUI.
 #
 # SOURCE
 #
@@ -172,41 +168,49 @@ proc init_gui_tourn {} {
 proc create_tournctrl {} {
     global tourn_f
 
+    if {![info exists tourn_f]} {
+	set tourn_f [ttk::frame $::game_f.tourn]
+
+	create_health_msg $tourn_f
+	
+	set tournctrl1_f [ttk::frame $tourn_f.time -relief raised \
+			      -borderwidth 2]
+	set tourntime_l  [ttk::label $tourn_f.time.l \
+			      -text "Max minutes / match:"]
+	set tourntime_e  [ttk::entry $tourn_f.time.e \
+			      -textvariable tlimit]
+
+	set ::tournScore_lb   [listbox $tourn_f.score -background black \
+				   -listvariable ::tournScore]
+
+	set ::tournMatches_lb [listbox $tourn_f.match -background black \
+				   -foreground white \
+				   -listvariable ::tournMatches]
+
+	set tournctrl2_f [ttk::frame $tourn_f.file -relief raised \
+			      -borderwidth 2]
+	set tournfile_l  [ttk::label $tourn_f.file.l \
+			      -text "Optional results filename:"]
+	set tournfile_e  [ttk::entry $tourn_f.file.e \
+			      -textvariable outfile]
+
+	grid $tourntime_l -column 0 -row 0 -sticky nsew
+	grid $tourntime_e -column 0 -row 1 -sticky nsew
+
+	grid $tournfile_l -column 0 -row 0 -sticky nsew
+	grid $tournfile_e -column 0 -row 1 -sticky nsew
+
+	grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
+	grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
+    }
     # The single battle mode shows the arena, the health box and the
     # message box
+    set ::tournScore    {}
+    set ::tournMatches  {}
+
     grid $::game_f  -column 0 -row 2 -sticky nsew
     grid $::arena_c -column 0 -row 0 -rowspan 2 -sticky nsew
-
-    set  tourn_f [ttk::frame $::game_f.tourn]
     grid $tourn_f -column 1 -row 0 -sticky nsew
-
-    create_health_msg $tourn_f
-
-    set tournctrl1_f [ttk::frame $tourn_f.time -relief raised -borderwidth 2]
-    set tourntime_l  [ttk::label $tourn_f.time.l \
-                          -text "Max minutes / match:"]
-    set tourntime_e  [ttk::entry $tourn_f.time.e \
-                          -textvariable tlimit]
-
-    grid $tourntime_l -column 0 -row 0 -sticky nsew
-    grid $tourntime_e -column 0 -row 1 -sticky nsew
-
-    set ::tournScore    {}
-    set ::tournScore_lb   [listbox $tourn_f.score -background black \
-                               -listvariable ::tournScore]
-
-    set ::tournMatches  {}
-    set ::tournMatches_lb [listbox $tourn_f.match -background black \
-                               -foreground white -listvariable ::tournMatches]
-
-    set tournctrl2_f [ttk::frame $tourn_f.file -relief raised -borderwidth 2]
-    set tournfile_l  [ttk::label $tourn_f.file.l \
-                          -text "Optional results filename:"]
-    set tournfile_e  [ttk::entry $tourn_f.file.e \
-                          -textvariable outfile]
-
-    grid $tournfile_l -column 0 -row 0 -sticky nsew
-    grid $tournfile_e -column 0 -row 1 -sticky nsew
 
     # Fix resizing of widgets
     grid columnconfigure $::game_f 0 -weight 1
@@ -222,9 +226,7 @@ proc create_tournctrl {} {
     grid $::robotHealth_lb  -column 0 -row 0 -sticky nsew
     grid $::tournScore_lb   -column 0 -row 1 -sticky nsew
     grid $::tournMatches_lb -column 0 -row 2 -sticky nsew
-    grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
     grid $::robotMsg_lb     -column 1 -row 0 -sticky nsew -rowspan 3
-    grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
 }
 #******
 
@@ -363,6 +365,8 @@ proc run_tourn {} {
     puts "MATCHES:\n"
 
     foreach match $matchlist {
+	debug "mlist: $matchlist"
+
         if {$gui} {
             # Remove old canvas items
             $::arena_c delete robot
@@ -386,7 +390,7 @@ proc run_tourn {} {
             set data($robot,brightness) $data_tourn($robot,brightness)
         }
         # Init current two robots' interpreters
-        init_game match
+        init_match
 
         if {$gui} {
             foreach robot $allRobots {
@@ -402,7 +406,6 @@ proc run_tourn {} {
 	    vwait game(state)
 	}
         if {$game(state) ne "halt"} {
-	    debug "hello"
             # Set match score for tournament mode
             # Do not score tournament if it was halted
 	    set match_msg ""
@@ -436,8 +439,9 @@ proc run_tourn {} {
             }
             puts $match_msg
             append matchlog "$match_msg\n"
-	    }
-
+	} else {
+	    break
+	}
 	# Disable robots and clear messages
 	foreach robot $activeRobots {
 	    disable_robot $robot
@@ -462,9 +466,11 @@ proc run_tourn {} {
 # SOURCE
 #
 proc reset_tourn {} {
-    global game parms
+    global game matchlist parms
 
     set game(state) "halt"
+
+    debug "state $game(state)"
 
     set ::StatusBarMsg "Cleaning up"
     update
@@ -478,7 +484,7 @@ proc reset_tourn {} {
         $::arena_c delete all
     }
     grid forget $::game_f
-    destroy $::tourn_f
+    grid forget $::tourn_f
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"

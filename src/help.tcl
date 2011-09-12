@@ -56,12 +56,12 @@ proc init_help {} {
 
     switch $::tcl_platform(platform) {
         windows {
-            if {![catch {load $::thisDir/lib/tkhtml/tkhtml.dll}] } {
+            if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.dll}] } {
                 set ::html_help 1
             }
         }
         unix {
-            if {![catch {load $::thisDir/lib/tkhtml/tkhtml.so}] } {
+            if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.so}] } {
                 set ::html_help 1
             }
         }
@@ -83,12 +83,12 @@ proc init_help {} {
         bind all <MouseWheel> "+handle_scrollwheel %X %Y %D"
 
         # Read the HTML help doc
-        set f [open $::thisDir/doc/game_doc.html]
+        set f [open $::thisDir/../doc/game_doc.html]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc, add <pre> formatting
-        set f [open $::thisDir/LICENSE]
+        set f [open $::thisDir/../LICENSE]
         set ::license_text "<pre>[read $f]</pre>"
         close $f
     } else {
@@ -97,12 +97,12 @@ proc init_help {} {
                         -yscrollcommand ".help.s set"]
 
         # Read the plain text help doc
-        set f [open $::thisDir/README]
+        set f [open $::thisDir/../README]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc
-        set f [open $::thisDir/LICENSE]
+        set f [open $::thisDir/../LICENSE]
         set ::license_text [read $f]
         close $f
     }

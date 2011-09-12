@@ -65,7 +65,7 @@ proc init_sim {} {
     # start robots
     set ::StatusBarMsg "Running Simulator"
 
-    init_game base
+    init_game
 
     set ::allRobots {r0 target}
     set ::activeRobots $::allRobots
@@ -76,7 +76,7 @@ proc init_sim {} {
     set ::data(target,num)  12345
 
     # init_robots is defined in tclrobots.tcl
-    init_game match
+    init_match
     set ::tick 0
 
     # Set target signature, make it black and place it in center of the arena

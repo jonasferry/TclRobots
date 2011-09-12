@@ -34,7 +34,7 @@
 # SOURCE
 #
 proc init_battle {} {
-    global data game
+    global data game game_f
 
     # Clear any old data
     array unset data
@@ -44,7 +44,9 @@ proc init_battle {} {
 
     grid forget $::sel_f
 
-    create_health_msg $::game_f
+    if {![info exists game_f]} {
+	create_health_msg $game_f
+    }
 
     # The single battle mode shows the arena, the health box and the
     # message box
@@ -65,6 +67,7 @@ proc init_battle {} {
 
     # Init
     init_game
+    init_match
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
@@ -135,8 +138,6 @@ proc reset_battle {} {
         $::arena_c delete all
     }
     grid forget $::game_f
-    destroy $::game_f.health
-    destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"
