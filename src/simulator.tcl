@@ -417,25 +417,25 @@ proc run_sim {} {
 # SOURCE
 #
 proc reset_sim {} {
-    global game
+    global activeRobots arena_c game game_f parms sel_f sim_f \
+	StatusBarMsg
 
-    set ::StatusBarMsg "Cleaning up"
+    set StatusBarMsg "Cleaning up"
 
     set game(state) "halt"
     update
-    destroy $::sim_f
+    destroy $sim_f
 
-    foreach robot $::activeRobots {
+    foreach robot $activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
-        $::arena_c delete {*}[$::arena_c children 0]
+    if {$parms(tkp)} {
+        $arena_c delete {*}[$arena_c children 0]
     } else {
-        $::arena_c delete all
+        $arena_c delete all
     }
-    grid forget $::game_f
-#    grid forget $::robotMsg_lb
-    grid $::sel_f -column 0 -row 2 -sticky nsew
+    grid forget $game_f
+    grid $sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"
 }

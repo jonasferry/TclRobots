@@ -54,10 +54,11 @@ proc init_tourn {} {
     }
     #debug "allrobots1 $allRobots"
 
-    # Init all robots, can't use init_game from tclrobots.tcl because
+    # Init all robots, can't use init_match from tclrobots.tcl because
     # interpreters should be initialised separately in tournament mode
     init_game
-    init_robots
+    #init_robots
+    init_match
 
     debug "allrobots2 $allRobots"
 
