@@ -63,7 +63,6 @@ proc main {} {
     # Check current operating system
     if {$tcl_platform(platform) eq "windows"} {
 	set os "windows"
-	create_display
     } elseif {$tcl_platform(os) eq "Darwin"} {
 	set os "mac"
     } else {
@@ -90,13 +89,13 @@ proc main {} {
         switch -regexp -- $arg  {
             --debug   {set game(debug) 1}
             --gui     {set gui 1}
-	    --help    {show_usage; return}
+	    --help    {create_display; show_usage; return}
             --nomsg   {set nomsg 1}
             --n       {incr i; set game(numbattle) [lindex $argv $i]}
             --o       {incr i; set game(outfile) $arg}
             --seed    {incr i; set game(seed_arg) [lindex $argv $i]}
             --t.*     {set game(tourn_type) 1}
-            --version {display "TclRobots $version"; return}
+            --version {create_display; display "TclRobots $version"; return}
             default {
                 if {[file isfile [pwd]/$arg]} {
                     lappend game(robotfiles) [pwd]/$arg
@@ -107,6 +106,7 @@ proc main {} {
         }
     }
     if {[llength $game(robotfiles)] >= 2 && !$gui} {
+	create_display
         if {$game(tourn_type) == 0} {
             # Run single battle in terminal
 	    if {$game(numbattle) == 1} {
@@ -177,23 +177,25 @@ proc main {} {
 # SOURCE
 #
 proc create_display {} {
-    global display_t
+    global display_t gui os
 
-    package require Tk
+    if {[eq os "windows"] && !$gui} {
+	package require Tk
 
-    grid columnconfigure . 0 -weight 1 
-    grid rowconfigure    . 0 -weight 1
+	grid columnconfigure . 0 -weight 1 
+	grid rowconfigure    . 0 -weight 1
 
-    # Create display text area
-    set display_t [tk::text .t -width 80 -height 30 -wrap word \
-		       -yscrollcommand ".s set"]
+	# Create display text area
+	set display_t [tk::text .t -width 80 -height 30 -wrap word \
+			   -yscrollcommand ".s set"]
 
-    # Create scrollbar for display window
-    set display_s [ttk::scrollbar .s -command ".t yview" \
-		       -orient vertical]
-    # Grid the text box and scrollbar
-    grid $display_t -column 0 -row 1 -sticky nsew
-    grid $display_s -column 1 -row 1 -sticky ns
+	# Create scrollbar for display window
+	set display_s [ttk::scrollbar .s -command ".t yview" \
+			   -orient vertical]
+	# Grid the text box and scrollbar
+	grid $display_t -column 0 -row 1 -sticky nsew
+	grid $display_s -column 1 -row 1 -sticky ns
+    }
 }
 #******
 
