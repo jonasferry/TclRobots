@@ -33,6 +33,8 @@
 # SOURCE
 #
 proc init_help {} {
+    global os
+
     # Create new toplevel and apply some settings
     toplevel .help
     grid columnconfigure .help 0 -weight 1; grid rowconfigure .help 0 -weight 1
@@ -54,17 +56,14 @@ proc init_help {} {
     # Load the HTML extension
     set ::html_help 0
 
-    switch $::tcl_platform(platform) {
-        windows {
-            if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.dll}] } {
-                set ::html_help 1
-            }
-        }
-        unix {
-            if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.so}] } {
-                set ::html_help 1
-            }
-        }
+    if {$os eq "windows"} {
+	if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.dll}] } {
+	    set ::html_help 1
+	}
+    } else {
+	if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.so}] } {
+	    set ::html_help 1
+	}
     }
     if {$::html_help} {
         # HTML is enabled, create HTML widget
@@ -76,7 +75,7 @@ proc init_help {} {
         bind .help <ButtonRelease-1> "handle_click %x %y"
 
         # Bind mouse scroll wheel
-        if {[string equal "unix" $::tcl_platform(platform)]} {
+        if {$os ne "windows"} {
             bind all <4> "+handle_scrollwheel %X %Y -1"
             bind all <5> "+handle_scrollwheel %X %Y 1"
         }

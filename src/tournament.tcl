@@ -351,7 +351,7 @@ proc run_tourn {} {
     }
     set matchlog ""
     set matchnumber 0
-    puts "MATCHES:\n"
+    display "MATCHES:\n"
 
     foreach match $matchlist {
         if {$gui} {
@@ -426,7 +426,7 @@ proc run_tourn {} {
                 incr ::matchnum
             }
 	    incr matchnumber
-            puts "Match $matchnumber:$match_msg"
+            display "Match $matchnumber:$match_msg"
             append matchlog "$match_msg\n"
 	} else {
 	    break
@@ -538,7 +538,7 @@ proc report_score {} {
             tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
         }
     } else {
-        puts "\n$::win_msg"
+        display "\n$::win_msg"
     }
     # Set up report file message
     set outmsg ""

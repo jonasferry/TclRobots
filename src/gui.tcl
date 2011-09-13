@@ -33,31 +33,22 @@
 # SOURCE
 #
 proc init_gui {} {
-    global auto_path files_fb game parms robotList robotlist_lb robotlist_s \
-	sel_f StatusBarMsg tcl_platform thisDir version
+    global auto_path files_fb game os parms robotList robotlist_lb \
+	robotlist_s sel_f StatusBarMsg thisDir version
 
     package require Tk
-    # Try to get tkpath
-#    if {[catch {package require tkpath}]} {
-#        # Try to get tkpath from a local lib
-#        set libpath [file join $thisDir lib/tkpath]
-#        if {[file isdirectory $libpath]} {
-#            lappend auto_path $libpath
-#        }
-#	lappend auto_path $libpath
-#    }
     set libpath [file join $thisDir ../lib/tkpath]
     lappend auto_path $libpath
 
     if {[catch {package require tkpath}]} {
 	# Check current operating system
-	if {$tcl_platform(platform) eq "windows"} {
+	if {$os eq "windows"} {
 	    catch {
 		load $libpath/tkpath031.dll
 		source tkpath.tcl
 		package require tkpath
 	    }
-	} elseif {$tcl_platform(os) eq "Darwin"} {
+	} elseif {$os eq "mac"} {
 	    catch {
                 load $libpath/libtkpath0.3.1.dylib
                 source tkpath.tcl
@@ -852,7 +843,7 @@ proc button_state {state {run_cmd {}} {reset_cmd {}}} {
         set StatusBarMsg "Paused"
     } else {
         # Error
-        puts "Illegal button state"
+        display "Illegal button state"
         exit
     }
 }
@@ -1181,12 +1172,9 @@ proc show_scan {} {
                     ($data($robot,syscall,$tick) eq \
                     $data($robot,syscall,[- $tick 1]))} {
 
-                #puts "deg: $deg, res: $res"
-
-                set x [* $data($robot,x) $scale]
+		set x [* $data($robot,x) $scale]
                 set y [* [- 1000 $data($robot,y)] $scale]
-                #puts "scan $robot $x $y"
-                set val [* $parms(mismax) $scale]
+		set val [* $parms(mismax) $scale]
                 if {$parms(tkp)} {
                     set path [arc_path [expr {$deg-$res}] [expr {2*$res + 1}]]
                     # Scale to radius and move to location

@@ -347,9 +347,9 @@ proc ver_range {var low high} {
 # SOURCE
 #
 proc examine {} {
-    puts $::data(r0,interp)
+    display $::data(r0,interp)
     set ::status_val [$::data(r0,interp) eval set $::status_var]
-    puts $::status_val
+    display $::status_val
 }
 #******
 

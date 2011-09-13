@@ -48,7 +48,8 @@
 # SOURCE
 #
 proc main {} {
-    global allRobots argv data game gui nomsg thisDir thisScript version
+    global allRobots argv data game gui nomsg os tcl_platform \
+	thisDir thisScript version
 
     # Provide package name for starpack build, see Makefile
     package provide app-tclrobots 1.0
@@ -59,6 +60,15 @@ proc main {} {
     set thisScript [file join [pwd] [info script]]
     set thisDir [file dirname $thisScript]
 
+    # Check current operating system
+    if {$tcl_platform(platform) eq "windows"} {
+	set os "windows"
+	create_display
+    } elseif {$tcl_platform(os) eq "Darwin"} {
+	set os "mac"
+    } else {
+	set os "linux"
+    }
     set version          "3.0-alpha (2011-09-12)"
     set gui              0
     set nomsg            0
@@ -66,32 +76,32 @@ proc main {} {
     set game(max_ticks)  6000
     set game(robotfiles) {}
     set game(tourn_type) 0
-    set game(outfile)   ""
-    set game(loglevel)  1
+    set game(outfile)    ""
+    set game(loglevel)   1
     set game(simulator)  0
-    set game(state)     ""
-    set game(numbattle) 1
-    set game(winner)    {}
+    set game(state)      ""
+    set game(numbattle)  1
+    set game(winner)     {}
 
     set len [llength $argv]
     for {set i 0} {$i < $len} {incr i} {
         set arg [lindex $argv $i]
 
         switch -regexp -- $arg  {
-            -debug   {set game(debug) 1}
-            -gui     {set gui 1}
-	    -help    {show_usage; exit}
-            -nomsg   {set nomsg 1}
-            -n       {incr i; set game(numbattle) [lindex $argv $i]}
-            -o       {incr i; set game(outfile) $arg}
-            -seed    {incr i; set game(seed_arg) [lindex $argv $i]}
-            -t.*     {set game(tourn_type) 1}
-            -version {puts "TclRobots $version"; exit}
+            --debug   {set game(debug) 1}
+            --gui     {set gui 1}
+	    --help    {show_usage; return}
+            --nomsg   {set nomsg 1}
+            --n       {incr i; set game(numbattle) [lindex $argv $i]}
+            --o       {incr i; set game(outfile) $arg}
+            --seed    {incr i; set game(seed_arg) [lindex $argv $i]}
+            --t.*     {set game(tourn_type) 1}
+            --version {display "TclRobots $version"; return}
             default {
                 if {[file isfile [pwd]/$arg]} {
                     lappend game(robotfiles) [pwd]/$arg
                 } else {
-                    puts "'$arg' not found, skipping"
+                    display "'$arg' not found, skipping"
                 }
             }
         }
@@ -100,9 +110,9 @@ proc main {} {
         if {$game(tourn_type) == 0} {
             # Run single battle in terminal
 	    if {$game(numbattle) == 1} {
-		puts "\nSingle battle started\n"
+		display "\nSingle battle started\n"
 	    } else {
-		puts "\nSingle battles started\n"
+		display "\nSingle battles started\n"
 	    }
             set running_time [/ [lindex [time {
 		while {$game(numbattle) > 0} {
@@ -113,12 +123,12 @@ proc main {} {
 		    incr game(numbattle) -1
 		}
 	    }] 0] 1000000.0]
-            puts "seed: $game(seed)"
-            puts "time: $running_time seconds"
+            display "seed: $game(seed)"
+            display "time: $running_time seconds"
 	    if {$game(numbattle) == 1} {
-		puts "\nSingle battle finished\n"
+		display "\nSingle battle finished\n"
 	    } else {
-		puts "\nSingle battles finished\n"
+		display "\nSingle battles finished\n"
 		foreach robot $allRobots {
 		    set count 0
 		    foreach winner $game(winner) {
@@ -129,18 +139,20 @@ proc main {} {
 		    lappend winnerList "$count $data($robot,name)"
 		}
 		foreach item [lsort -index 0 -decreasing $winnerList] {
-		    puts $item
+		    display $item
 		}
+		# Newline for pretty output
+		display ""
 	    }
         } else {
             # Run tournament in terminal
-            puts "\nTournament started\n"
+            display "\nTournament started\n"
             source $thisDir/tournament.tcl
             set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
                                   1000000.0]
-            puts "seed: $game(seed)"
-            puts "time: $running_time seconds\n"
-            puts "Tournament finished\n"
+            display "seed: $game(seed)"
+            display "time: $running_time seconds\n"
+            display "Tournament finished\n"
         }
     } else {
         # Run GUI
@@ -148,6 +160,40 @@ proc main {} {
         source $thisDir/gui.tcl
         init_gui
     }
+}
+#******
+
+#****P* main/create_display
+#
+# NAME
+#
+#   create_display
+#
+# DESCRIPTION
+#
+#   Windows has no standard output, so a special text box is created
+#   to display game text messages.
+#
+# SOURCE
+#
+proc create_display {} {
+    global display_t
+
+    package require Tk
+
+    grid columnconfigure . 0 -weight 1 
+    grid rowconfigure    . 0 -weight 1
+
+    # Create display text area
+    set display_t [tk::text .t -width 80 -height 30 -wrap word \
+		       -yscrollcommand ".s set"]
+
+    # Create scrollbar for display window
+    set display_s [ttk::scrollbar .s -command ".t yview" \
+		       -orient vertical]
+    # Grid the text box and scrollbar
+    grid $display_t -column 0 -row 1 -sticky nsew
+    grid $display_s -column 1 -row 1 -sticky ns
 }
 #******
 
@@ -166,20 +212,20 @@ proc main {} {
 proc show_usage {} {
     global version
 
-    puts "
+    display "
 TclRobots $version
 
-Command-line arguments:
+Command-line arguments (in any order):
 
--debug     : Enable debug messages and lowered health for quicker battles.
--gui       : Use GUI; useful in combination with robot files.
--help      : Show this help.
--msg       : Disable robot messages.
--n <N>     : Run N number of battles.
--o <FILE>  : Set results output file.
--seed <S>  : Start with random seed S to replay a specific battle.
--t*        : Run tournament in batch mode.
--version   : Show version and exit.
+--debug     : Enable debug messages and lowered health for quicker battles.
+--gui       : Use GUI; useful in combination with robot files.
+--help      : Show this help.
+--msg       : Disable robot messages.
+--n <N>     : Run N number of battles.
+--o <FILE>  : Set results output file.
+--seed <S>  : Start with random seed S to replay a specific battle.
+--t*        : Run tournament in batch mode.
+--version   : Show version and exit.
 <robot.tr> : Add one ore more robot files.
 "
 }
@@ -1197,7 +1243,7 @@ proc disable_robot {robot} {
         set activeRobots [lreplace $activeRobots $index $index]
         array unset data $robot
     } else {
-        puts "disable robot $robot failed; interp does not exist"
+        display "disable robot $robot failed; interp does not exist"
     }
 }
 #******
@@ -1279,7 +1325,7 @@ proc find_winner {} {
             }
         }
     }
-    puts "$win_msg\n"
+    display "$win_msg\n"
     foreach robot $activeRobots {
         disable_robot $robot
     }
@@ -1332,7 +1378,7 @@ proc find_winner {} {
 #
 proc write_file {file str} {
     set fd [open $file w]
-    puts $fd $str
+    display $fd $str
     close $fd
 }
 #******
@@ -1728,7 +1774,7 @@ proc sysTeamDeclare {robot} {
 proc sysTeamSend {robot msg} {
     global data
 
-    puts "sysTeamSend $robot $msg"
+    display "sysTeamSend $robot $msg"
     set data($robot,data) $msg
 }
 #******
@@ -1759,7 +1805,7 @@ proc sysTeamGet {robot} {
         }
     }
     if {$val ne {}} {
-        puts "sysTeamGet $robot $val"
+        display "sysTeamGet $robot $val"
     }
     return $val
 }
@@ -1788,7 +1834,7 @@ proc sysDputs {robot msg} {
 	    show_msg $robot $msg
 	} else {
 	    # Output to terminal
-	    puts "$data($robot,name): $msg"
+	    display "$data($robot,name): $msg"
 	}
 	if {$game(outfile) ne ""} {
 	    append robmsg_out "$data($robot,name): $msg\n"
@@ -1797,7 +1843,7 @@ proc sysDputs {robot msg} {
 }
 #******
 
-#****P* tclrobots/rand
+#****P* tclrobots/mrand
 #
 # NAME
 #
@@ -1811,6 +1857,31 @@ proc sysDputs {robot msg} {
 #
 proc mrand {max} {
     return [int [* [rand] $max]]
+}
+#******
+
+#****P* tclrobots/display
+#
+# NAME
+#
+#   display
+#
+# DESCRIPTION
+#
+#   Displays text $msg.
+#
+# SOURCE
+#
+proc display {msg} {
+    global display_t os
+
+    if {$os eq "windows"} {
+	$display_t insert end "$msg\n"
+	$display_t see end
+	update
+    } else {
+	puts $msg
+    }
 }
 #******
 
@@ -1846,15 +1917,15 @@ proc debug {args} {
         set caller [lindex [info level [- [info level] 1]] 0]
         if {[lindex $args 0] eq "breakpoint"} {
             set broken 1
-            puts "Breakpoint reached (dbg: $caller)"
+            display "Breakpoint reached (dbg: $caller)"
             vwait broken
         } elseif {[lindex $args 0] eq "exit"} {
             # Calling with 'debug exit "msg"' prints the message and then
             # exits. This is useful for "checkpoint" style debugging.
-            puts "- [join [lrange $args 1 end]] (dbg: $caller)\n"
+            display "- [join [lrange $args 1 end]] (dbg: $caller)\n"
             exit
         } else {
-            puts "- [join $args] (dbg: $caller)\n"
+            display "- [join $args] (dbg: $caller)\n"
         }
     }
 }

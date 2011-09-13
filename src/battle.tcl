@@ -112,8 +112,6 @@ proc run_battle {} {
     button_state "running"
     run_game
 
-    puts "state: $game(state)"
-
     # find winnner
     if {$game(state) eq "halt"} {
         set ::StatusBarMsg "Battle halted"
