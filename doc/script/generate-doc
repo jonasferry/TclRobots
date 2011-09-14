@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh
 
 proc main {} {
-    set srcfiles  {tclrobots syscalls gui battle simulator tournament help}
+    set srcfiles  {main syscalls gui battle simulator tournament help}
     set ::srcdocs {}
 
     foreach file $srcfiles {
@@ -9,6 +9,9 @@ proc main {} {
         gen_src_doc ${file}.tcl ${file}_doc
         clean_file  ${file}_doc
     }
+    # Generate documentation for top-level file
+    gen_src_doc ../tclrobots.tcl tclrobots_doc
+    clean_file  tclrobots_doc
     # Generate README by stripping the HTML from help_doc.html
     gen_readme
 }

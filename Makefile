@@ -1,6 +1,6 @@
 SRC = src/battle.tcl src/gui.tcl src/help.tcl \
-      src/simulator.tcl src/tclrobots.tcl \
-      src/tournament.tcl
+      src/simulator.tcl src/main.tcl \
+      src/tournament.tcl tclrobots.tcl
 
 SDX = ../build/tclkit-8.6 ../build/sdx.kit
 
@@ -8,7 +8,7 @@ SDX = ../build/tclkit-8.6 ../build/sdx.kit
 # with the same name
 TEMP = temp123123123
 
-all: doc test
+all: doc test build
 
 build: build-linux build-windows
 

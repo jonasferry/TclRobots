@@ -6,21 +6,22 @@
 <li>2.1. <a href="#robo2">init_tourn/get_filenames_tourn</a></li>
 <li>2.2. <a href="#robo3">init_tourn/init_gui_tourn</a></li>
 <ul>
-<li>2.2.1. <a href="#robo4">init_gui_tourn/create_tournctrl</a></li>
+<li>2.2.1. <a href="#robo4">init_gui_tourn/create_tourn_gui</a></li>
+<li>2.2.2. <a href="#robo5">init_gui_tourn/grid_tourn_gui</a></li>
 </ul>
-<li>2.3. <a href="#robo5">init_tourn/build_matchlist</a></li>
-<li>2.4. <a href="#robo9">init_tourn/run_tourn</a></li>
+<li>2.3. <a href="#robo6">init_tourn/build_matchlist</a></li>
+<li>2.4. <a href="#robo10">init_tourn/run_tourn</a></li>
 <ul>
-<li>2.4.1. <a href="#robo11">run_tourn/sort_score</a></li>
-<li>2.4.2. <a href="#robo12">run_tourn/report_score</a></li>
+<li>2.4.1. <a href="#robo12">run_tourn/sort_score</a></li>
+<li>2.4.2. <a href="#robo13">run_tourn/report_score</a></li>
 </ul>
 </ul>
-<li>3. <a href="#robo6">tournament/update_tourn</a></li>
+<li>3. <a href="#robo7">tournament/update_tourn</a></li>
 <ul>
-<li>3.1. <a href="#robo7">update_tourn/show_score</a></li>
-<li>3.2. <a href="#robo8">update_tourn/show_matches</a></li>
+<li>3.1. <a href="#robo8">update_tourn/show_score</a></li>
+<li>3.2. <a href="#robo9">update_tourn/show_matches</a></li>
 </ul>
-<li>4. <a href="#robo10">halt_tourn/reset_tourn</a></li>
+<li>4. <a href="#robo11">halt_tourn/reset_tourn</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="tournament2ffile5fheader"></a>
@@ -65,21 +66,19 @@
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_tourn {} {
     global allRobots allRobots_tourn activeRobots activeRobots_tourn data \
-        data_tourn game score
+        data_tourn game gui score
 
     # Clear any old data
     array unset data
 
-    if {$::gui} {
+    if {$gui} {
         get_filenames_tourn
         init_gui_tourn
     }
-    # Init all robots, can't use init_game from tclrobots.tcl because
-    # interpreters should be initialised separately in tournament mode
-    init_game base
-    init_robots
+    init_game
+    init_match
 
-    if {$::gui} {
+    if {$gui} {
         # Init robots on GUI
         gui_init_robots
 
@@ -97,11 +96,7 @@
 
     build_matchlist
 
-    if {$::debug} {
-        #set ::matchlist {{r0 r1} {r0 r1} {r0 r1}}
-    }
-
-    if {$::gui} {
+    if {$gui} {
         set game(state) "halt"
 
         set ::matchnum 0
@@ -133,8 +128,10 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc get_filenames_tourn {} {
+    global game robotList
+
     # get robot filenames from window
-    set ::robotFiles $::robotList
+    set game(robotfiles) $robotList
 }
 </pre>
 <a name="robo3"></a>
@@ -144,95 +141,94 @@
 <p>   init_gui_tourn
 </p>
 <p class="item_name">DESCRIPTION</p>
-<p>   Creates theemacs -r ~/Desktop/code/tcl/tclrobots/tclrobots/tclrobots.tcl tournament mode GUI.
+<p>   Creates the tournament mode GUI.
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_gui_tourn {} {
-    grid forget $::sel_f
+    global robotHealth robotMsg sel_f StatusBarMsg
+
+    grid forget $sel_f
 
     show_arena
 
     # Create and grid the tournament control box
-    create_tournctrl
+    create_tourn_gui
+    grid_tourn_gui
 
     # Clear message boxes
-    set ::robotHealth {}
-    set ::robotMsg    {}
+    set robotHealth {}
+    set robotMsg    {}
 
     # start robots
-    set ::StatusBarMsg "Optionally select match time and outfile and press START"
+    set StatusBarMsg "Press START to start tournament"
     button_state "game" run_tourn reset_tourn
 }
 </pre>
 <a name="robo4"></a>
-<a name="init5fgui5ftourn2fcreate5ftournctrl"></a>
-<h3>2.2.1.  init_gui_tourn/create_tournctrl [ procedure ]  </h3>
+<a name="init5fgui5ftourn2fcreate5ftourn5fgui"></a>
+<h3>2.2.1.  init_gui_tourn/create_tourn_gui [ procedure ]  </h3>
 <p class="item_name">NAME</p>
-<p>   create_tournctrl
+<p>   create_tourn_gui
 </p>
 <p class="item_name">DESCRIPTION</p>
-<p>   Create and grid the tournament control box.
+<p>   Create the tournament GUI.
 </p>
 <p class="item_name">SOURCE</p>
-<pre class="source">proc create_tournctrl {} {
-    global tourn_f
+<pre class="source">proc create_tourn_gui {} {
+    global game_f tourn_f tournMatches tournMatches_lb \
+        tournScore tournScore_lb
 
-    # The single battle mode shows the arena, the health box and the
-    # message box
-    grid $::game_f  -column 0 -row 2 -sticky nsew
-    grid $::arena_c -column 0 -row 0 -rowspan 2 -sticky nsew
+    if {![info exists tourn_f]} {
+        set tourn_f [ttk::frame $game_f.tourn]
 
-    set  tourn_f [ttk::frame $::game_f.tourn]
-    grid $tourn_f -column 1 -row 0 -sticky nsew
+        set tournScore_lb   [listbox $tourn_f.score -background black \
+                                 -listvariable tournScore]
 
-    create_health_msg $tourn_f
-
-    set tournctrl1_f [ttk::frame $tourn_f.time -relief raised -borderwidth 2]
-    set tourntime_l  [ttk::label $tourn_f.time.l \
-                          -text "Max minutes / match:"]
-    set tourntime_e  [ttk::entry $tourn_f.time.e \
-                          -textvariable tlimit]
-
-    grid $tourntime_l -column 0 -row 0 -sticky nsew
-    grid $tourntime_e -column 0 -row 1 -sticky nsew
-
-    set ::tournScore    {}
-    set ::tournScore_lb   [listbox $tourn_f.score -background black \
-                               -listvariable ::tournScore]
-
-    set ::tournMatches  {}
-    set ::tournMatches_lb [listbox $tourn_f.match -background black \
-                               -foreground white -listvariable ::tournMatches]
-
-    set tournctrl2_f [ttk::frame $tourn_f.file -relief raised -borderwidth 2]
-    set tournfile_l  [ttk::label $tourn_f.file.l \
-                          -text "Optional results filename:"]
-    set tournfile_e  [ttk::entry $tourn_f.file.e \
-                          -textvariable outfile]
-
-    grid $tournfile_l -column 0 -row 0 -sticky nsew
-    grid $tournfile_e -column 0 -row 1 -sticky nsew
-
-    # Fix resizing of widgets
-    grid columnconfigure $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $tourn_f 0 -weight 1
-    grid columnconfigure $tourn_f 1 -weight 1
-    grid rowconfigure    $tourn_f  0 -weight 1
-    grid rowconfigure    $tourn_f  1 -weight 1
-    grid rowconfigure    $tourn_f  2 -weight 1
-
-    # Grid all major widgets
-    grid $::robotHealth_lb  -column 0 -row 0 -sticky nsew
-    grid $::tournScore_lb   -column 0 -row 1 -sticky nsew
-    grid $::tournMatches_lb -column 0 -row 2 -sticky nsew
-    grid $tournctrl1_f      -column 0 -row 3 -sticky nsew
-    grid $::robotMsg_lb     -column 1 -row 0 -sticky nsew -rowspan 3
-    grid $tournctrl2_f      -column 1 -row 3 -sticky nsew
+        set tournMatches_lb [listbox $tourn_f.match -background black \
+                                   -foreground white \
+                                   -listvariable tournMatches]
+    }
+    grid $tournScore_lb   -column 0 -row 1 -sticky nsew
+    grid $tournMatches_lb -column 0 -row 2 -sticky nsew
 }
 </pre>
 <a name="robo5"></a>
+<a name="init5fgui5ftourn2fgrid5ftourn5fgui"></a>
+<h3>2.2.2.  init_gui_tourn/grid_tourn_gui [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   grid_tourn_gui
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Grid the tournament GUI.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc grid_tourn_gui {} {
+    global arena_c game_f robotMsg_lb robotHealth_lb tourn_f \
+        tournMatches tournMatches_lb tournScore tournScore_lb
+
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    set tournScore    {}
+    set tournMatches  {}
+
+    grid $game_f         -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -sticky nsew -rowspan 2
+    grid $robotHealth_lb -column 1 -row 0 -sticky nsew
+    grid $tourn_f        -column 1 -row 1 -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0 -sticky nsew -rowspan 3
+
+    # Fix resizing of widgets
+    grid columnconfigure $game_f  0 -weight 1
+    grid columnconfigure $game_f  1 -weight 1
+    grid rowconfigure    $game_f  0 -weight 1
+    grid columnconfigure $tourn_f 0 -weight 1
+    grid columnconfigure $tourn_f 1 -weight 1
+    grid rowconfigure    $tourn_f 0 -weight 1
+    grid rowconfigure    $tourn_f 1 -weight 1
+    grid rowconfigure    $tourn_f 2 -weight 1
+}
+</pre>
+<a name="robo6"></a>
 <a name="init5ftourn2fbuild5fmatchlist"></a>
 <h2>2.3.  init_tourn/build_matchlist [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -259,7 +255,7 @@
     }
 }
 </pre>
-<a name="robo9"></a>
+<a name="robo10"></a>
 <a name="init5ftourn2frun5ftourn"></a>
 <h2>2.4.  init_tourn/run_tourn [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -271,20 +267,20 @@
 <p class="item_name">SOURCE</p>
 <pre class="source">proc run_tourn {} {
     global activeRobots activeRobots_tourn allRobots allRobots_tourn \
-        data data_tourn game matchlist matchlog score
+        data data_tourn game gui matchlist matchlog score
 
-    if {$::gui} {
+    if {$gui} {
         button_state "running"
     }
     set matchlog ""
-    puts "MATCHES:\n"
+    set matchnumber 0
+    display "MATCHES:\n"
 
     foreach match $matchlist {
-        if {$::gui} {
+        if {$gui} {
             # Remove old canvas items
             $::arena_c delete robot
             $::arena_c delete scan
-            debug "Running match $::matchnum $match from $matchlist"
         }
         set robot  [lindex $match 0]
         set target [lindex $match 1]
@@ -299,13 +295,15 @@
             set data($robot,code)       $data_tourn($robot,code)
             set data($robot,name)       $data_tourn($robot,name)
             set data($robot,num)        $data_tourn($robot,num)
-            set data($robot,color)      $data_tourn($robot,color)
-            set data($robot,brightness) $data_tourn($robot,brightness)
+            if {$gui} {
+                set data($robot,color)      $data_tourn($robot,color)
+                set data($robot,brightness) $data_tourn($robot,brightness)
+            }
         }
         # Init current two robots' interpreters
-        init_game match
+        init_match
 
-        if {$::gui} {
+        if {$gui} {
             foreach robot $allRobots {
                 gui_create_robot $robot $data_tourn($robot,color) \
                     [lsearch -exact $allRobots_tourn $robot]
@@ -319,7 +317,6 @@
             vwait game(state)
         }
         if {$game(state) ne "halt"} {
-            debug "hello"
             # Set match score for tournament mode
             # Do not score tournament if it was halted
             set match_msg ""
@@ -332,10 +329,10 @@
                 incr score([lindex $activeRobots 0]) 3
                 if {$robot eq $activeRobots} {
                     append match_msg \
-                        "$data($robot,name)(w) vs $data($target,name)"
+                        "$data($robot,name)(win) vs $data($target,name)"
                 } else {
                     append match_msg \
-                        "$data($robot,name)    vs $data($target,name)(w)"
+                        "$data($robot,name)    vs $data($target,name)(win)"
                 }
             } else {
                 # Note that this presupposes two-robot matches
@@ -347,25 +344,29 @@
             }
             sort_score
 
-            if {$::gui} {
+            if {$gui} {
                 update_tourn
                 incr ::matchnum
             }
-            puts $match_msg
+            incr matchnumber
+            display "Match $matchnumber:$match_msg"
             append matchlog "$match_msg\n"
-            }
-
+        } else {
+            break
+        }
         # Disable robots and clear messages
         foreach robot $activeRobots {
             disable_robot $robot
             set ::robotMsg {}
         }
-        button_state "file"
+        if {$gui} {
+            button_state "file"
+        }
         report_score
         }
 }
 </pre>
-<a name="robo11"></a>
+<a name="robo12"></a>
 <a name="run5ftourn2fsort5fscore"></a>
 <h3>2.4.1.  run_tourn/sort_score [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -393,7 +394,7 @@
     }
 }
 </pre>
-<a name="robo12"></a>
+<a name="robo13"></a>
 <a name="run5ftourn2freport5fscore"></a>
 <h3>2.4.2.  run_tourn/report_score [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -404,21 +405,21 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc report_score {} {
-    global game matchlog tournScore
+    global game gui matchlog tournScore
 
     set ::win_msg "TOURNAMENT SCORES:\n\n"
     foreach robotscore $tournScore {
         append ::win_msg "$robotscore\n"
     }
     # show results
-    if {$::gui} {
+    if {$gui} {
         if {$game(state) eq "halt"} {
             set ::StatusBarMsg "Battle halted"
         } else {
             tk_dialog2 .winner "Results" $::win_msg "-image iconfn" 0 dismiss
         }
     } else {
-        puts "\n$::win_msg"
+        display "\n$::win_msg"
     }
     # Set up report file message
     set outmsg ""
@@ -426,12 +427,11 @@
     append outmsg "$::win_msg"
 
     if {$game(outfile) ne ""} {
-        debug "$game(outfile) :::: $outmsg"
         catch {write_file $game(outfile) $outmsg}
     }
 }
 </pre>
-<a name="robo6"></a>
+<a name="robo7"></a>
 <a name="tournament2fupdate5ftourn"></a>
 <h1>3.  tournament/update_tourn [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -445,7 +445,7 @@
     update
 }
 </pre>
-<a name="robo7"></a>
+<a name="robo8"></a>
 <a name="update5ftourn2fshow5fscore"></a>
 <h2>3.1.  update_tourn/show_score [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -466,7 +466,7 @@
     }
 }
 </pre>
-<a name="robo8"></a>
+<a name="robo9"></a>
 <a name="update5ftourn2fshow5fmatches"></a>
 <h2>3.2.  update_tourn/show_matches [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -498,7 +498,7 @@
     }
 }
 </pre>
-<a name="robo10"></a>
+<a name="robo11"></a>
 <a name="halt5ftourn2freset5ftourn"></a>
 <h1>4.  halt_tourn/reset_tourn [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -509,27 +509,26 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc reset_tourn {} {
-    global game
+    global game matchlist parms
+
+    set game(state) "halt"
 
     set ::StatusBarMsg "Cleaning up"
     update
 
-    set game(state) "halt"
-    destroy $::tourn_f
-
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
+    if {$parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all
     }
     grid forget $::game_f
+    grid forget $::tourn_f
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"
-    debug button_state
 }
 </pre>
 

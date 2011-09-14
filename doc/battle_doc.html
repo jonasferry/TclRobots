@@ -3,9 +3,10 @@
 <li>1. <a href="#robo0">battle/file_header</a></li>
 <li>2. <a href="#robo1">battle/init_battle</a></li>
 <ul>
-<li>2.1. <a href="#robo2">init_battle/run_battle</a></li>
+<li>2.1. <a href="#robo2">init_battle/grid_battle_gui</a></li>
+<li>2.2. <a href="#robo3">init_battle/run_battle</a></li>
 </ul>
-<li>3. <a href="#robo3">halt_battle/reset_battle</a></li>
+<li>3. <a href="#robo4">halt_battle/reset_battle</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="battle2ffile5fheader"></a>
@@ -39,29 +40,15 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_battle {} {
-    global data
+    global data game game_f
 
     # Clear any old data
     array unset data
 
     # get robot filenames from window
-    set ::robotFiles $::robotList
+    set game(robotfiles) $::robotList
 
-    grid forget $::sel_f
-
-    create_health_msg $::game_f
-
-    # The single battle mode shows the arena, the health box and the
-    # message box
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotHealth_lb -column 1 -row 0            -sticky nsew
-    grid $::robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $::game_f 0 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid columnconfigure $::game_f 2 -weight 1
-
+    grid_battle_gui
     show_arena
 
     # Clear message boxes
@@ -70,6 +57,7 @@
 
     # Init
     init_game
+    init_match
 
     # start robots
     set ::StatusBarMsg "Press START to start battle"
@@ -77,8 +65,35 @@
 }
 </pre>
 <a name="robo2"></a>
+<a name="init5fbattle2fgrid5fbattle5fgui"></a>
+<h2>2.1.  init_battle/grid_battle_gui [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   grid_battle_gui
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Grid the battle GUI.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc grid_battle_gui {} {
+    global arena_c game_f robotHealth_lb robotMsg_lb sel_f
+
+    grid forget $sel_f
+
+    # The single battle mode shows the arena, the health box and the
+    # message box
+    grid $game_f -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $robotHealth_lb -column 1 -row 0            -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
+    grid columnconfigure $game_f 0 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
+    grid columnconfigure $game_f 1 -weight 1
+    grid columnconfigure $game_f 2 -weight 1
+}
+</pre>
+<a name="robo3"></a>
 <a name="init5fbattle2frun5fbattle"></a>
-<h2>2.1.  init_battle/run_battle [ procedure ]  </h2>
+<h2>2.2.  init_battle/run_battle [ procedure ]  </h2>
 <p class="item_name">NAME</p>
 <p>   run_battle
 </p>
@@ -97,8 +112,6 @@
     button_state "running"
     run_game
 
-    puts "state: $game(state)"
-
     # find winnner
     if {$game(state) eq "halt"} {
         set ::StatusBarMsg "Battle halted"
@@ -107,7 +120,7 @@
     }
 }
 </pre>
-<a name="robo3"></a>
+<a name="robo4"></a>
 <a name="halt5fbattle2freset5fbattle"></a>
 <h1>3.  halt_battle/reset_battle [ procedure ]  </h1>
 <p class="item_name">NAME</p>
@@ -118,7 +131,7 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc reset_battle {} {
-    global game
+    global game parms
 
     set game(state) "halt"
 
@@ -128,14 +141,12 @@
     foreach robot $::activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
+    if {$parms(tkp)} {
         $::arena_c delete {*}[$::arena_c children 0]
     } else {
         $::arena_c delete all
     }
     grid forget $::game_f
-    destroy $::game_f.health
-    destroy $::game_f.msg
     grid $::sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"

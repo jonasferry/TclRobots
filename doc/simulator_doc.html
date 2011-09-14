@@ -3,15 +3,16 @@
 <li>1. <a href="#robo0">simulator/file_header</a></li>
 <li>2. <a href="#robo1">simulator/init_sim</a></li>
 <ul>
-<li>2.1. <a href="#robo2">init_sim/create_simctrl</a></li>
+<li>2.1. <a href="#robo3">init_sim/create_simctrl</a></li>
 <ul>
-<li>2.1.1. <a href="#robo3">create_simctrl/ver_range</a></li>
-<li>2.1.2. <a href="#robo4">create_simctrl/examine</a></li>
-<li>2.1.3. <a href="#robo5">create_simctrl/setval</a></li>
+<li>2.1.1. <a href="#robo4">create_simctrl/ver_range</a></li>
+<li>2.1.2. <a href="#robo5">create_simctrl/examine</a></li>
+<li>2.1.3. <a href="#robo6">create_simctrl/setval</a></li>
 </ul>
-<li>2.2. <a href="#robo6">init_sim/run_sim</a></li>
+<li>2.2. <a href="#robo7">init_sim/run_sim</a></li>
 </ul>
-<li>3. <a href="#robo7">halt_sim/reset_sim</a></li>
+<li>3. <a href="#robo2">init_battle/grid_sim_gui</a></li>
+<li>4. <a href="#robo8">halt_sim/reset_sim</a></li>
 </ul>
 <a name="robo0"></a>
 <a name="simulator2ffile5fheader"></a>
@@ -45,25 +46,17 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_sim {} {
+    global game
+
     # Read from robot file names; only the first file is used
-    set ::robotFiles [lrange $::robotList 0 0]
+    set game(robotfiles) [lindex $::robotList 0]
 
     set ticks   0
     set ::StatusBarMsg "Simulator"
 
-    grid forget $::sel_f
-
-    create_health_msg $::game_f
-
-    # The simulator shows the arena, the message box and the simulator
-    # controls. Simulator controls are defined later.
-    grid $::game_f -column 0 -row 2 -sticky nsew
-    grid $::arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $::robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $::game_f 0 -weight 1
-    grid rowconfigure    $::game_f 0 -weight 1
-    grid columnconfigure $::game_f 1 -weight 1
-    grid columnconfigure $::game_f 2 -weight 1
+    # Create and grid the simulation control box
+    create_simctrl
+    grid_sim_gui
 
     # show_arena is defined in gui.tcl
     show_arena
@@ -74,7 +67,7 @@
     # start robots
     set ::StatusBarMsg "Running Simulator"
 
-    init_game base
+    init_game
 
     set ::allRobots {r0 target}
     set ::activeRobots $::allRobots
@@ -85,16 +78,13 @@
     set ::data(target,num)  12345
 
     # init_robots is defined in tclrobots.tcl
-    init_game match
+    init_match
     set ::tick 0
 
     # Set target signature, make it black and place it in center of the arena
     set ::data(target,num)   1
     set ::data(target,x)     500
     set ::data(target,y)     500
-
-    # Create and grid the simulation control box
-    create_simctrl
 
     # Start simulation in continous (non-step) mode
     set ::step 0
@@ -104,7 +94,7 @@
     button_state "game" run_sim reset_sim
 }
 </pre>
-<a name="robo2"></a>
+<a name="robo3"></a>
 <a name="init5fsim2fcreate5fsimctrl"></a>
 <h2>2.1.  init_sim/create_simctrl [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -118,7 +108,6 @@
     global sim_f
 
     set  sim_f  [ttk::frame $::game_f.sim]
-    grid $sim_f -column 1 -row 0 -sticky nsew
 
     # Create and grid first row of simulation control box
     set stepsys_cb [ttk::checkbutton $sim_f.cb -text "Step syscalls" \
@@ -299,7 +288,7 @@
     }
 }
 </pre>
-<a name="robo3"></a>
+<a name="robo4"></a>
 <a name="create5fsimctrl2fver5frange"></a>
 <h3>2.1.1.  create_simctrl/ver_range [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -320,7 +309,7 @@
     set ::data(r0,$var) $val
 }
 </pre>
-<a name="robo4"></a>
+<a name="robo5"></a>
 <a name="create5fsimctrl2fexamine"></a>
 <h3>2.1.2.  create_simctrl/examine [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -331,12 +320,12 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc examine {} {
-    puts $::data(r0,interp)
+    display $::data(r0,interp)
     set ::status_val [$::data(r0,interp) eval set $::status_var]
-    puts $::status_val
+    display $::status_val
 }
 </pre>
-<a name="robo5"></a>
+<a name="robo6"></a>
 <a name="create5fsimctrl2fsetval"></a>
 <h3>2.1.3.  create_simctrl/setval [ procedure ]  </h3>
 <p class="item_name">NAME</p>
@@ -350,7 +339,7 @@
     $::data(r0,interp) eval set $::status_var $::status_val
 }
 </pre>
-<a name="robo6"></a>
+<a name="robo7"></a>
 <a name="init5fsim2frun5fsim"></a>
 <h2>2.2.  init_sim/run_sim [ procedure ]  </h2>
 <p class="item_name">NAME</p>
@@ -379,9 +368,36 @@
     coroutine run_robotsCo run_robots
 }
 </pre>
-<a name="robo7"></a>
+<a name="robo2"></a>
+<a name="init5fbattle2fgrid5fsim5fgui"></a>
+<h1>3.  init_battle/grid_sim_gui [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   grid_sim_gui
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   Grid the simulator GUI.
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc grid_sim_gui {} {
+    global arena_c game_f robotMsg_lb sel_f sim_f
+
+    grid forget $sel_f
+
+    # The simulator shows the arena, the message box and the simulator
+    # controls. Simulator controls are defined later.
+    grid $game_f -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
+    grid $sim_f -column 1 -row 0 -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
+    grid columnconfigure $game_f 0 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
+    grid columnconfigure $game_f 1 -weight 1
+    grid columnconfigure $game_f 2 -weight 1
+}
+</pre>
+<a name="robo8"></a>
 <a name="halt5fsim2freset5fsim"></a>
-<h1>3.  halt_sim/reset_sim [ procedure ]  </h1>
+<h1>4.  halt_sim/reset_sim [ procedure ]  </h1>
 <p class="item_name">NAME</p>
 <p>   reset_sim
 </p>
@@ -390,26 +406,25 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc reset_sim {} {
-    global game
+    global activeRobots arena_c game game_f parms sel_f sim_f \
+        StatusBarMsg
 
-    set ::StatusBarMsg "Cleaning up"
+    set StatusBarMsg "Cleaning up"
 
     set game(state) "halt"
     update
-    destroy $::sim_f
+    destroy $sim_f
 
-    foreach robot $::activeRobots {
+    foreach robot $activeRobots {
         disable_robot $robot
     }
-    if {$::parms(tkp)} {
-        $::arena_c delete {*}[$::arena_c children 0]
+    if {$parms(tkp)} {
+        $arena_c delete {*}[$arena_c children 0]
     } else {
-        $::arena_c delete all
+        $arena_c delete all
     }
-    grid forget $::game_f
-    destroy $::game_f.health
-    destroy $::game_f.msg
-    grid $::sel_f -column 0 -row 2 -sticky nsew
+    grid forget $game_f
+    grid $sel_f -column 0 -row 2 -sticky nsew
 
     button_state "file"
 }

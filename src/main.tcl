@@ -1,4 +1,4 @@
-#****F* tclrobots/file_header
+#****F* main/file_header
 #
 # NAME
 #
@@ -35,19 +35,19 @@
 #
 #******
 
-#****P* tclrobots/main
+#****P* main/startup
 #
 # NAME
 #
-#   main
+#   startup
 #
 # DESCRIPTION
 #
-#   The main proc is run at program startup.
+#   The startup proc is run at program startup.
 #
 # SOURCE
 #
-proc main {} {
+proc startup {} {
     global allRobots argv data game gui nomsg os tcl_platform \
 	thisDir thisScript version
 
@@ -1363,7 +1363,7 @@ proc find_winner {} {
 }
 #******
 
-#****P* tclrobots/write_file
+#****P* main/write_file
 #
 # NAME
 #
@@ -1382,7 +1382,7 @@ proc write_file {file str} {
 }
 #******
 
-#****P* tclrobots/syscall
+#****P* main/syscall
 #
 # NAME
 #
@@ -1842,7 +1842,7 @@ proc sysDputs {robot msg} {
 }
 #******
 
-#****P* tclrobots/mrand
+#****P* main/mrand
 #
 # NAME
 #
@@ -1859,7 +1859,7 @@ proc mrand {max} {
 }
 #******
 
-#****P* tclrobots/display
+#****P* main/display
 #
 # NAME
 #
@@ -1884,7 +1884,7 @@ proc display {msg} {
 }
 #******
 
-#****P* tclrobots/debug
+#****P* main/debug
 #
 # NAME
 #
@@ -1931,4 +1931,4 @@ proc debug {args} {
 #******
 
 # All procs are sourced; enter main proc; see top of file.
-main
+startup
