@@ -174,8 +174,8 @@ proc create_tourn_gui {} {
 				   -foreground white \
 				   -listvariable tournMatches]
     }
-    grid $tournScore_lb   -column 0 -row 1 -sticky nsew
-    grid $tournMatches_lb -column 0 -row 2 -sticky nsew
+    grid $tournScore_lb   -column 0 -row 0 -sticky nsew
+    grid $tournMatches_lb -column 0 -row 1 -sticky nsew
 }
 #******
 
@@ -204,17 +204,17 @@ proc grid_tourn_gui {} {
     grid $arena_c        -column 0 -row 0 -sticky nsew -rowspan 2
     grid $robotHealth_lb -column 1 -row 0 -sticky nsew
     grid $tourn_f        -column 1 -row 1 -sticky nsew
-    grid $robotMsg_lb    -column 2 -row 0 -sticky nsew -rowspan 3
+    grid $robotMsg_lb    -column 2 -row 0 -sticky nsew -rowspan 2
 
     # Fix resizing of widgets
-    grid columnconfigure $game_f  0 -weight 1
+    grid columnconfigure $game_f  0 -weight 2
     grid columnconfigure $game_f  1 -weight 1
+    grid columnconfigure $game_f  2 -weight 1
     grid rowconfigure    $game_f  0 -weight 1
+    grid rowconfigure    $game_f  1 -weight 1
     grid columnconfigure $tourn_f 0 -weight 1
-    grid columnconfigure $tourn_f 1 -weight 1
     grid rowconfigure    $tourn_f 0 -weight 1
     grid rowconfigure    $tourn_f 1 -weight 1
-    grid rowconfigure    $tourn_f 2 -weight 1
 }
 #******
 

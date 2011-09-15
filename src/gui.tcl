@@ -40,6 +40,9 @@ proc init_gui {} {
     set libpath [file join $thisDir ../lib/tkpath]
     lappend auto_path $libpath
 
+    puts "thisDir: $thisDir"
+    puts "libpath: $libpath"
+
     if {[catch {package require tkpath}]} {
 	# Check current operating system
 	if {$os eq "windows"} {

@@ -6,7 +6,7 @@
 #
 # DESCRIPTION
 #
-#   This is the top-level file of TclRobots. It sources ./src/main.tcl
+#   This is the top-level file of TclRobots. It sources src/main.tcl
 #   which includes the main game logic.
 #
 #   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
@@ -24,4 +24,9 @@
 # Provide package name for starpack build, see Makefile
 package provide app-tclrobots 1.0
 
-source ./src/main.tcl
+set thisScript2 [file join [pwd] [info script]]
+set thisDir2 [file dirname $thisScript2]
+
+puts $thisDir2
+
+source $thisDir2/src/main.tcl

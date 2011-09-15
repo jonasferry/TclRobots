@@ -385,14 +385,15 @@
 
     # The simulator shows the arena, the message box and the simulator
     # controls. Simulator controls are defined later.
-    grid $game_f -column 0 -row 2 -sticky nsew
-    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $sim_f -column 1 -row 0 -sticky nsew
-    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $game_f 0 -weight 1
-    grid rowconfigure    $game_f 0 -weight 1
+    grid $game_f      -column 0 -row 2 -sticky nsew
+    grid $arena_c     -column 0 -row 0 -sticky nsew -rowspan 2
+    grid $sim_f       -column 1 -row 0 -sticky nsew
+    grid $robotMsg_lb -column 2 -row 0 -sticky nsew
+
+    grid columnconfigure $game_f 0 -weight 2
     grid columnconfigure $game_f 1 -weight 1
     grid columnconfigure $game_f 2 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
 }
 </pre>
 <a name="robo8"></a>

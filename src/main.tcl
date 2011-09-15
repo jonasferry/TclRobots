@@ -1872,9 +1872,15 @@ proc mrand {max} {
 # SOURCE
 #
 proc display {msg} {
-    global display_t os
+    global display_t gui os
 
-    if {$os eq "windows"} {
+    if {!$gui && [eq $os "windows"]} {	rm -rf $(TEMP)
+	mkdir $(TEMP)
+	(cd $(TEMP); cp -rf ../src .; cp -rf ../lib/ .; cp -rf ../samples/ .; cp ../README .; cp ../LICENSE .; cp -rf ../tclrobots.tcl .)
+	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
+	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
+	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
+	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
 	$display_t insert end "$msg\n"
 	$display_t see end
 	update

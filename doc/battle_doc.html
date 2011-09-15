@@ -81,14 +81,15 @@
 
     # The single battle mode shows the arena, the health box and the
     # message box
-    grid $game_f -column 0 -row 2 -sticky nsew
-    grid $arena_c        -column 0 -row 0 -rowspan 2 -sticky nsew
-    grid $robotHealth_lb -column 1 -row 0            -sticky nsew
-    grid $robotMsg_lb    -column 2 -row 0            -sticky nsew
-    grid columnconfigure $game_f 0 -weight 1
-    grid rowconfigure    $game_f 0 -weight 1
+    grid $game_f         -column 0 -row 2 -sticky nsew
+    grid $arena_c        -column 0 -row 0 -sticky nsew -rowspan 2
+    grid $robotHealth_lb -column 1 -row 0 -sticky nsew
+    grid $robotMsg_lb    -column 2 -row 0 -sticky nsew
+
+    grid columnconfigure $game_f 0 -weight 2
     grid columnconfigure $game_f 1 -weight 1
     grid columnconfigure $game_f 2 -weight 1
+    grid rowconfigure    $game_f 0 -weight 1
 }
 </pre>
 <a name="robo3"></a>

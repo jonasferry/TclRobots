@@ -19,9 +19,7 @@ build-linux:
 	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
 	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
 	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	cp -rf $(TEMP)/src/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	mkdir $(TEMP)/tclrobots.vfs/lib/lib
-	cp -rf $(TEMP)/lib/ $(TEMP)/tclrobots.vfs/lib/lib/
+	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
         # Wrap Linux version
 	cp build/tclkit-8.6 $(TEMP)/
 	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6)
@@ -35,14 +33,12 @@ build-windows:
 	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
 	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
 	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	cp -rf $(TEMP)/src/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	mkdir $(TEMP)/tclrobots.vfs/lib/lib
-	cp -rf $(TEMP)/lib/ $(TEMP)/tclrobots.vfs/lib/lib/
+	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
         # Wrap Windows version
 	cp build/tclkit-8.6.exe $(TEMP)/
 	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6.exe)
 	cp $(TEMP)/tclrobots.kit build/tclrobots.exe
-	rm -rf $(TEMP)
+#	rm -rf $(TEMP)
 
 check: header.syntax
 	nagelfar header.syntax $(SRC)
