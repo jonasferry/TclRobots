@@ -2,31 +2,25 @@ SRC = src/battle.tcl src/gui.tcl src/help.tcl \
       src/simulator.tcl src/main.tcl \
       src/tournament.tcl tclrobots.tcl
 
-SDX = ../build/tclkit-8.6 ../build/sdx.kit
+SDX = ../build/linux/tclkit-8.6-linux ../build/sdx.kit
 
 # Make reasonably sure no one has a local temp directory
 # with the same name
 TEMP = temp123123123
 
-all: doc test build
-
-build: build-linux build-windows
+all: doc test build-linux build-windows build-mac
 
 build-linux:
-	rm -rf $(TEMP)
-	mkdir $(TEMP)
-	(cd $(TEMP); cp -rf ../src .; cp -rf ../lib/ .; cp -rf ../samples/ .; cp ../README .; cp ../LICENSE .; cp -rf ../tclrobots.tcl .)
-	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
-	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
-	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-        # Wrap Linux version
-	cp build/tclkit-8.6 $(TEMP)/
-	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6)
-	cp $(TEMP)/tclrobots.kit build/tclrobots
-	rm -rf $(TEMP)
+	$(MAKE) build MAKEFLAGS=RUNTIME=linux TARGET=tclrobots
 
 build-windows:
+	$(MAKE) build MAKEFLAGS=RUNTIME=windows TARGET=tclrobots.exe
+
+build-mac:
+	$(MAKE) build MAKEFLAGS=RUNTIME=mac TARGET=tclrobots
+
+build: 
+	echo "Building $(TARGET)"
 	rm -rf $(TEMP)
 	mkdir $(TEMP)
 	(cd $(TEMP); cp -rf ../src .; cp -rf ../lib/ .; cp -rf ../samples/ .; cp ../README .; cp ../LICENSE .; cp -rf ../tclrobots.tcl .)
@@ -34,11 +28,10 @@ build-windows:
 	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
 	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
 	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-        # Wrap Windows version
-	cp build/tclkit-8.6.exe $(TEMP)/
-	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6.exe)
-	cp $(TEMP)/tclrobots.kit build/tclrobots.exe
-#	rm -rf $(TEMP)
+	cp build/$(RUNTIME)/tclkit-8.6-$(RUNTIME) $(TEMP)/
+	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6-$(RUNTIME))
+	cp $(TEMP)/tclrobots.kit build/$(RUNTIME)/$(TARGET)
+	rm -rf $(TEMP)
 
 check: header.syntax
 	nagelfar header.syntax $(SRC)
@@ -52,4 +45,4 @@ doc:
 test:
 	test/all.tcl
 
-.PHONY: all build build-linux build-windows check doc test
+.PHONY: all build build-linux build-windows build-mac check doc test
