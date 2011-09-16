@@ -88,7 +88,7 @@ proc clean_file {docfile} {
 }
 
 proc gen_readme {} {
-    set   src  [open ./doc/game_doc.html]
+    set   src  [open ./doc/readme_doc.html]
     set   dest [open ./README w]
 
     set   text [read $src]
