@@ -1,7 +1,7 @@
 #!/usr/bin/env tclsh
 
 proc main {} {
-    set srcfiles  {main syscalls gui battle simulator tournament help}
+    set srcfiles  {battle game gui help init main simulator syscalls tournament}
     set ::srcdocs {}
 
     foreach file $srcfiles {

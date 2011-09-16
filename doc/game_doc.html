@@ -1,602 +1,612 @@
-<p><strong>NOTE: Some of this text still refers to TclRobots 2.0.</strong></p>
-
 <h3>TABLE OF CONTENTS</h3>
 <ul>
-  <li>1. <a href="#anchor1">WHAT IS TCLROBOTS?</a></li>
-  <li>2. <a href="#anchor2">INSTALLATION AND DEMO</a></li>
-  <li>3. <a href="#anchor3">SYNOPSIS</a></li>
-  <li>4. <a href="#anchor4">THE ROBOT</a></li>
-  <li>5. <a href="#anchor5">THE BATTLEFIELD</a></li>
-  <li>6. <a href="#anchor6">THE ROBOT TCL LANGUAGE</a></li>
-  <li>7. <a href="#anchor7">THE ROBOT HARDWARE INTERFACES</a></li><ul>
-    <li>7.1. <a href="#anchor7.1">Basic syscalls</a></li><ul>
-      <li>7.1.1 <a href="#anchor7.1.1">scanner</a></li>
-      <li>7.1.2 <a href="#anchor7.1.2">dsp</a></li>
-      <li>7.1.3 <a href="#anchor7.1.3">alert</a></li>
-      <li>7.1.4 <a href="#anchor7.1.4">cannon</a></li>
-      <li>7.1.5 <a href="#anchor7.1.5">health</a></li>
-      <li>7.1.6 <a href="#anchor7.1.6">drive</a></li>
-      <li>7.1.7 <a href="#anchor7.1.7">speed</a></li>
-      <li>7.1.8 <a href="#anchor7.1.8">heat</a></li>
-      <li>7.1.9 <a href="#anchor7.1.9">loc_x</a></li>
-      <li>7.1.10 <a href="#anchor7.1.10">loc_y</a></li>
-      <li>7.1.11 <a href="#anchor7.1.11">tick</a></li></ul>
-    <li>7.2. <a href="#anchor7.2">Team syscalls</a></li><ul>
-      <li>7.2.1 <a href="#anchor7.1.1">team_declare</a></li>
-      <li>7.2.2 <a href="#anchor7.2.2">team_send</a></li>
-      <li>7.2.3 <a href="#anchor7.2.3">team_get</a></li></ul>
-    <li>7.3. <a href="#anchor7.2">Convenience syscalls</a></li><ul>
-      <li>7.3.1 <a href="#anchor7.3.1">dputs</a></li>
-      <li>7.3.2 <a href="#anchor7.3.2">rand</a></li>
-      <li>7.3.2 <a href="#anchor7.3.3">callback</a></li></ul></ul>
+<li>1. <a href="#robo0">game/file_header</a></li>
+<li>2. <a href="#robo1">game/run_robots</a></li>
+<ul>
+<li>2.1. <a href="#robo2">run_robots/act</a></li>
+<li>2.2. <a href="#robo3">run_robots/update_robots</a></li>
+<ul>
+<li>2.2.1. <a href="#robo4">update_robots/check_missiles</a></li>
+<li>2.2.2. <a href="#robo5">update_robots/update_missile_location</a></li>
+<li>2.2.3. <a href="#robo6">update_robots/missile_reached_target</a></li>
+<li>2.2.4. <a href="#robo7">update_robots/assign_missile_damage</a></li>
+<li>2.2.5. <a href="#robo8">update_robots/check_barrel</a></li>
+<li>2.2.6. <a href="#robo9">update_robots/check_speed</a></li>
+<li>2.2.7. <a href="#robo10">update_robots/update_speed</a></li>
+<li>2.2.8. <a href="#robo11">update_robots/update_heading</a></li>
+<li>2.2.9. <a href="#robo12">update_robots/update_distance</a></li>
+<li>2.2.10. <a href="#robo13">update_robots/check_wall</a></li>
+<li>2.2.11. <a href="#robo14">update_robots/check_health</a></li>
+<ul>
+<li>2.2.11.1. <a href="#robo15">check_health/disable_robot</a></li>
+</ul>
+</ul>
+<li>2.3. <a href="#robo16">run_robots/tick</a></li>
+</ul>
+</ul>
+<a name="robo0"></a>
+<a name="game2ffile5fheader"></a>
+<h1>1.  game/file_header [ file ]  </h1>
+<p class="item_name">NAME</p>
+<p>   game.tcl
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   This file contains the game logic.
+</p>
 
-<a name="anchor1"></a>
-<h1>1. WHAT IS TCLROBOTS?</h1>
-<p>
-TclRobots is a programming game where you write a Tcl program to control
-a robot. The robot's mission is to survive a battle with other robots.
-</p><p>
-At least two robots compete during a battle, each running different
-programs (or possibly the same program in different robots). Each robot
-is equipped with a scanner, cannon, drive mechanism. A single match
-continues until one robot is left running. Robots may compete
-individually, or combine in a team oriented battle. A tournament can be
-run with any number of robot programs, each robot playing every other in
-a round-robin fashion, one-on-one.
-</p><p>
-A battle simulator is available to help debug robot programs.
-</p><p>
-The TclRobots program provides a physical environment, imposing certain
-game parameters to which all robots must adhere. TclRobots also provides
-a view on a battle, and a controlling user interface.
-</p><p>
-TclRobots require Tcl 8.6 since it uses coroutines.
-</p><p>
-TclRobots is licensed under the Simplified BSD license. See <a href="http://github.com/jonasferry/TclRobots/blob/master/LICENSE">LICENSE</a> for
-information.
+<p>   The authors are Jonas Ferry, Peter Spjuth and Martin Lindskog, based
+   on TclRobots 2.0 by Tom Poindexter.
 </p>
-<a name="anchor2"></a>
-<h1>2. INSTALLATION AND DEMO</h1>
-<p><ul class="dots"><li>
-Download the source from the GitHub repository.
-</li><li>
-run "tclrobots" from the directory where you unpacked the
-distribution.
-</li><li>
-In the Files listbox, Double-Click on the "samples" directory
-for sample individual robot programs or the "teams" directory for 2-on-2
-team robot programs.
-</li><li>
-Click on "Select All"
-</li><li>
-Click on "Run Battle"
-</li></ul></p>
-<a name="anchor3"></a>
-<h1>3. SYNOPSIS</h1>
-<p>
-tclrobots
-</p><p>
-Tclrobots without any command line arguments starts TclRobots in
-interactive mode. The user interface (described below) is used to
-select files, start battles, tournaments, or the simulator.
-</p><p>
-If command line arguments are specified, tclrobots starts in
-tournament or single battle mode using the specified files.
-</p>
-<a name="anchor4"></a>
-<h1>4. THE ROBOT</h1>
-<p>
-All robots in TclRobots are constructed equally. What differentiates the
-robots' behavior is the control program that you write. The robot has
-the ability to move, look for, and shoot at, other robots.
-</p><p>
-Robots use a compass system based on 0 to 359 degrees, with 0 pointing
-due east, 90 due north, 180 due west, and 270 due south.
-</p><p>
-The robot's drive mechanism can be controlled to move the robot in a
-particular direction, at some speed. Direction is expressed as an
-integer degree heading 0 - 359, and speed is 0 to 100 percent. The motor
-is inefficient above 35% speed, and begins to overheat. When a
-temperature heat index of 200 is reached, the motor cannot be operated
-over 35% until cooling allows the heat index to drop back to 0. While
-the robot is very agile and stable, safeguards are built into the
-interface to prevent the robot from tipping over while trying to turn at
-too fast a rate for any given speed.
-</p><p>
-The following table represents maximum speeds at which a delta course
-change can be made:
-</p><pre>
-   Degrees of     Maximum Speed
-   course change
-   ____________________________
-   25 or less         100%
-   25 - 50             50%
-   50 - 75             30%
-   75 or greater       20%
-</pre><p>
-If a course change is attempted at a speed above the maximum for the
-change, the drive is disengaged (speed set to 0) on the present
-course. The drive mechanism also allows the robot to turn faster at
-slower speeds.
-</p><pre>
-   Speed         Rate of turn
-   ____________________________
-   25% or less       90
-   25 - 50%          60
-   50 - 75%          40
-   75% or greater    30
-</pre><p>
-At 100% speed, the robot travels at 20 meters per second. Robots are
-also subject to acceleration and deaccelearation, a linear constant of
-20% of the maximun speed per second.
-</p><p>
-Each robot is equipped with a scanning device, which can be pointed
-independently of the current drive heading of the robot. A scan can be
-initiated in any direction, 0-359 degrees. The scanner has a variable
-resolution capability, detecting other robots within a maximum of +/- 10
-degrees from the scan direction. If a scan finds a robot, the distance
-to the opposing robot is reported. However, if a resolution greater than
-0 is used, the scanner's result may be reported inaccurately. In this
-case, the distance reported may be off by as much as 10 meters for each
-degree of resolution (up to 100 meters in error for a +/- 10 degree
-resolution scan.) A high resolution scan (0 specified for resolution)
-will return accurate results, subject to cannon barrel heat distortion
-(see below).
-</p><p>
-If two or more robots are in the scan's resolution, the closest opponent
-is reported. It's also possible to distinguish various opposing robots,
-as the scanner has a rudimentary digital signal processor, and each
-robot has a arbitrary signature. A robot program can also be alerted
-when it is the subject of a scan by another robot. The signature of the
-scanning robot can be determined, but not it's heading or distance.
-</p><p>
-A cannon is the robot's offensive weapon, firing a shell at opposing
-robots. The cannon has a maximum range of 700 meters, and can be aimed
-independently of the robot heading. Damage to all surrounding robots
-from an exploding shell is assessed as follows:
-</p><pre>
-   Meters from   % Damage
-    explosion    incurred
-   ______________________
-        6          25%
-       10          12%
-       20           7%
-       40           3%
-</pre><p>
-While the robot has an large (unlimited) cache of shells available, it
-can only reload fast enough to have one shell in the air at maximum
-range at any one time (approximately 4 seconds). Cannon shells are
-grouped four to a clip; after a clip is exhausted, it is ejected and a
-new clip loaded in place. The effect is that on every fourth shell, the
-reload time is tripled (12 seconds.) The cannon fires its shells in a
-high arc; a shell will not impact into another robot that might be in
-the line of flight. Shells travel at 200 meters per second toward the
-target.
-</p><p>
-Each shell fired causes the cannon barrel to heat up. The heat rising
-off the barrel distorts the view of the scanner. If the temperature of
-the barrel becomes too great, the scanner is rendered useless. At lesser
-temperatures, the heat distortion will cause the scanner to return
-inaccurate results, a random plus or minus meters equal to the total
-heat of the barrel (one unit of barrel heat = one meter error.) Firing a
-shell causes the barrel temperature to increase by 20 heat units. The
-normal cooling rate is 2 units per second. The scanner always reports 0
-for range while the barrel temperature is above 35 units. The scanning
-beam, however, still registers upon other robots in the path of the
-scan, triggering a scanned robot's alert procedure. The cannon barrel
-does not have temperature sensor.
-</p><p>
-Various feedback registers in the robot can be accessed by the control
-program, reporting the current amount of damage, x and y axis
-battlefield location, current speed, and an internal clock tick.
-</p><p>
-Robots have health expressed as a percent value. Health starts at 100%
-and decreases with damage. When 0% health is reached, the robot is
-"dead", and ceases to function. However, damage has no effect on
-operational ability. A robot with 1% health operates as well as one with
-no damage.
-</p>
-<a name="anchor5"></a>
-<h1>5. THE BATTLEFIELD</h1>
-<p>
-The battlefield in TclRobots is a 1,000 by 1,000 meter square area.
-Walls surround the battlefield, and robots running into a wall will
-suffer 5% damage. The coordinate system is based on increasing x and y
-axis values from the southwest corner (bottom left is 0,0). 999,999 is
-the extreme northeast (upper right).
-</p><p>
-Upon start up, robots are placed in random quadrants.
-</p>
-<a name="anchor6"></a>
-<h1>6. THE ROBOT TCL LANGUAGE</h1>
-<p>
-Robot control programs are written in the Tcl language. The robot
-programs are run in separate safe interpreters.
-</p><p>
-The following Tcl commands are available:
-</p><p><pre>
-   after    append    apply    array
-   binary   break     catch    chan
-   clock    close     concat   continue
-   dict     eof       error    eval
-   expr     fblocked  fcopy    fileevent
-   flush    for       foreach  format
-   gets     global    if       incr
-   info     interp    join     lappend
-   lassign  lindex    linsert  list
-   llength  lrange    lrepeat  lreplace
-   lsearch  lset      lsort    namespace
-   package  pid       proc     puts
-   read     regexp    regsub   rename
-   return   scan      seek     set
-   split    string    subst    switch
-   tell     time      trace    unset
-   update   uplevel   upvar    variable
-   vwait    while
-</pre></p><p>
-The following Tcl commands are not available:
-</p><p><pre>
-   cd          encoding  exec    exit
-   fconfigure  file      glob    load
-   open        pwd       socket  source
-   unload
-</pre></p>
 
-<a name="anchor7"></a>
-<h1>7. THE ROBOT HARDWARE INTERFACES</h1>
-<p>
-The following Tcl commands are the interface to the robot's hardware;
-the syscalls. Each interface command takes 1 clock tick to complete,
-except: the scanner command, which requires 2 clock ticks per execution;
-team communications commands team_get and team_send execute without
-delay. Commands that take arguments will return -1 if any argument is
-out of valid ranges. For degrees, valid values are 0-359; for speed,
-0-100, for resolution, 0-10, for cannon range, 0-700.
+<p>   See http://tclrobots.org for more information.
 </p>
-<a name="anchor7.1"></a>
-<h2>7.1 Basic syscalls</h2>
-<a name="anchor7.1.1"></a>
-<h3>7.1.1 scanner</h3>
-<p class="item_name">
-NAME
-</p><p>
-scanner - Find other robots by scanning the battlefield
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>scanner</strong> <em>degree resolution</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The scanner command invokes the robot's scanner. Degree must be in the
-range 0-359. Scanner returns 0 if nothing found, or an integer greater
-than zero indicating the distance to an opponent. Resolution controls
-how wide in degrees the scan can detect opponents from the absolute
-scanning direction, and must be in the range 0-10. A robot that has been
-destroyed is not reported by the scanner.
-</p><p>
-Cost: 2 ticks.
+<p class="item_name">COPYRIGHT</p>
+<p>   Jonas Ferry (jonas.ferry@tclrobots.org), 2010. Licensed under the
+   Simplified BSD License. See LICENSE file for details.
 </p>
-<a name="anchor7.1.2"></a>
-<h3>7.1.2 dsp</h3>
-<p class="item_name">
-NAME
-</p><p>
-dsp - Get information on last scanned robot
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>dsp</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The dsp command returns a list of two integers, the first element is the
-digital signature of the last robot found using the scanner. The second
-element is the percent of health the scanned robot has remaining, 1-100
-percent. Each robot in a battle has a distinct signature. If nothing was
-found during the last scan (scanner command returned 0), then the dsp
-command will return "0 0".
-</p><p>
-Cost: 1 tick.
+<a name="robo1"></a>
+<a name="game2frun5frobots"></a>
+<h1>2.  game/run_robots [ procedure ]  </h1>
+<p class="item_name">NAME</p>
+<p>   run_robots
 </p>
-<a name="anchor7.1.3"></a>
-<h3>7.1.3 alert</h3>
-<p class="item_name">
-NAME
-</p><p>
-alert - React on being scanned
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>alert</strong> <em>proc-name</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The alert command names a procedure to be called when the robot is being
-scanned by another robot. When the robot detects it has been scanned,
-the proc-name procedure is called with one argument, the dsp signature
-of the robot that performed the scan. If proc-name is null (""), then
-the alert feature is disabled.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc run_robots {} {
+    global activeRobots data do_step game gui parms sim_syscall StatusBarMsg \
+    step tick timeAt5
+
+    while {$game(state) eq "run" || $game(state) eq "pause"} {
+        if {$game(state) ne "pause"} {
+            if {$game(simulator)} {
+                # Reset health of target
+                set data(target,health) [* $parms(health) 10]
+            }
+            foreach robot $activeRobots {
+                if {($data($robot,alert) ne {}) &amp;&amp; \
+                        ($data($robot,ping) ne {})} {
+                    # Prepend alert data to sysreturn no notify robot it's
+                    # been scanned.
+                    set data($robot,sysreturn,[- $tick 1]) \
+                        "alert $data($robot,alert) $data($robot,ping) $data($robot,sysreturn,[- $tick 1])"
+
+                    # Robot is notified; reset alert request
+                    set data($robot,ping) {}
+                }
+                ${robot}Run $data($robot,sysreturn,[- $tick 1])
+            }
+            act
+
+            # Print extra information in simulator GUI
+            if {$game(simulator) &amp;&amp;
+                [ne $data(r0,sysreturn,$tick) ""]} {
+                set sim_syscall $data(r0,syscall,$tick)
+                append sim_syscall " =&gt; " $data(r0,sysreturn,$tick)
+            }
+            update_robots
+
+            if {$gui} {
+                update_gui
+            }
+            tick
+
+            # Check if single step is active in simulator mode
+            if {$game(simulator) &amp;&amp; $step} {
+                vwait do_step
+                set do_step 0
+            }
+            if {$parms(tick) &lt; 5} {
+                # Don't bother at high speed
+                after $parms(tick) [info coroutine]
+            } elseif {$tick &lt;= 5} {
+                # Let the first few ticks pass before measuring
+                after $parms(tick) [info coroutine]
+                set timeAt5 [clock milliseconds]
+            } else {
+                # Try to measure time, to adjust the tick delay for load
+                set target [expr {$parms(tick) * ($tick - 4) + $timeAt5}]
+                set delay [expr {$target - [clock milliseconds]}]
+                # Sanity check value
+                if {$delay &gt; $parms(tick)} {
+                    set delay $parms(tick)
+                } elseif {$delay &lt; 5} {
+                    set delay 5
+                }
+                after $delay [info coroutine]
+                # Keep the lag visible
+                set StatusBarMsg "Running $delay"
+            }
+            yield
+        } else {
+            # Game is paused, but GUI needs to respond
+            update
+        }
+    }
+    rename [info coroutine] ""
+    yield
+}
+</pre>
+<a name="robo2"></a>
+<a name="run5frobots2fact"></a>
+<h2>2.1.  run_robots/act [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   act
 </p>
-<a name="anchor7.1.4"></a>
-<h3>7.1.4 cannon</h3>
-<p class="item_name">
-NAME
-</p><p>
-cannon - Fire the offensive weapon
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>cannon</strong> <em>degree range</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The cannon commands fires a shell in the direction specified by degree,
-for the distance range. Cannon returns 1 if a shell was fired; if the
-cannon is reloading, 0 is returned.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc act {} {
+    global activeRobots data tick
+
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            set currentSyscall $data($robot,syscall,$tick)
+            switch [lindex $currentSyscall 0] {
+                scanner      {sysScanner     $robot}
+                dsp          {sysDsp         $robot}
+                alert        {sysAlert       $robot}
+                cannon       {sysCannon      $robot}
+                drive        {sysDrive       $robot}
+                health       -
+                speed        -
+                heat         -
+                loc_x        -
+                loc_y        {sysData        $robot}
+                tick         {sysTick        $robot}
+                team_declare {sysTeamDeclare $robot}
+            }
+        }
+    }
+}
+</pre>
+<a name="robo3"></a>
+<a name="run5frobots2fupdate5frobots"></a>
+<h2>2.2.  run_robots/update_robots [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   update_robots
 </p>
-<a name="anchor7.1.5"></a>
-<h3>7.1.5 health</h3>
-<p class="item_name">
-NAME
-</p><p>
-health - Get information on current health
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>health</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The health command returns the current health, 1-100 percent.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p>   update position of missiles and robots, assess damage
 </p>
-<a name="anchor7.1.6"></a>
-<h3>7.1.6 drive</h3>
-<p class="item_name">
-NAME
-</p><p>
-drive - Move the robot on the battlefield
-</p><p class="item_name">
-SYNOPSIS
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_robots {} {
+    global allRobots data game
+
+    foreach robot $allRobots {
+        # check all flying missiles
+        set num_miss [check_missiles $robot]
+
+        # skip rest if robot dead
+        if {!$data($robot,status)} {
+            continue
+        }
+        # update missile reloader
+        if {$data($robot,reload)} {
+            incr data($robot,reload) -1
+        }
+        # check for barrel overheat, apply cooling
+        check_barrel $robot
+
+        # check for excessive speed, increment heat
+        check_speed $robot
+
+        # update robot speed, moderated by acceleration
+        update_speed $robot
+
+        # update robot heading, moderated by turn rates
+        update_heading $robot
+
+        # update distance traveled on this heading
+        update_distance $robot
+
+        # check for wall collision
+        check_wall $robot
+    }
+    # check for robot health
+    set health_status [check_health]
+
+    set num_rob       [lindex $health_status 0]
+    set diffteam      [lindex $health_status 1]
+    set num_team      [lindex $health_status 2]
+
+    if {($num_rob&lt;=1 || $num_team==1) &amp;&amp; $num_miss==0} {
+        # Stop game
+        set game(state) "end"
+    }
+}
+</pre>
+<a name="robo4"></a>
+<a name="update5frobots2fcheck5fmissiles"></a>
+<h3>2.2.1.  update_robots/check_missiles [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   check_missiles
 </p>
-<p>
-<strong>drive</strong> <em>degree speed</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The drive command starts the robot's drive mechanism. Degree must be in
-the range 0-359. Speed must be in the range 0-100. Any change in course
-that falls outside the "Degrees of course change" table (see "The
-Robot", above) will cause the robot's speed to be set to 0 along the
-current course. A speed of 0 causes the robot to coast to a stop. The
-drive command returns the speed set. If the drive is currently
-overheated, the maximum speed during overheating (35%) will be set.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p>   check all flying missiles
 </p>
-<a name="anchor7.1.7"></a>
-<h3>7.1.7 speed</h3>
-<p class="item_name">
-NAME
-</p><p>
-speed - Get information the the current speed
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>speed</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The speed command reports the current speed of the robot, 0-100. Speed
-may return more or less than what was last set with the drive command
-because of acceleration/deaccelearation, drive overheating, or collision
-into a wall.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_missiles {robot} {
+    global activeRobots data 
+    set num_miss 0
+
+    if {$data($robot,mstate)} {
+        incr num_miss
+        update_missile_location $robot
+        # check if missile reached target
+        if {$data($robot,mrange) &gt; $data($robot,mdist)} {
+            missile_reached_target $robot
+
+            # assign damage to all within explosion ranges
+            foreach target $activeRobots {
+                if {!$data($target,status)} {
+                    continue
+                }
+                assign_missile_damage $robot $target
+            }
+        }
+    }
+    return $num_miss
+}
+</pre>
+<a name="robo5"></a>
+<a name="update5frobots2fupdate5fmissile5flocation"></a>
+<h3>2.2.2.  update_robots/update_missile_location [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   update_missile_location
 </p>
-<a name="anchor7.1.8"></a>
-<h3>7.1.8 heat</h3>
-<p class="item_name">
-NAME
-</p><p>
-heat - Get information on current motor heat
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>heat</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The heat command returns a list of two integers, the first element is
-the overheating flag, 1 if the maximum motor heat value was attained,
-otherwise 0. The second element is the current motor heat index,
-0-200.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p>   update location of missile
 </p>
-<a name="anchor7.1.9"></a>
-<h3>7.1.9 loc_x</h3>
-<p class="item_name">
-NAME
-</p><p>
-loc_x - Get information on current position on X axis
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>loc_x</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The loc_x command returns the current x axis location of the robot,
-0-999 meters.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_missile_location {robot} {
+    global c_tab data parms s_tab
+
+    set data($robot,mrange) \
+        [+ $data($robot,mrange) $parms(msp)]
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mrange)] \
+             $data($robot,morgy)]
+}
+</pre>
+<a name="robo6"></a>
+<a name="update5frobots2fmissile5freached5ftarget"></a>
+<h3>2.2.3.  update_robots/missile_reached_target [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   missile_reached_target
 </p>
-<a name="anchor7.1.10"></a>
-<h3>7.1.10 loc_y</h3>
-<p class="item_name">
-NAME
-</p><p>
-loc_y - Get information on current position on Y axis
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>loc_y</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The loc_y command returns the current y axis location of the robot,
-0-999 meters.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc missile_reached_target {robot} {
+    global c_tab data gui s_tab
+
+    set data($robot,mstate) 0
+    set data($robot,mx) \
+        [+ [* $c_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgx)]
+    set data($robot,my) \
+        [+ [* $s_tab($data($robot,mhdg)) $data($robot,mdist)] \
+             $data($robot,morgy)]
+    if {$gui} {
+        after 1 "show_explode $robot"
+    }
+}
+</pre>
+<a name="robo7"></a>
+<a name="update5frobots2fassign5fmissile5fdamage"></a>
+<h3>2.2.4.  update_robots/assign_missile_damage [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   assign_missile_damage
 </p>
-<a name="anchor7.1.11"></a>
-<h3>7.1.11 tick</h3>
-<p class="item_name">
-NAME
-</p><p>
-tick - Get information on the current clock tick
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>tick</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The tick command returns the current clock tick of the battle. The clock
-tick is set to 0 at game startup.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">DESCRIPTION</p>
+<p>   assign damage to all within explosion ranges
 </p>
-<a name="anchor7.2"></a>
-<h2>7.2 Team syscalls</h2>
-<a name="anchor7.2.1"></a>
-<h3>7.2.1 team_declare</h3>
-<p class="item_name">
-NAME
-</p><p>
-team_declare - Join a team of robots
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>team_declare</strong> <em>teamname</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The team_declare command sets the team alliance to the teamname
-argument. team_declare is only effective the first time it is executed
-in a robot control program. team_declare returns the teamname value.
-</p><p>
-Cost: 1 tick.
+<p class="item_name">SOURCE</p>
+<pre class="source">proc assign_missile_damage {robot target} {
+    global data parms
+
+    set d [hypot [- $data($robot,mx) $data($target,x)] \
+            [- $data($robot,my) $data($target,y)]]
+    if {$d &lt; $parms(dia3)} {
+        if {$d &lt; $parms(dia0)} {
+            incr data($target,health) $parms(hit0)
+            incr data($robot,inflicted) [- $parms(hit0)]
+        } elseif {$d&lt;$parms(dia1)} {
+            incr data($target,health) $parms(hit1)
+            incr data($robot,inflicted) [- $parms(hit1)]
+        } elseif {$d&lt;$parms(dia2)} {
+            incr data($target,health) $parms(hit2)
+            incr data($robot,inflicted) [- $parms(hit2)]
+        } else {
+            incr data($target,health) $parms(hit3)
+            incr data($robot,inflicted) [- $parms(hit3)]
+        }
+    }
+}
+</pre>
+<a name="robo8"></a>
+<a name="update5frobots2fcheck5fbarrel"></a>
+<h3>2.2.5.  update_robots/check_barrel [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   check_barrel
 </p>
-<a name="anchor7.2.2"></a>
-<h3>7.2.2 team_send</h3>
-<p class="item_name">
-NAME
-</p><p>
-team_send - Send a message to all team mates
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>team_send</strong> <em>data</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The team_send command makes the argument available to all other robots
-with the same teamname. Data is a single string argument, and can be any
-value or list. If a team has not been declared with the team_declare
-command, the team_send command has no effect.
-</p><p>
-Cost: 0 ticks.
+<p class="item_name">DESCRIPTION</p>
+<p>   check for barrel overheat, apply cooling
 </p>
-<a name="anchor7.2.3"></a>
-<h3>7.2.3 team_get</h3>
-<p class="item_name">
-NAME
-</p><p>
-team_get - Get messages from all team mates
-</p><p class="item_name">
-SYNOPSIS
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_barrel {robot} {
+    global data parms
+
+    if {$data($robot,btemp)} {
+        incr data($robot,btemp) $parms(cancool)
+        if {$data($robot,btemp) &lt; 0} {
+            set data($robot,btemp) 0
+        }
+    }
+}
+</pre>
+<a name="robo9"></a>
+<a name="update5frobots2fcheck5fspeed"></a>
+<h3>2.2.6.  update_robots/check_speed [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   check_speed
 </p>
-<p>
-<strong>team_get</strong>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The team_get command returns a list of team members and their current
-data values. Each element of the list returned is a list of the digital
-signature of a team member and that robot's last team_send data
-value. If a team has not been declared with team_declare or all of the
-other members of the team have not declared a team or are dead, the
-return value is an null list. The robot executing the team_get command
-is also excluded from the return list.
-</p><p>
-Cost: 0 ticks.
+<p class="item_name">DESCRIPTION</p>
+<p>   check for excessive speed, increment heat
 </p>
-<a name="anchor7.3"></a>
-<h2>7.3 Convenience syscalls</h2>
-<a name="anchor7.3.1"></a>
-<h3>7.3.1 dputs</h3>
-<p class="item_name">
-NAME
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) &gt; $parms(heatsp)} {
+        incr data($robot,heat) \
+            [+ [round [/ [- $data($robot,speed) $parms(heatsp)] \
+                           $parms(hrate)]] 1]
+        if {$data($robot,heat) &gt;= $parms(heatmax)} {
+            set data($robot,heat) $parms(heatmax)
+            set data($robot,hflag) 1
+            if {$data($robot,dspeed) &gt; $parms(heatsp)} {
+                set data($robot,dspeed) $parms(heatsp)
+            }
+        }
+    } else {
+        # if overheating, apply cooling rate
+        if {$data($robot,hflag) || $data($robot,heat) &gt; 0} {
+            incr data($robot,heat) $parms(cooling)
+            if {$data($robot,heat) &lt;= 0} {
+                set data($robot,hflag) 0
+                set data($robot,heat) 0
+            }
+        }
+    }
+}
+</pre>
+<a name="robo10"></a>
+<a name="update5frobots2fupdate5fspeed"></a>
+<h3>2.2.7.  update_robots/update_speed [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   update_speed
 </p>
-<p>
-dputs - Print a message
-</p><p class="item_name">
-SYNOPSIS
+<p class="item_name">DESCRIPTION</p>
+<p>   update robot speed, moderated by acceleration
 </p>
-<p>
-<strong>dputs</strong> <em>args</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The dputs command prints a message in the GUI message window. Dputs
-accepts any number of arguments.
-</p><p>
-Cost: 0 ticks.
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_speed {robot} {
+    global data parms
+
+    if {$data($robot,speed) != $data($robot,dspeed)} {
+        if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+            incr data($robot,speed) -$parms(accel)
+            if {$data($robot,speed) &lt; $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        } else {
+            incr data($robot,speed) $parms(accel)
+            if {$data($robot,speed) &gt; $data($robot,dspeed)} {
+                set data($robot,speed) $data($robot,dspeed)
+            }
+        }
+    }
+}
+</pre>
+<a name="robo11"></a>
+<a name="update5frobots2fupdate5fheading"></a>
+<h3>2.2.8.  update_robots/update_heading [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   update_heading
 </p>
-<a name="anchor7.3.2"></a>
-<h3>7.3.2 rand</h3>
-<p class="item_name">
-NAME
-</p><p>
-rand - Generate a random number
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>rand</strong> <em>max</em>
-</p><p class="item_name">
-DESCRIPTION
-</p><p>
-The rand command uses the Tcl mathfunc rand to generate a random integer
-between 0 and (max - 1). The seed value is randomly set at game
-startup. The seed value is reported at battle end to enable the
-possibility to re-run battles.
-</p><p>
-Note that since Tcl mathfunc rand is not cryptographically secure you
-should not let your TclRobot select your passwords.
-</p><p>
-Cost: 0 ticks.
+<p class="item_name">DESCRIPTION</p>
+<p>   update robot heading, moderated by turn rates
 </p>
-<a name="anchor7.3.3"></a>
-<h3>7.3.3 callback</h3>
-<p class="item_name">
-NAME
-</p><p>
-callback - Schedule actions for later ticks
-</p><p class="item_name">
-SYNOPSIS
-</p><p>
-<strong>callback</strong> <em>time script</em>
-</p><p class="item_name">
-DESCRIPTION
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_heading {robot} {
+    global data parms
+
+    if {$data($robot,hdg) != $data($robot,dhdg)} {
+        set mrate $parms(rate,[int [/ $data($robot,speed) 25]])
+        set d1 [% [+ [- $data($robot,dhdg) $data($robot,hdg)]  360] 360]
+        set d2 [% [+ [- $data($robot,hdg)  $data($robot,dhdg)] 360] 360]
+
+        if {$d1 &lt; $d2} {
+            set d $d1
+        } else {
+            set d $d2
+        }
+        if {$d &lt;= $mrate} {
+            set data($robot,hdg) $data($robot,dhdg)
+        } else {
+            set data($robot,hdg) \
+                [% [+ [$data($robot,dir) $data($robot,hdg) $mrate] 360] 360]
+        }
+        set data($robot,orgx)  $data($robot,x)
+        set data($robot,orgy)  $data($robot,y)
+        set data($robot,range) 0
+    }
+}
+</pre>
+<a name="robo12"></a>
+<a name="update5frobots2fupdate5fdistance"></a>
+<h3>2.2.9.  update_robots/update_distance [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   update_distance
 </p>
-<p>
-Cost: 0 ticks.
+<p class="item_name">DESCRIPTION</p>
+<p>   update distance traveled on this heading
 </p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc update_distance {robot} {
+    global c_tab data parms s_tab
+
+    if {$data($robot,speed) &gt; 0} {
+        set data($robot,range) \
+            [+ $data($robot,range) \
+                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+
+        # Modify range with random factor to avoid totally
+        # deterministic movement. Range is currently +- 1%.
+        # Playtesting will tell if this should be lower or higher.
+        set randfactor [/ [+ [mrand 100] 1.0] 10000]
+        if {[mrand 2] == 0} {
+            set randfactor [- $randfactor]
+        }
+        set data($robot,range) [+ $data($robot,range) \
+                                    [* $data($robot,range) \
+                                         $randfactor]]
+
+        set data($robot,x) \
+            [round [+ [* $c_tab($data($robot,hdg)) $data($robot,range)] \
+                         $data($robot,orgx)]]
+
+        set data($robot,y) \
+            [round [+ [* $s_tab($data($robot,hdg)) $data($robot,range)] \
+                        $data($robot,orgy)]]
+    }
+}
+</pre>
+<a name="robo13"></a>
+<a name="update5frobots2fcheck5fwall"></a>
+<h3>2.2.10.  update_robots/check_wall [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   check_wall
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for wall collision
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_wall {robot} {
+    global data parms
+
+    if {$data($robot,speed) &gt; 0} {
+        if {($data($robot,x) &lt; 0) || ($data($robot,x) &gt; 999)} {
+            if {$data($robot,x) &lt; 0} {
+                set data($robot,x) 0
+            } else {
+                set data($robot,x) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+        if {($data($robot,y) &lt; 0) || ($data($robot,y) &gt; 999)} {
+            if {$data($robot,y) &lt; 0} {
+                set data($robot,y) 0
+            } else {
+                set data($robot,y) 999
+            }
+            set data($robot,orgx)    $data($robot,x)
+            set data($robot,orgy)    $data($robot,y)
+            set data($robot,range)   0
+            set data($robot,speed)   0
+            set data($robot,dspeed)  0
+            incr data($robot,health) $parms(coll)
+        }
+    }
+}
+</pre>
+<a name="robo14"></a>
+<a name="update5frobots2fcheck5fhealth"></a>
+<h3>2.2.11.  update_robots/check_health [ procedure ]  </h3>
+<p class="item_name">NAME</p>
+<p>   check_health
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p>   check for robot health
+</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc check_health {} {
+    global activeRobots data finish gui tick
+
+    set num_rob  0
+    set diffteam ""
+    set num_team 0
+    foreach robot $activeRobots {
+        if {$data($robot,status)} {
+            if {$data($robot,health) &lt;= 0 } {
+                set data($robot,status) 0
+                set data($robot,health) 0
+                disable_robot $robot
+                append finish "$data($robot,name) team($data($robot,team)) dead at tick: $tick\n"
+                if {$gui} {
+                    after 1 "show_die $robot"
+                }
+            } else {
+                incr num_rob
+                if {$data($robot,team) != ""} {
+                    if {[lsearch -exact $diffteam $data($robot,team)] == -1} {
+                        lappend diffteam $data($robot,team)
+                        incr num_team
+                    }
+                } else {
+                    lappend diffteam $data($robot,name)
+                    incr num_team
+                }
+            }
+        }
+    }
+    return [list $num_rob $diffteam $num_team]
+}
+</pre>
+<a name="robo15"></a>
+<a name="check5fhealth2fdisable5frobot"></a>
+<h4>2.2.11.1.  check_health/disable_robot [ procedure ]  </h4>
+<p class="item_name">NAME</p>
+<p>   disable_robot
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc disable_robot {robot} {
+    global activeRobots data tick
+
+    if {[interp exists $data($robot,interp)]} {
+        interp delete $data($robot,interp)
+        set index [lsearch -exact $activeRobots $robot]
+        set activeRobots [lreplace $activeRobots $index $index]
+        array unset data $robot
+    } else {
+        display "disable robot $robot failed; interp does not exist"
+    }
+}
+</pre>
+<a name="robo16"></a>
+<a name="run5frobots2ftick"></a>
+<h2>2.3.  run_robots/tick [ procedure ]  </h2>
+<p class="item_name">NAME</p>
+<p>   tick
+</p>
+<p class="item_name">DESCRIPTION</p>
+<p class="item_name">SOURCE</p>
+<pre class="source">proc tick {} {
+    global game tick
+
+    if {$tick &lt; $game(max_ticks)} {
+        incr tick
+    } else {
+        set game(state) "end"
+    }
+}
+</pre>
+

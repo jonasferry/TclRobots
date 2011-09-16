@@ -24,9 +24,7 @@
 # Provide package name for starpack build, see Makefile
 package provide app-tclrobots 1.0
 
-set thisScript2 [file join [pwd] [info script]]
-set thisDir2 [file dirname $thisScript2]
+set thisScript [file join [pwd] [info script]]
+set thisDir [file dirname $thisScript]
 
-puts $thisDir2
-
-source $thisDir2/src/main.tcl
+source $thisDir/src/main.tcl
