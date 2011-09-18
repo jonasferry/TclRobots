@@ -23,7 +23,7 @@ proc main {} {
 <meta http-equiv='content-type' content='text/html; charset=UTF-8'>
 <title>TclRobots source documentation</title></head><body>"
     
-    puts $f "<h1>TclRobots source documentation</h1><ol>"
+    puts $f "<h3>TclRobots source documentation</h3><ol>"
     foreach doc $srcdocs {
 	puts $f "<li>$doc</li>"
     }
