@@ -1,0 +1,333 @@
+For the robot API commands available see the <a href='http://tclrobots.org/documentation/#anchor6'>documentation</a>.
+
+The sample robots are:
+
+<h1>charger</h1>
+<pre>
+# TclRobots - Sample robot control program
+# Jonas Ferry 2010, Tom Poindexter 1996
+#
+# Charger scans first in wide then in narrow resolution until a 
+# target is found. It charges the target while firing the cannon.
+# When Charger has not seen a target for a while it starts the wide
+# scanner again. Charger ignores damage and does not avoid walls.
+
+# 'dir' is scanner direction
+# 'nothing' is a timer restarting wide scanner when nothing is found
+# 'closest' is direction to closest cannon out-of-range target
+set dir [rand 360]
+set nothing 0
+set closest 0
+
+while {1} {
+    # Start of main code:
+    # - Wide scan looking for an opponent
+    set rng [scanner $dir 10]
+
+    if {$rng > 0 && $rng < 700} {
+        # Target is found found and in range:
+        # - Begin narrow scan
+        set start [expr ($dir + 20) % 360]
+        for {set limit 1} {$limit <= 40} {incr limit} {
+            set dir [expr ($start - ($limit) + 360) % 360]
+            set rng [scanner $dir 1]
+            if {$rng > 0 && $rng < 700} {
+                # Target is found found and in range:
+                # - Reset scanner timer
+                # - Fire cannon
+                # - Charge!
+                # - Back up scanner to not miss a moving target
+                set nothing 0
+                cannon $dir $rng
+                drive $dir 70
+                incr limit -4
+            }
+        }
+    } else {
+        # No target found or out of range:
+        # - Increase scanner timer
+        # - If out-of-range target is found, make note of direction
+        incr nothing
+        if {$rng > 700} {
+            set closest $dir
+        }
+    }
+    drive 0 0
+
+    # Check for nothing found in reasonable time
+    if {$nothing >= 30} {
+        set nothing 0
+        drive $closest 100
+    }
+    set dir [expr ($dir - 20 + 360) % 360]
+}
+
+</pre>
+<h1>clockwise</h1>
+<pre>
+# TclRobots - sample robot control program
+# Jonas Ferry 2010, Tom Poindexter 1996
+#
+#  -move to a random center location
+#  -scan in wide resolution until something is found
+#  -use narrow to pinpoint target & fire, countinuing while found
+#  -check damage periodically, move to new location if hit
+
+set dir [rand 360]
+set dam [health]
+set nothing 0
+set closest 0
+
+# goto near an x,y location
+proc goto {x y} {
+    # calculate heading to new location
+    set rad2deg 57.2958
+    set delta_y [expr $y - [loc_y]]
+    set delta_x [expr $x - [loc_x]]
+    set hdg [expr int($rad2deg * atan2($delta_y,$delta_x))]
+
+    if {$hdg < 0} {
+        incr hdg 360
+    }
+    dputs hdg: $hdg to $x $y
+    drive $hdg 100
+
+    while { abs($x-[loc_x]) > 20 || abs($y-[loc_y]) > 20} {
+        # if ran into wall, break
+        if {[speed] == 0} {break}
+        # if speed drops below 100 due to heat,
+	# try to get speed back up
+        if {[speed] <= 35} {drive $hdg 100}
+    }
+    drive $hdg 0
+}
+
+# start of main code
+# start somewhere near the center
+goto [expr [rand 400] + 300] [expr [rand 400] + 300]
+
+while {1} {
+    # look for an opponent
+    set rng [scanner $dir 10]
+
+    # if found and in range
+    if {$rng > 0 && $rng < 700} {
+        # begin narrow scan
+        set start [expr ($dir + 20) % 360]
+        for {set limit 1} {$limit <= 40} {incr limit} {
+            set dir [expr ($start - $limit + 360) % 360]
+            set rng [scanner $dir 1]
+            if {$rng > 0 && $rng < 700} {
+                # fire a shell, and backup scan so not
+		# to miss a moving target
+                set nothing 0
+                cannon $dir $rng
+                incr limit -4
+            }
+            if {$dam-10 > [health]} {
+                break
+            }
+        }
+    } else {
+        incr nothing
+        if {$rng > 700} {
+            set closest $dir
+        }
+    }
+    # check for nothing found in reasonable time
+    if {$nothing >= 30} {
+        set nothing 0
+        set dam [health]
+        drive $closest 100
+    }
+    # check for damage, move when incurred 10% damage
+    if {$dam-10 >= [health]} {
+        goto [expr [rand 400] + 300] [expr [rand 400] + 300]
+        set dam [health]
+    }
+    set dir [expr ($dir - 20 + 360) % 360]
+}
+
+</pre>
+<h1>corner</h1>
+<pre>
+# TclRobots - sample robot control program
+# Jonas Ferry 2010, Tom Poindexter 1996
+#
+#  -move to a random corner
+#  -scan in medium resolution until something is found
+#  -fire while in range
+#  -move if nothing in range or hit
+
+# define set of corner, and starting scan directions from
+# those corners
+set corners {{10 10} {990 10} {10 990} {990 990}}
+#set corners {{20 20} {980 20} {20 980} {980 980}}
+set cor_dir   {0       90       270      180}
+
+set dam [health]
+
+proc I_was_scanned {who} {
+    dputs $who scanned me
+}
+alert I_was_scanned
+
+# goto near an x,y location
+proc goto {x y} {
+    dputs goto $x $y
+    # calculate heading to new location
+    set rad2deg 57.2958
+    set hdg [expr int($rad2deg * atan2(($y-[loc_y]),($x-[loc_x])))]
+    if {$hdg < 0} {
+        incr hdg 360
+    }
+    drive $hdg 100
+
+    # keep moving until close to desired location
+    while {abs($x - [loc_x]) > 40 || abs($y - [loc_y]) > 40} {
+        set hdg \
+	    [expr int($rad2deg * \
+			  atan2(($y-[loc_y]),($x-[loc_x])))]
+        if {$hdg < 0} {
+            incr hdg 360
+        }
+        dputs heading $hdg
+        # if speed drops below 100 due to heat,
+	# try to get speed back up
+        if {[speed] <= 35} {
+            drive $hdg 100
+        }
+    }
+    dputs At location
+    drive $hdg 0
+}
+# start of main code
+
+# goto nearest corner
+set x [loc_x]
+set y [loc_y]
+
+if {$x < 500} {
+    set x 10
+    set s1 0
+} else {
+    set x 990
+    set s1 1
+}
+if {$y < 500} {
+    set y 10
+    set s2 0
+} else {
+    set y 990
+    set s2 1
+}
+if {$s1 && $s2} {
+    set start 180
+    set new_corner 3
+}
+if {$s1 && !$s2} {
+    set start 90
+    set new_corner 1
+}
+if {!$s1 && $s2} {
+    set start 270
+    set new_corner 2
+}
+if {!$s1 && !$s2} {
+    set start 0
+    set new_corner 0
+}
+set resincr 5
+goto $x $y
+
+while {1} {
+    set num_scans 5
+    set dir $start
+
+    while {($num_scans > 0) && (($dam - 10) < [health])} {
+        set rng [scanner $dir $resincr]
+
+        if {($rng > 0) && ($rng <= 700)} {
+            set resincr 1
+            cannon $dir $rng
+            incr dir -8
+        }
+        incr dir $resincr
+        if {$dir >= $start + 90} {
+            incr num_scans -1
+            set dir $start
+            set resincr 5
+        }
+    }
+    set test_corner [rand 4]
+
+    while {$new_corner == $test_corner} {
+        set test_corner [rand 4]
+    }
+    set new_corner $test_corner
+    eval goto [lindex $corners $new_corner]
+    set start [lindex $cor_dir $new_corner]
+    set dam [health]
+}
+
+
+</pre>
+<h1>traveler</h1>
+<pre>
+#
+# TclRobots - sample robot control program
+# Tom Poindexter
+#
+# traveler
+#  -move along outside wall
+#  -keep moving, ignore damage
+#  -limited scan
+
+set cur_dir 0
+
+# keep_moving ensures we're always going somewhere
+proc keep_moving {} {
+    global cur_dir
+
+    switch $cur_dir {
+        0   { if {[loc_x] > 900} { set cur_dir 90  } }
+        90  { if {[loc_y] > 900} { set cur_dir 180 } }
+        180 { if {[loc_x] < 100} { set cur_dir 270 } }
+        270 { if {[loc_y] < 100} { set cur_dir 0   } }
+    }
+
+    #if {$::_debug} {dputs set cur_dir to $cur_dir}
+
+    drive $cur_dir 100
+
+    # reschedule in one second to check position and turn if needed
+    # NOT SUPPORTED in coroutine based TclRobots
+    after 1000 keep_moving
+}
+
+# start it up
+keep_moving
+
+set scan_dir   0
+set scan_cnt   0
+set scan_res   3
+
+while 1 {
+
+    if {$scan_cnt <= 0} {
+        set scan_dir [expr ($cur_dir-06+360)%360]
+        set scan_cnt [expr 90 / $scan_res]
+    }
+
+    set range [scanner $scan_dir $scan_res]
+
+    if {$range > 0 && $range <= 700} {
+        cannon $scan_dir $range 
+        set scan_dir [expr ($scan_dir - 10 + 360) % 360]
+    }
+
+    set scan_dir [expr ($scan_dir + $scan_res) % 360]
+    incr scan_cnt -1
+}
+
+</pre>

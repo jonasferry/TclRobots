@@ -1,13 +1,13 @@
 # TclRobots - Sample robot control program
 # Jonas Ferry 2010, Tom Poindexter 1996
 #
-# Charger scans first in wide then in narrow resolution until a target
-# is found. It charges the target while firing the cannon. When Charger
-# has not seen a target for a while it starts the wide scanner
-# again. Charger ignores damage and does not avoid walls.
+# Charger scans first in wide then in narrow resolution until a 
+# target is found. It charges the target while firing the cannon.
+# When Charger has not seen a target for a while it starts the wide
+# scanner again. Charger ignores damage and does not avoid walls.
 
 # 'dir' is scanner direction
-# 'nothing' is a timer to restart wide scanner when nothing is found
+# 'nothing' is a timer restarting wide scanner when nothing is found
 # 'closest' is direction to closest cannon out-of-range target
 set dir [rand 360]
 set nothing 0

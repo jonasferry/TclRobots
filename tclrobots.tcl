@@ -29,4 +29,4 @@ package provide app-tclrobots 1.0
 set thisScript [file join [pwd] [info script]]
 set thisDir [file dirname $thisScript]
 
-source $thisDir/src/main.tcl
+source [file join $thisDir src/main.tcl]

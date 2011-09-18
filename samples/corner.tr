@@ -2,13 +2,14 @@
 # Jonas Ferry 2010, Tom Poindexter 1996
 #
 #  -move to a random corner
-#  -scan in medim resolution until something is found
+#  -scan in medium resolution until something is found
 #  -fire while in range
 #  -move if nothing in range or hit
 
-# define set of corner, and starting scan directions from those corners
-#set corners {{10 10} {990 10} {10 990} {990 990}}
-set corners {{20 20} {980 20} {20 980} {980 980}}
+# define set of corner, and starting scan directions from
+# those corners
+set corners {{10 10} {990 10} {10 990} {990 990}}
+#set corners {{20 20} {980 20} {20 980} {980 980}}
 set cor_dir   {0       90       270      180}
 
 set dam [health]
@@ -23,7 +24,7 @@ proc goto {x y} {
     dputs goto $x $y
     # calculate heading to new location
     set rad2deg 57.2958
-    set hdg [expr int($rad2deg * atan2(($y - [loc_y]),($x - [loc_x])))]
+    set hdg [expr int($rad2deg * atan2(($y-[loc_y]),($x-[loc_x])))]
     if {$hdg < 0} {
         incr hdg 360
     }
@@ -31,12 +32,15 @@ proc goto {x y} {
 
     # keep moving until close to desired location
     while {abs($x - [loc_x]) > 40 || abs($y - [loc_y]) > 40} {
-        set hdg [expr int($rad2deg * atan2(($y - [loc_y]),($x - [loc_x])))]
+        set hdg \
+	    [expr int($rad2deg * \
+			  atan2(($y-[loc_y]),($x-[loc_x])))]
         if {$hdg < 0} {
             incr hdg 360
         }
         dputs heading $hdg
-        # if speed drops below 100 due to heat, try to get speed back up
+        # if speed drops below 100 due to heat,
+	# try to get speed back up
         if {[speed] <= 35} {
             drive $hdg 100
         }
@@ -112,3 +116,4 @@ while {1} {
     set start [lindex $cor_dir $new_corner]
     set dam [health]
 }
+

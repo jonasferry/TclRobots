@@ -28,7 +28,8 @@ proc goto {x y} {
     while { abs($x-[loc_x]) > 20 || abs($y-[loc_y]) > 20} {
         # if ran into wall, break
         if {[speed] == 0} {break}
-        # if speed drops below 100 due to heat, try to get speed back up
+        # if speed drops below 100 due to heat,
+	# try to get speed back up
         if {[speed] <= 35} {drive $hdg 100}
     }
     drive $hdg 0
@@ -50,7 +51,8 @@ while {1} {
             set dir [expr ($start - $limit + 360) % 360]
             set rng [scanner $dir 1]
             if {$rng > 0 && $rng < 700} {
-                # fire a shell, and backup scan so not to miss a moving target
+                # fire a shell, and backup scan so not
+		# to miss a moving target
                 set nothing 0
                 cannon $dir $rng
                 incr limit -4
