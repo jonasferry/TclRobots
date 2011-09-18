@@ -33,7 +33,7 @@
 # SOURCE
 #
 proc init_help {} {
-    global os
+    global os thisDir
 
     # Create new toplevel and apply some settings
     toplevel .help
@@ -57,18 +57,18 @@ proc init_help {} {
     set ::html_help 0
 
     if {$os eq "windows"} {
-	if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.dll}] } {
+	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.dll}] } {
 	    set ::html_help 1
 	}
     } else {
-	if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.so}] } {
+	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.so}] } {
 	    set ::html_help 1
 	}
     }
     if {$::html_help} {
         # HTML is enabled, create HTML widget
         set ::help_t [html .help.t -hyperlinkcommand handle_link \
-                          -base $::thisDir/doc/game_doc.html \
+                          -base [file join $thisDir doc/game_doc.html] \
                           -yscrollcommand ".help.s set"]
 
         # Bind mouse clicks
@@ -82,12 +82,12 @@ proc init_help {} {
         bind all <MouseWheel> "+handle_scrollwheel %X %Y %D"
 
         # Read the HTML help doc
-        set f [open $::thisDir/../doc/game_doc.html]
+        set f [open [file join $thisDir ../doc/game_doc.html]]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc, add <pre> formatting
-        set f [open $::thisDir/../LICENSE]
+        set f [open [file join $thisDir ../LICENSE]]
         set ::license_text "<pre>[read $f]</pre>"
         close $f
     } else {
@@ -96,12 +96,12 @@ proc init_help {} {
                         -yscrollcommand ".help.s set"]
 
         # Read the plain text help doc
-        set f [open $::thisDir/../README]
+        set f [open [file join $thisDir ../README]]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc
-        set f [open $::thisDir/../LICENSE]
+        set f [open [file join $thisDir ../LICENSE]]
         set ::license_text [read $f]
         close $f
     }

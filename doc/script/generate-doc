@@ -16,22 +16,30 @@ proc main {} {
     clean_file  tclrobots_doc
 
     # Generate documentation index
-    set f [open ./doc/index.html w]
-    puts $f "<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01//EN'
+    set prefix "<!DOCTYPE html PUBLIC '-//W3C//DTD HTML 4.01//EN'
 'http://www.w3.org/TR/html4/strict.dtd'>
 <html lang='en-US'><head>
-<meta http-equiv='content-type' content='text/html; charset=UTF-8'>
-<title>TclRobots source documentation</title></head><body>"
+<meta http-equiv='content-type' content='text/html; charset=UTF-8'>"
+
+    set suffix "</body></html>"
+
+    set f [open ./doc/index.html w]
+    puts $f $prefix
+    puts $f "<title>TclRobots source documentation</title></head><body>"
     
     puts $f "<h3>TclRobots source documentation</h3><ol>"
     foreach doc $srcdocs {
 	puts $f "<li>$doc</li>"
     }
-    puts $f "</ol></body></html>"
+    puts $f "</ol>"
+    puts $f $suffix
     close $f
 
     # Generate README by stripping the HTML from help_doc.html
     gen_readme
+
+    # Generate HTML file for sample robot page on website
+    gen_samples
 }
 
 proc gen_src_doc {srcfile docfile} {
@@ -106,16 +114,34 @@ proc clean_file {docfile} {
 }
 
 proc gen_readme {} {
-    set   src  [open ./doc/readme_doc.html]
-    set   dest [open ./README w]
-
-    set   text [read $src]
+    set src  [open ./doc/readme_doc.html]
+    set dest [open ./README w]
+    set text [read $src]
 
     # Strip all HTML tags
-    puts  $dest [regsub -all -- {<[^>]*>} $text {}]
+    puts $dest [regsub -all -- {<[^>]*>} $text {}]
 
     close $src
     close $dest
+}
+
+proc gen_samples {} {
+    set f [open ./doc/sample-robots.html w]
+
+    puts $f "For the robot API commands available see the <a href='http://tclrobots.org/documentation/#anchor6'>documentation</a>.
+
+The sample robots are:
+"
+
+    foreach robot {charger clockwise corner traveler} {
+	puts $f "<h1>$robot</h1>"
+	set rfile [open ./samples/${robot}.tr]
+	puts $f "<pre>"
+	puts $f [read $rfile]
+	puts $f "</pre>"
+	close $rfile
+    }
+    close $f
 }
 
 # All procedures are sourced; run main

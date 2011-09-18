@@ -40,7 +40,7 @@
 </p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc init_help {} {
-    global os
+    global os thisDir
 
     # Create new toplevel and apply some settings
     toplevel .help
@@ -64,18 +64,18 @@
     set ::html_help 0
 
     if {$os eq "windows"} {
-        if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.dll}] } {
+        if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.dll}] } {
             set ::html_help 1
         }
     } else {
-        if {![catch {load $::thisDir/../lib/tkhtml/tkhtml.so}] } {
+        if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.so}] } {
             set ::html_help 1
         }
     }
     if {$::html_help} {
         # HTML is enabled, create HTML widget
         set ::help_t [html .help.t -hyperlinkcommand handle_link \
-                          -base $::thisDir/doc/game_doc.html \
+                          -base [file join $thisDir doc/game_doc.html] \
                           -yscrollcommand ".help.s set"]
 
         # Bind mouse clicks
@@ -89,12 +89,12 @@
         bind all &lt;MouseWheel&gt; "+handle_scrollwheel %X %Y %D"
 
         # Read the HTML help doc
-        set f [open $::thisDir/../doc/game_doc.html]
+        set f [open [file join $thisDir ../doc/game_doc.html]]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc, add &lt;pre&gt; formatting
-        set f [open $::thisDir/../LICENSE]
+        set f [open [file join $thisDir ../LICENSE]]
         set ::license_text "&lt;pre&gt;[read $f]&lt;/pre&gt;"
         close $f
     } else {
@@ -103,12 +103,12 @@
                         -yscrollcommand ".help.s set"]
 
         # Read the plain text help doc
-        set f [open $::thisDir/../README]
+        set f [open [file join $thisDir ../README]]
         set ::help_text [read $f]
         close $f
 
         # Read the license doc
-        set f [open $::thisDir/../LICENSE]
+        set f [open [file join $thisDir ../LICENSE]]
         set ::license_text [read $f]
         close $f
     }

@@ -101,8 +101,8 @@ proc startup {} {
             }
         }
     }
-    source src/init.tcl
-    source src/game.tcl
+    source [file join $thisDir init.tcl]
+    source [file join $thisDir game.tcl]
 
     if {[llength $game(robotfiles)] >= 2 && !$gui} {
 	create_display
@@ -146,7 +146,7 @@ proc startup {} {
         } else {
             # Run tournament in terminal
             display "\nTournament started\n"
-            source $thisDir/tournament.tcl
+            source [file join $thisDir tournament.tcl]
             set running_time [/ [lindex [time {init_tourn;run_tourn}] 0] \
                                   1000000.0]
             display "seed: $game(seed)"
@@ -156,7 +156,7 @@ proc startup {} {
     } else {
         # Run GUI
         set gui 1
-        source $thisDir/gui.tcl
+        source [file join $thisDir gui.tcl]
         init_gui
     }
 }
@@ -178,7 +178,7 @@ proc startup {} {
 proc create_display {} {
     global display_t gui os
 
-    if {[eq os "windows"] && !$gui} {
+    if {[eq $os "windows"] && !$gui} {
 	package require Tk
 
 	grid columnconfigure . 0 -weight 1 
@@ -863,13 +863,7 @@ proc mrand {max} {
 proc display {msg} {
     global display_t gui os
 
-    if {!$gui && [eq $os "windows"]} {	rm -rf $(TEMP)
-	mkdir $(TEMP)
-	(cd $(TEMP); cp -rf ../src .; cp -rf ../lib/ .; cp -rf ../samples/ .; cp ../README .; cp ../LICENSE .; cp -rf ../tclrobots.tcl .)
-	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
-	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
-	cp -rf $(TEMP)/src/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
+    if {!$gui && [eq $os "windows"]} {
 	$display_t insert end "$msg\n"
 	$display_t see end
 	update

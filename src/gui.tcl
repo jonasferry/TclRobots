@@ -37,27 +37,27 @@ proc init_gui {} {
 	robotlist_s sel_f StatusBarMsg thisDir version
 
     package require Tk
-    set libpath [file join $thisDir ../lib/tkpath]
+    set libpath [file normalize [file join $thisDir .. lib tkpath]]
     lappend auto_path $libpath
 
     if {[catch {package require tkpath}]} {
 	# Check current operating system
 	if {$os eq "windows"} {
 	    catch {
-		load $libpath/tkpath031.dll
+		load [file join $libpath tkpath031.dll]
 		source tkpath.tcl
 		package require tkpath
 	    }
 	} elseif {$os eq "mac"} {
 	    catch {
-                load $libpath/libtkpath0.3.1.dylib
+                load [file join $libpath libtkpath0.3.1.dylib]
                 source tkpath.tcl
                 package require tkpath
             }
         } else {
             # Try 64bit linux version
 	    catch {
-                load $libpath/libtkpath0.3.1.64.so
+                load [file join $libpath libtkpath0.3.1.64.so]
                 source tkpath.tcl
                 package require tkpath
             }
@@ -105,7 +105,7 @@ proc init_gui {} {
             lappend parms(paths) $path
         }
     }
-    wm title . "TclRobots $version"
+    wm title . "TclRobots $version $libpath"
     wm iconname . TclRobots
     wm protocol . WM_DELETE_WINDOW "catch {.f1.b4 invoke}"
 
@@ -182,10 +182,10 @@ proc init_gui {} {
 
     # Source all relevant files to make their procedures available to
     # each other.
-    source $thisDir/battle.tcl
-    source $thisDir/simulator.tcl
-    source $thisDir/tournament.tcl
-    source $thisDir/help.tcl
+    source [file join $thisDir battle.tcl]
+    source [file join $thisDir simulator.tcl]
+    source [file join $thisDir tournament.tcl]
+    source [file join $thisDir help.tcl]
 }
 #******
 
@@ -495,7 +495,8 @@ proc choose_all {} {
     set win $files_fb
     set lsize [$win.l.lst size]
     for {set i 0} {$i < $lsize} {incr i} {
-        set f [string trim [$win.l.lst get $i]]
+#        set f [string trim [$win.l.lst get $i]]
+	set f [$win.l.lst get $i]
         if {![string match */ $f]} {
             choose_file $win $f
         }
@@ -617,7 +618,7 @@ proc remove_file {} {
 # SOURCE
 #
 proc remove_all {} {
-    global robotList
+    global robotList robotlist_lb
 
     set robotList {}
 }
@@ -724,9 +725,9 @@ proc init_mode {mode} {
             }
         }
         simulator {
-            if {[llength $robotList] == 0} {
-                tk_dialog2 .morerobots "More robots!" \
-                    "Please select at least one robot" "-image iconfn" \
+            if {[llength $robotList] != 1} {
+                tk_dialog2 .morerobots "Wrong number of robots!" \
+                    "Please select exactly one robot" "-image iconfn" \
                     0 dismiss
                 return
             } else {

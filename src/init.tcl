@@ -397,7 +397,8 @@ proc init_interps {} {
 
         interp alias $data($robot,interp) syscall {} syscall $robot
 
-        $data($robot,interp) invokehidden source $thisDir/syscalls.tcl
+        $data($robot,interp) invokehidden source \
+	    [file join $thisDir syscalls.tcl]
 
         $data($robot,interp) eval coroutine \
                 ${robot}Run [list uplevel \#0 $data($robot,code)]
