@@ -58,14 +58,12 @@ information.
 <a name="anchor2"></a>
 <h1>2. INSTALLATION AND DEMO</h1>
 <p><ul class="dots"><li>
-Download the source from the GitHub repository.
+Download the game and sample robots from <a href="http://tclrobots.org">tclrobots.org</a>.
 </li><li>
-run "tclrobots" from the directory where you unpacked the
-distribution.
+Run "tclrobots" (Linux/Mac) or "tclrobots.exe" (Windows) depending on operating system.
 </li><li>
 In the Files listbox, Double-Click on the "samples" directory
-for sample individual robot programs or the "teams" directory for 2-on-2
-team robot programs.
+for sample robot programs.
 </li><li>
 Click on "Select All"
 </li><li>
@@ -82,6 +80,19 @@ select files, start battles, tournaments, or the simulator.
 </p><p>
 If command line arguments are specified, tclrobots starts in
 tournament or single battle mode using the specified files.
+</p><p>
+Command-line arguments (in any order):
+
+--debug    : Enable debug messages and lowered health for quicker battles.
+--gui      : Use GUI; useful in combination with robot files.
+--help     : Show this help.
+--msg      : Disable robot messages.
+--n &#60;N&#62;    : Run N number of battles.
+--o &#60;FILE&#62; : Set results output file.
+--seed &#60;S&#62; : Start with random seed S to replay a specific battle.
+--t*       : Run tournament in batch mode.
+--version  : Show version and exit.
+&#60;robot.tr&#62; : Add one ore more robot files.
 </p>
 <a name="anchor4"></a>
 <h1>4. THE ROBOT</h1>
@@ -202,8 +213,8 @@ no damage.
 The battlefield in TclRobots is a 1,000 by 1,000 meter square area.
 Walls surround the battlefield, and robots running into a wall will
 suffer 5% damage. The coordinate system is based on increasing x and y
-axis values from the southwest corner (bottom left is 0,0). 999,999 is
-the extreme northeast (upper right).
+axis values from the southwest corner: bottom left is (0,0) and
+(999,999) is the northeast (upper right).
 </p><p>
 Upon start up, robots are placed in random quadrants.
 </p>
@@ -247,8 +258,8 @@ The following Tcl commands are not available:
 <p>
 The following Tcl commands are the interface to the robot's hardware;
 the syscalls. Each interface command takes 1 clock tick to complete,
-except: the scanner command, which requires 2 clock ticks per execution;
-team communications commands team_get and team_send execute without
+except the scanner command, which requires 2 clock ticks per execution,
+and team communication commands team_get and team_send execute without
 delay. Commands that take arguments will return -1 if any argument is
 out of valid ranges. For degrees, valid values are 0-359; for speed,
 0-100, for resolution, 0-10, for cannon range, 0-700.
@@ -580,7 +591,7 @@ startup. The seed value is reported at battle end to enable the
 possibility to re-run battles.
 </p><p>
 Note that since Tcl mathfunc rand is not cryptographically secure you
-should not let your TclRobot select your passwords.
+better not let your TclRobot select your passwords.
 </p><p>
 Cost: 0 ticks.
 </p>
