@@ -539,7 +539,7 @@
 <p class="item_name">DESCRIPTION</p>
 <p class="item_name">SOURCE</p>
 <pre class="source">proc remove_file {} {
-    robotlist_lb
+    global robotlist_lb
 
     set index -1
     catch {set index [$robotlist_lb curselection]}

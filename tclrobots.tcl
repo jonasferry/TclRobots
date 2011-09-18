@@ -21,6 +21,8 @@
 #
 #******
 
+set version "3.0-alpha (2011-09-18)"
+
 # Provide package name for starpack build, see Makefile
 package provide app-tclrobots 1.0
 

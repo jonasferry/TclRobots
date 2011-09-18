@@ -594,7 +594,7 @@ proc fillLst {win filt dir} {
 # SOURCE
 #
 proc remove_file {} {
-    robotlist_lb
+    global robotlist_lb
 
     set index -1
     catch {set index [$robotlist_lb curselection]}

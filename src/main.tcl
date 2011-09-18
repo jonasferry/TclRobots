@@ -49,7 +49,7 @@
 #
 proc startup {} {
     global allRobots argv data game gui nomsg os tcl_platform \
-	thisDir thisScript version
+	thisDir thisScript
 
     set thisScript [file join [pwd] [info script]]
     set thisDir [file dirname $thisScript]
@@ -65,7 +65,6 @@ proc startup {} {
     } else {
 	set os "linux"
     }
-    set version          "3.0-alpha (2011-09-12)"
     set gui              0
     set nomsg            0
     set game(debug)      0
