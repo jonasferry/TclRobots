@@ -238,8 +238,7 @@ proc build_matchlist {} {
     foreach robot $allRobots {
         foreach target $allRobots {
             # Make sure all matches are unique
-            if {[<= [lsearch $allRobots $target] \
-                     [lsearch $allRobots $robot]]} {
+            if {[lsearch $allRobots $target] <= [lsearch $allRobots $robot]} {
                 continue
             }
             lappend matchlist [list $robot $target]
@@ -401,7 +400,7 @@ proc run_tourn {} {
             for {set i [string length $data($robot,name)]} \
                 {$i <= $::long_name} {incr i} {
                     append match_msg " "
-                }
+            }
             if {[llength $activeRobots] == 1} {
                 incr score([lindex $activeRobots 0]) 3
                 if {$robot eq $activeRobots} {
@@ -440,7 +439,7 @@ proc run_tourn {} {
 	    button_state "file"
 	}
 	report_score
-	}
+    }
 }
 #******
 
