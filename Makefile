@@ -2,7 +2,7 @@ SRC = src/battle.tcl src/game.tcl src/gui.tcl src/help.tcl \
 	src/init.tcl src/main.tcl src/simulator.tcl \
 	src/tournament.tcl tclrobots.tcl
 
-SDX = ../build/tclkit-8.6-linux ../build/sdx.kit
+SDX = ../build/tclkit86-linux ../build/sdx.kit
 
 # Make reasonably sure no one has a local temp directory
 # with the same name
@@ -29,11 +29,12 @@ build:
 	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
 	#mkdir $(TEMP)/tclrobots.vfs/lib/
 	#cp -rf $(TEMP)/lib/* $(TEMP)/tclrobots.vfs/lib/
-	cp build/tclkit-8.6-$(RUNTIME) $(TEMP)/
-	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit-8.6-$(RUNTIME))
+	cp build/tclkit86-$(RUNTIME) $(TEMP)/
+	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit86-$(RUNTIME))
 	cp $(TEMP)/tclrobots.kit build/download-files/$(TARGET)
+	cp $(TEMP)/tclrobots.kit $(TEMP)/$(TARGET)
 	#chmod +x build/download-files/$(TARGET)
-	(cd $(TEMP); tar cvf ../build/download-files/samples.tar samples/)
+	(cd $(TEMP); tar cvf ../build/download-files/tclrobots-$(RUNTIME).tar $(TARGET) samples/)
 	#rm -rf $(TEMP)
 
 check: header.syntax
