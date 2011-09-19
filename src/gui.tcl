@@ -45,20 +45,20 @@ proc init_gui {} {
 	if {$os eq "windows"} {
 	    catch {
 		load [file join $libpath tkpath031.dll]
-		source tkpath.tcl
+		source [file join $libpath tkpath.tcl]
 		package require tkpath
 	    }
 	} elseif {$os eq "mac"} {
 	    catch {
                 load [file join $libpath libtkpath0.3.1.dylib]
-                source tkpath.tcl
+                 source [file join $libpath tkpath.tcl]
                 package require tkpath
             }
         } else {
             # Try 64bit linux version
 	    catch {
                 load [file join $libpath libtkpath0.3.1.64.so]
-                source tkpath.tcl
+                source [file join $libpath tkpath.tcl]
                 package require tkpath
             }
         }
@@ -709,7 +709,7 @@ proc highlightRobot {} {
 proc init_mode {mode} {
     global game robotList
 
-    if {[eq $mode "simulator"]} {
+    if {$mode eq "simulator"} {
         set game(simulator) 1
     }
     # Check that the number of selected robots is correct
@@ -1301,7 +1301,7 @@ proc tk_dialog2 {w title text bitmap default args} {
     if {$bitmap != ""} {
         if {[llength $bitmap] > 1} {
             switch -- [lindex $bitmap 0] {
-                -image {set type -image; set bitmap [lindex $bitmap 1]}
+                -image  {set type -image;  set bitmap [lindex $bitmap 1]}
                 -bitmap {set type -bitmap; set bitmap [lindex $bitmap 1]}
                 default {set type -bitmap; set bitmap [lindex $bitmap 1]}
             }
