@@ -32,7 +32,7 @@ build:
 	#cp -rf $(TEMP)/lib/* $(TEMP)/tclrobots.vfs/lib/
 	cp build/tclkit86-$(RUNTIME) $(TEMP)/
 	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit86-$(RUNTIME))
-	cp $(TEMP)/tclrobots.kit build/downlo ad-files/$(TARGET)
+	cp $(TEMP)/tclrobots.kit build/download-files/$(TARGET)
 	cp $(TEMP)/tclrobots.kit $(TEMP)/$(TARGET)
 	#chmod +x build/download-files/$(TARGET)
 	(cd $(TEMP); tar cvf ../build/download-files/tclrobots-$(RUNTIME).tar $(TARGET) samples/)
