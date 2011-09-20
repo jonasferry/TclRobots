@@ -57,11 +57,11 @@ proc init_help {} {
     set ::html_help 0
 
     if {$os eq "windows"} {
-	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.dll}] } {
+	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.dll]}] } {
 	    set ::html_help 1
 	}
     } else {
-	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.so}] } {
+	if {![catch {load [file join $thisDir ../lib/tkhtml/tkhtml.so]}] } {
 	    set ::html_help 1
 	}
     }
@@ -232,7 +232,7 @@ proc handle_scrollwheel { x y delta } {
 
     if {$widget != ""} {
         # Make sure we've got a vertical scrollbar for this widget
-        if {[catch "$widget cget -yscrollcommand" cmd]} return
+        if {[catch {$widget cget -yscrollcommand} cmd]} return
 
         if {$cmd != ""} {
             # Find out the scrollbar widget we're using
@@ -246,7 +246,7 @@ proc handle_scrollwheel { x y delta } {
     if {$act == 1} {
         # Now we know we have to process the wheel mouse event
         set xy [$widget yview]
-        set factor [expr [lindex $xy 1]-[lindex $xy 0]]
+        set factor [expr {[lindex $xy 1] - [lindex $xy 0]}]
 
         # Make sure we activate the scrollbar's command
         # The following line is original, but the second line works.

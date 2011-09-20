@@ -2,7 +2,8 @@ SRC = src/battle.tcl src/game.tcl src/gui.tcl src/help.tcl \
 	src/init.tcl src/main.tcl src/simulator.tcl \
 	src/tournament.tcl tclrobots.tcl
 
-SDX = ../build/tclkit86-linux ../build/sdx.kit
+TCLKIT = build/tclkit86-linux
+SDX = ../$(TCLKIT) ../build/sdx.kit
 
 # Make reasonably sure no one has a local temp directory
 # with the same name
@@ -38,15 +39,15 @@ build:
 	#rm -rf $(TEMP)
 
 check: header.syntax
-	nagelfar header.syntax $(SRC)
+	nagelfar -s syntaxdb86.tcl header.syntax $(SRC)
 
 header.syntax: $(SRC) helper.syntax
-	nagelfar -header header.syntax helper.syntax $(SRC)
+	nagelfar -s syntaxdb86.tcl -header header.syntax helper.syntax $(SRC)
 
 doc:
 	doc/script/generate-doc
 
 test:
-	test/all.tcl
+	$(TCLKIT) test/all.tcl
 
 .PHONY: all build build-linux build-windows build-mac check doc test
