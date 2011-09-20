@@ -49,7 +49,7 @@
 #
 proc startup {} {
     global allRobots argv data game gui nomsg os tcl_platform \
-	thisDir thisScript
+	thisDir thisScript version
 
     set thisScript [file join [pwd] [info script]]
     set thisDir [file dirname $thisScript]
@@ -178,7 +178,7 @@ proc startup {} {
 proc create_display {} {
     global display_t gui os
 
-    if {[eq $os "windows"] && !$gui} {
+    if {$os eq "windows" && !$gui} {
 	package require Tk
 
 	grid columnconfigure . 0 -weight 1 
@@ -366,7 +366,7 @@ proc find_winner {} {
 #
 proc write_file {file str} {
     set fd [open $file w]
-    display $fd $str
+    puts $fd $str
     close $fd
 }
 #******
@@ -863,7 +863,7 @@ proc mrand {max} {
 proc display {msg} {
     global display_t gui os
 
-    if {!$gui && [eq $os "windows"]} {
+    if {!$gui && $os eq "windows"} {
 	$display_t insert end "$msg\n"
 	$display_t see end
 	update

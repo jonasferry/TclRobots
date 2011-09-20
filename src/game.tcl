@@ -58,8 +58,7 @@ proc run_robots {} {
             act
 
             # Print extra information in simulator GUI
-            if {$game(simulator) &&
-                [ne $data(r0,sysreturn,$tick) ""]} {
+            if {$game(simulator) && $data(r0,sysreturn,$tick) ne ""} {
                 set sim_syscall $data(r0,syscall,$tick)
                 append sim_syscall " => " $data(r0,sysreturn,$tick)
             }

@@ -60,7 +60,7 @@
 <p class="item_name">SOURCE</p>
 <pre class="source">proc startup {} {
     global allRobots argv data game gui nomsg os tcl_platform \
-        thisDir thisScript
+        thisDir thisScript version
 
     set thisScript [file join [pwd] [info script]]
     set thisDir [file dirname $thisScript]
@@ -186,7 +186,7 @@
 <pre class="source">proc create_display {} {
     global display_t gui os
 
-    if {[eq $os "windows"] &amp;&amp; !$gui} {
+    if {$os eq "windows" &amp;&amp; !$gui} {
         package require Tk
 
         grid columnconfigure . 0 -weight 1 
@@ -358,7 +358,7 @@ Command-line arguments (in any order):
 <p class="item_name">SOURCE</p>
 <pre class="source">proc write_file {file str} {
     set fd [open $file w]
-    display $fd $str
+    puts $fd $str
     close $fd
 }
 </pre>
@@ -791,7 +791,7 @@ Command-line arguments (in any order):
 <pre class="source">proc display {msg} {
     global display_t gui os
 
-    if {!$gui &amp;&amp; [eq $os "windows"]} {
+    if {!$gui &amp;&amp; $os eq "windows"} {
         $display_t insert end "$msg\n"
         $display_t see end
         update
