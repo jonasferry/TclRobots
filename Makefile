@@ -34,6 +34,7 @@ build:
 	cp $(TEMP)/tclrobots.kit build/download-files/$(TARGET)
 	cp $(TEMP)/tclrobots.kit $(TEMP)/$(TARGET)
 	(cd $(TEMP); tar cvf ../build/download-files/tclrobots-$(RUNTIME).tar $(TARGET) samples/)
+	(cd $(TEMP); zip -r ../build/download-files/tclrobots-$(RUNTIME).zip $(TARGET) samples/)
 	rm -rf $(TEMP)
 
 check: header.syntax
