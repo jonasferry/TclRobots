@@ -99,6 +99,8 @@ proc run_robots {} {
         } else {
             # Game is paused, but GUI needs to respond
             update
+            # Keep timebase up to date to not get skewed during pause
+            set timeAt5 [expr {[clock milliseconds] - $parms(tick) * ($tick - 4)}]
         }
     }
     rename [info coroutine] ""
@@ -477,7 +479,7 @@ proc update_distance {robot} {
     if {$data($robot,speed) > 0} {
         set data($robot,range) \
             [+ $data($robot,range) \
-                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+                 [/ [* $data($robot,speed) $parms(sp)] 100.0]]
 
         # Modify range with random factor to avoid totally
         # deterministic movement. Range is currently +- 1%.
