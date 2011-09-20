@@ -49,7 +49,7 @@
     global game robotList
 
     # Read from robot file names; only the first file is used
-    lappend game(robotfiles) [lindex $robotList 0]
+    set game(robotfiles) [lrange $robotList 0 0]
 
     set ticks   0
     set ::StatusBarMsg "Simulator"
