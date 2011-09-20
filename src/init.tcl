@@ -216,7 +216,6 @@ proc init_files {} {
 
     # Pick a random element from a list; use this for reading code!
     # lpick list {lindex $list [expr {int(rand()*[llength $list])}]}
-
     for {set i 0} {$i < [llength $game(robotfiles)]} {incr i} {
         # Give the robots names like r0, r1, etc.
         set robot r$i
@@ -224,7 +223,7 @@ proc init_files {} {
         lappend allRobots $robot
 
         # Read code
-        set f [open [lindex $game(robotfiles) $i]]
+        set f [open [file join [lindex $game(robotfiles) $i]]]
         set data($robot,code) [read $f]
         close $f
 
