@@ -28,15 +28,13 @@ build:
 	(cd $(TEMP); $(SDX) qwrap tclrobots.tcl)
 	(cd $(TEMP); $(SDX) unwrap tclrobots.kit)
 	cp -rf $(TEMP)/src/ $(TEMP)/lib/ $(TEMP)/samples $(TEMP)/README $(TEMP)/LICENSE $(TEMP)/tclrobots.vfs/lib/app-tclrobots/
-	#mkdir $(TEMP)/tclrobots.vfs/lib/
-	#cp -rf $(TEMP)/lib/* $(TEMP)/tclrobots.vfs/lib/
 	cp build/tclkit86-$(RUNTIME) $(TEMP)/
 	(cd $(TEMP); $(SDX) wrap tclrobots.kit -runtime tclkit86-$(RUNTIME))
+	mkdir -p build/download-files
 	cp $(TEMP)/tclrobots.kit build/download-files/$(TARGET)
 	cp $(TEMP)/tclrobots.kit $(TEMP)/$(TARGET)
-	#chmod +x build/download-files/$(TARGET)
 	(cd $(TEMP); tar cvf ../build/download-files/tclrobots-$(RUNTIME).tar $(TARGET) samples/)
-	#rm -rf $(TEMP)
+	rm -rf $(TEMP)
 
 check: header.syntax
 	nagelfar -s syntaxdb86.tcl header.syntax $(SRC)
