@@ -711,6 +711,8 @@ proc init_mode {mode} {
 
     if {$mode eq "simulator"} {
         set game(simulator) 1
+    } else {
+        set game(simulator) 0
     }
     # Check that the number of selected robots is correct
     switch $mode {
