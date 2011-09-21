@@ -62,12 +62,13 @@ proc run_robots {} {
                 set sim_syscall $data(r0,syscall,$tick)
                 append sim_syscall " => " $data(r0,sysreturn,$tick)
             }
-            update_robots
-
-            if {$gui} {
-                update_gui
-            }
-            tick
+	    if {$tick % 5 == 0} {
+		update_robots
+		if {$gui} {
+		    update_gui
+		}
+	    }
+	    tick
 
             # Check if single step is active in simulator mode
             if {$game(simulator) && $step} {

@@ -82,10 +82,11 @@
                 set sim_syscall $data(r0,syscall,$tick)
                 append sim_syscall " =&gt; " $data(r0,sysreturn,$tick)
             }
-            update_robots
-
-            if {$gui} {
-                update_gui
+            if {$tick % 5 == 0} {
+                update_robots
+                if {$gui} {
+                    update_gui
+                }
             }
             tick
 
@@ -119,6 +120,8 @@
         } else {
             # Game is paused, but GUI needs to respond
             update
+            # Keep timebase up to date to not get skewed during pause
+            set timeAt5 [expr {[clock milliseconds] - $parms(tick) * ($tick - 4)}]
         }
     }
     rename [info coroutine] ""
@@ -460,7 +463,7 @@
     if {$data($robot,speed) &gt; 0} {
         set data($robot,range) \
             [+ $data($robot,range) \
-                 [/ [* $data($robot,speed) $parms(sp)] 100]]
+                 [/ [* $data($robot,speed) $parms(sp)] 100.0]]
 
         # Modify range with random factor to avoid totally
         # deterministic movement. Range is currently +- 1%.

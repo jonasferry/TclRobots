@@ -63,7 +63,7 @@ proc init_parms {} {
 
     # milliseconds per tick
     if {$gui} {
-        set parms(tick) 100
+        set parms(tick) 20
     } else {
         set parms(tick) 0
     }
