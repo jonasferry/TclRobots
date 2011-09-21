@@ -24,9 +24,8 @@ proc keep_moving {} {
 
     drive $cur_dir 100
 
-    # reschedule in one second to check position and turn if needed
-    # NOT SUPPORTED in coroutine based TclRobots
-    after 1000 keep_moving
+    # reschedule in ten ticks to check position and turn if needed
+    callback 10 keep_moving
 }
 
 # start it up
