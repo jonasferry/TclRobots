@@ -67,6 +67,7 @@ proc startup {} {
     }
     set gui              0
     set nomsg            0
+    set maximize         0
     set game(debug)      0
     set game(max_ticks)  6000
     set game(robotfiles) {}
@@ -87,6 +88,7 @@ proc startup {} {
             --gui     {set gui 1}
 	    --help    {create_display; show_usage; return}
             --nomsg   {set nomsg 1}
+            --max     {set maximize 1}
             --n       {incr i; set game(numbattle) [lindex $argv $i]}
             --o       {incr i; set game(outfile) $arg}
             --seed    {incr i; set game(seed_arg) [lindex $argv $i]}
@@ -158,6 +160,13 @@ proc startup {} {
         set gui 1
         source [file join $thisDir gui.tcl]
         init_gui
+        if {$maximize} {
+            if {$os eq "linux"} {
+                wm attributes . -zoomed 1
+            } else {
+                wm state . zoomed
+            }
+        }
     }
 }
 #******

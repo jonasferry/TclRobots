@@ -48,7 +48,10 @@ header.syntax: $(SRC) helper.syntax
 doc:
 	doc/script/generate-doc
 
+run:
+	$(TCLKIT) tclrobots.tcl --max --gui samples/*.tr
+
 test:
 	$(TCLKIT) test/all.tcl
 
-.PHONY: all build build-linux build-windows build-mac check doc test
+.PHONY: all build build-linux build-windows build-mac check doc run test
