@@ -9,9 +9,11 @@ SDX = ../$(TCLKIT) ../build/sdx.kit
 # with the same name
 TEMP = temp123123123
 
-all: doc test build-linux build-windows build-mac
+all: doc test build-linux32 build-linux64 build-windows build-mac
 
-build-linux:
+build-linux32:
+	$(MAKE) build MAKEFLAGS=RUNTIME=linux32 TARGET=tclrobots
+build-linux64:
 	$(MAKE) build MAKEFLAGS=RUNTIME=linux64 TARGET=tclrobots
 
 build-windows:
