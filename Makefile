@@ -51,7 +51,10 @@ doc:
 run:
 	$(TCLKIT) tclrobots.tcl --max --gui samples/*.tr
 
+runtour:
+	$(TCLKIT) tclrobots.tcl --nomsg --tournament samples/*.tr
+
 test:
 	$(TCLKIT) test/all.tcl
 
-.PHONY: all build build-linux build-windows build-mac check doc run test
+.PHONY: all build build-linux build-windows build-mac check doc run runtour test

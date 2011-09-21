@@ -364,11 +364,11 @@ proc run_tourn {} {
 	    # Clear robot message box
 	    set robotMsg {}
 	}
-        set robot  [lindex $match 0]
-        set target [lindex $match 1]
+        set robot1 [lindex $match 0]
+        set robot2 [lindex $match 1]
 
         # Switch all and active robots to current tournament pair
-        set allRobots    "$robot $target"
+        set allRobots    "$robot1 $robot2"
         set activeRobots $allRobots
 
         # Unset old data array, but retain some information
@@ -409,12 +409,12 @@ proc run_tourn {} {
             }
             if {[llength $activeRobots] == 1} {
                 incr score([lindex $activeRobots 0]) 3
-                if {$robot eq $activeRobots} {
+                if {$robot1 eq $activeRobots} {
                     append match_msg \
-                        "$data($robot,name)(win) vs $data($target,name)"
+                        "$data($robot1,name)(win) vs $data($robot2,name)"
                 } else {
                     append match_msg \
-                        "$data($robot,name)    vs $data($target,name)(win)"
+                        "$data($robot1,name)    vs $data($robot2,name)(win)"
                 }
             } else {
                 # Note that this presupposes two-robot matches
@@ -422,7 +422,7 @@ proc run_tourn {} {
                     incr score($robot) 1
                 }
                 append match_msg \
-                    "$data($robot,name)    vs $data($target,name) (tie)"
+                    "$data($robot1,name)    vs $data($robot2,name) (tie)"
             }
             sort_score
 
