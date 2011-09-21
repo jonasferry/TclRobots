@@ -85,12 +85,12 @@ Command-line arguments (in any order):
 --gui      : Use GUI; useful in combination with robot files.
 --help     : Show this help.
 --msg      : Disable robot messages.
---n &#60;N&#62;    : Run N number of battles.
---o &#60;FILE&#62; : Set results output file.
---seed &#60;S&#62; : Start with random seed S to replay a specific battle.
+--n [N]    : Run N number of battles.
+--o [FILE] : Set results output file.
+--seed [S] : Start with random seed S to replay a specific battle.
 --t*       : Run tournament in batch mode.
 --version  : Show version and exit.
-&#60;robot.tr&#62; : Add one ore more robot files.
+[robot.tr] : Add one ore more robot files.
 
 
 4. THE ROBOT

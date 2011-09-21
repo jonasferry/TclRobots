@@ -105,7 +105,7 @@ proc init_gui {} {
             lappend parms(paths) $path
         }
     }
-    wm title . "TclRobots $version $libpath"
+    wm title . "TclRobots $version"
     wm iconname . TclRobots
     wm protocol . WM_DELETE_WINDOW "catch {.f1.b4 invoke}"
 
@@ -1519,7 +1519,6 @@ proc show_msg {robot msg} {
     if {$data($robot,brightness) > 0.5} {
         $robotMsg_lb itemconfigure end -background black
     }
-
     $robotMsg_lb see end
 }
 #******

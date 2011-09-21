@@ -305,22 +305,25 @@ proc show_score {} {
 # SOURCE
 #
 proc show_matches {} {
-    set ::tournMatches {}
+    global data matchlist matchnum tournMatches tournMatches_lb
+
+    set tournMatches {}
     set index 0
 
-    foreach match $::matchlist {
-        lappend ::tournMatches "$::data([lindex $match 0],name) vs $::data([lindex $match 1],name)"
+    foreach match $matchlist {
+        lappend tournMatches "$data([lindex $match 0],name) vs $data([lindex $match 1],name)"
 
-        if {$::matchnum == $index} {
+        if {$matchnum == $index} {
             # Highlight current match
-            $::tournMatches_lb itemconfigure $index -background white
-            $::tournMatches_lb itemconfigure $index -foreground black
+            $tournMatches_lb itemconfigure $index -background white
+            $tournMatches_lb itemconfigure $index -foreground black
+	    $tournMatches_lb see $index
 
             if {$index > 0} {
                 # Remove highlight from previous match
-                $::tournMatches_lb itemconfigure [- $index 1] \
+                $tournMatches_lb itemconfigure [- $index 1] \
                     -background black
-                $::tournMatches_lb itemconfigure [- $index 1] \
+                $tournMatches_lb itemconfigure [- $index 1] \
                     -foreground white
             }
         }
@@ -343,7 +346,8 @@ proc show_matches {} {
 #
 proc run_tourn {} {
     global activeRobots activeRobots_tourn allRobots allRobots_tourn \
-        data data_tourn game gui matchlist matchlog score
+        arena_c data data_tourn game gui long_name matchlist matchlog \
+	matchnum robotMsg score
 
     if {$gui} {
         button_state "running"
@@ -355,8 +359,10 @@ proc run_tourn {} {
     foreach match $matchlist {
         if {$gui} {
             # Remove old canvas items
-            $::arena_c delete robot
-            $::arena_c delete scan
+            $arena_c delete robot
+            $arena_c delete scan
+	    # Clear robot message box
+	    set robotMsg {}
 	}
         set robot  [lindex $match 0]
         set target [lindex $match 1]
@@ -398,7 +404,7 @@ proc run_tourn {} {
 	    set match_msg ""
             # Fix padding
             for {set i [string length $data($robot,name)]} \
-                {$i <= $::long_name} {incr i} {
+                {$i <= $long_name} {incr i} {
                     append match_msg " "
             }
             if {[llength $activeRobots] == 1} {
@@ -422,7 +428,7 @@ proc run_tourn {} {
 
             if {$gui} {
                 update_tourn
-                incr ::matchnum
+                incr matchnum
             }
 	    incr matchnumber
             display "Match $matchnumber:$match_msg"
@@ -433,12 +439,11 @@ proc run_tourn {} {
 	# Disable robots and clear messages
 	foreach robot $activeRobots {
 	    disable_robot $robot
-	    set ::robotMsg {}
-	}
-	if {$gui} {
-	    button_state "file"
 	}
 	report_score
+    }
+    if {$gui} {
+	button_state "file"
     }
 }
 #******
